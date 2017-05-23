@@ -1,3 +1,4 @@
+package annotationtool;
 
 import java.awt.AWTEvent;
 import java.awt.AlphaComposite;
@@ -34,6 +35,8 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import annotationtool.ControllerBox;
 import sun.awt.image.ToolkitImage;
 
 public class AnnotationTool extends JFrame {
@@ -137,16 +140,16 @@ public class AnnotationTool extends JFrame {
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
 
-        try {
+      /*  try {*/
             InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
             System.out.println("Stream is " + imageStream);
-            Image image = ImageIO.read(imageStream);
-            pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
+//            Image image = ImageIO.read(imageStream);
+//            pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
             defaultCursor = getCursor();
 //            setCursor(pencilCursor);
-        } catch (IOException ioe) {
+       /* } /*catch (IOException ioe) {
             ioe.printStackTrace(System.err);
-        }
+        }*/
 
         setBounds(x - 5, y - 5, w + 10, h + 10);
 

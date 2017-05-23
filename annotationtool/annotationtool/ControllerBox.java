@@ -1,3 +1,4 @@
+package annotationtool;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,11 +9,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import util.GridBagConstraintBuilder;
 
-class ControllerBox extends JFrame {
+public class ControllerBox extends JFrame {
 
     private AnnotationTool annotationTool;
     private static final int SWATCH_SIZE = 24;
