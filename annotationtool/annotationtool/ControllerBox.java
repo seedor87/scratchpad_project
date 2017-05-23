@@ -126,6 +126,7 @@ public class ControllerBox extends JFrame {
     private JRadioButton thickLine;
     private JRadioButton hugeLine;
 
+
     public ControllerBox(AnnotationTool at) {
         super("Tools");
 
@@ -138,6 +139,12 @@ public class ControllerBox extends JFrame {
         this.setAlwaysOnTop(true);
 
         ButtonGroup toolGroup = new ButtonGroup();
+        ActionListener setMakingTextBoxFalse = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.setMakingTextBox(false);
+            }
+        };
 
         add(new JLabel("Pens"), gbcb.fullWidth().build());
         gbcb.nextY().singleWidth();
@@ -145,6 +152,7 @@ public class ControllerBox extends JFrame {
         for (Color ppi : penColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
+            jrb.addActionListener(setMakingTextBoxFalse);
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
@@ -159,6 +167,7 @@ public class ControllerBox extends JFrame {
         for (Color ppi : highlighterColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
+            jrb.addActionListener(setMakingTextBoxFalse);
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
@@ -266,8 +275,7 @@ public class ControllerBox extends JFrame {
                                        @Override
                                         public void actionPerformed(ActionEvent e)
                                         {
-
-
+                                            annotationTool.setMakingTextBox(true);
                                         }
                                    }
 

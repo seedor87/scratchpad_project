@@ -9,8 +9,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +36,8 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import com.sun.awt.AWTUtilities;
 
 import annotationtool.ControllerBox;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
 import sun.awt.image.ToolkitImage;
 
 public class AnnotationTool extends JFrame {
@@ -71,8 +77,13 @@ public class AnnotationTool extends JFrame {
     
     private boolean canDraw = true;
 
+    private boolean makingTextBox = false;
+    private StringBuffer textBoxText = new StringBuffer(64);
+    private Point textBoxPoint;
+
     private Path2D.Float borderShape;
-    
+
+
     private class GlobalKeyListener implements NativeKeyListener {
 
     	@Override
@@ -100,46 +111,20 @@ public class AnnotationTool extends JFrame {
     	
     }
 
-    private abstract class TextBoxListener implements MouseListener
-    {
-        public boolean makingTextBox = false;
-    }
-    private TextBoxListener textBoxListener = textBoxListener = new TextBoxListener() {
-
-        @Override
-        public void mouseClicked(MouseEvent e)
-        {
-
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e)
-        {
 
 
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e)
-        {
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e)
-        {
-
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e)
-        {
-
-        }
-    };
     public void setMakingTextBox(boolean set)
     {
-        textBoxListener.makingTextBox = set;
+        this.makingTextBox = set;
+        if(set)
+        {
+            canDraw = false;
+        }
+        else
+        {
+            canDraw = true;
+        }
+
     }
 
     private KeyListener keyListener = new KeyListener()
@@ -149,7 +134,17 @@ public class AnnotationTool extends JFrame {
         private boolean yPressed = false;
 
         @Override
-        public void keyTyped(KeyEvent e) {
+        public void keyTyped(KeyEvent e)
+        {
+            char c = e.getKeyChar();
+            if(makingTextBox && ( c > 31)&&(c < 127))
+            {
+                appendToTextBox(c);
+            }
+            if(makingTextBox && e.getExtendedKeyCode() == e.VK_BACK_SPACE)
+            {
+
+            }
 
         }
 
@@ -257,7 +252,7 @@ public class AnnotationTool extends JFrame {
 		}
 
 		GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
-		
+
 
 
 
@@ -467,6 +462,69 @@ public class AnnotationTool extends JFrame {
         		repaint();
         	}
         }
+        else if(makingTextBox)
+        {
+            if(evt instanceof MouseEvent)
+            {
+                MouseEvent me  = (MouseEvent) evt;
+
+                if(me.getID() == MouseEvent.MOUSE_RELEASED)
+                {
+                    textBoxText.delete(0,textBoxText.length());
+                    //ShapeDef def = new ShapeDef(,Color.BLACK,);
+                    Graphics2D g = (Graphics2D) backingMain.getGraphics();
+                    g.setPaint(Color.BLACK);
+                    textBoxPoint = me.getPoint();
+                    Font font = new Font("Arial", Font.BOLD, 100);
+                    FontRenderContext frc = g.getFontRenderContext();
+                    TextLayout layout = new TextLayout("This is a string", font, frc);
+                    //layout.draw(g, (float) point.getX(), (float)point.getY());
+                    //repaint();
+                    //use a key listener to change some stuff here :)
+
+
+                    //g.setPaint(Color.BLACK);
+                    //g.setFont(font);
+                    //FontMetrics fm = g.getFontMetrics();
+                    //int x = backingMain.getWidth(this) - fm.stringWidth("This is a String") - 5;
+                    //int y = fm.getHeight();
+
+//                    g.draw(layout.getCaretShape(layout.hitTestChar((float)point.getX(), (float)point.getY())));
+                    //g.drawString("This is a string", x, y);
+
+
+/*                    Rectangle2D bounds = layout.getBounds();
+                    bounds.setRect(bounds.getX()+getLocation().getX(),
+                            bounds.getY()+getLocation().getY(),
+                            bounds.getWidth(),
+                            bounds.getHeight());
+                    g.draw(bounds);*/
+
+                    // textField.setBackground(mostlyClearPaint);
+                  //  textField.setForeground(Color.BLACK);
+                    //this.add(textField);
+                }
+                //TODO create a text box at the given point         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
+                //TODO make it so the text box can be exited out of
+                //TODO make it so the text box isn't accessible once created
+                //TODO make it so you can delete text
+                //TODO make it so you can highlight text
+                //TODO make it so you can undo
+            }
+
+        }
+    }
+
+    private void appendToTextBox(char c)
+    {
+        textBoxText.append(c);
+        Graphics2D g = (Graphics2D) backingMain.getGraphics();
+        g.setPaint(Color.BLACK);
+        Font font = new Font("Arial", Font.BOLD, 100);
+        FontRenderContext frc = g.getFontRenderContext();
+        TextLayout layout = new TextLayout(textBoxText.toString(), font, frc);
+        layout.draw(g, (float) textBoxPoint.getX(), (float)textBoxPoint.getY());
+        repaint();
     }
 
     public static void main(final String[] args)
