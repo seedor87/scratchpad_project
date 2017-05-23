@@ -36,6 +36,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import com.sun.awt.AWTUtilities;
+
 import annotationtool.ControllerBox;
 import sun.awt.image.ToolkitImage;
 
@@ -94,6 +96,10 @@ public class AnnotationTool extends JFrame {
             {
                 controlPressed = true;
             }
+            if(e.isShiftDown())
+            {
+            	suppressWindow(true);
+            }
             if(e.getExtendedKeyCode() == e.VK_Z)
             {
                 zPressed = true;
@@ -123,6 +129,10 @@ public class AnnotationTool extends JFrame {
             {
                 controlPressed = false;
             }
+            if(e.getExtendedKeyCode() == KeyEvent.VK_SHIFT) 
+            {
+            	suppressWindow(false);
+            }
             if(e.getExtendedKeyCode() == e.VK_Y)
             {
                 yPressed = false;
@@ -139,17 +149,6 @@ public class AnnotationTool extends JFrame {
         this.addKeyListener(keyListener);
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-
-      /*  try {*/
-            InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
-            System.out.println("Stream is " + imageStream);
-//            Image image = ImageIO.read(imageStream);
-//            pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
-            defaultCursor = getCursor();
-//            setCursor(pencilCursor);
-       /* } /*catch (IOException ioe) {
-            ioe.printStackTrace(System.err);
-        }*/
 
         setBounds(x - 5, y - 5, w + 10, h + 10);
 
@@ -210,6 +209,14 @@ public class AnnotationTool extends JFrame {
                 borderShape);*/
     }
 
+    public void suppressWindow(boolean suppression) {
+    	if(suppression) {
+    		AWTUtilities.setWindowOpacity(this, 0.01f);
+    	}
+    	else {
+    		AWTUtilities.setWindowOpacity(this, 1f);
+    	}
+    }
     public void setPaint(Paint paint) {
         this.paint = paint;
     }
