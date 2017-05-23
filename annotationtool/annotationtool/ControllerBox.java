@@ -31,7 +31,7 @@ public class ControllerBox extends JFrame {
         @Override
         public void componentMoved(ComponentEvent e)
         {
-            annotationTool.setLocation(new Point(thisBox.getX() -1300, thisBox.getY()));
+            //annotationTool.setLocation(new Point(thisBox.getX() -1300, thisBox.getY()));
 
         }
 
