@@ -10,11 +10,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +26,10 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import java.awt.BasicStroke;
+
+
+import com.sun.javafx.font.Glyph;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -80,6 +82,10 @@ public class AnnotationTool extends JFrame {
     private boolean makingTextBox = false;
     private StringBuffer textBoxText = new StringBuffer(64);
     private Point textBoxPoint;
+    private int fontSize = 100;
+    private int fontStyle = Font.BOLD;
+    private String fontString = "Arial";
+    private Color textColor = Color.BLACK;
 
     private Path2D.Float borderShape;
 
@@ -141,10 +147,7 @@ public class AnnotationTool extends JFrame {
             {
                 appendToTextBox(c);
             }
-            if(makingTextBox && e.getExtendedKeyCode() == e.VK_BACK_SPACE)
-            {
 
-            }
 
         }
 
@@ -170,6 +173,14 @@ public class AnnotationTool extends JFrame {
             if(yPressed && controlPressed)
             {
                 redo();
+            }
+            if(makingTextBox && e.getExtendedKeyCode() == e.VK_BACK_SPACE )
+            {
+                if(textBoxText.length()>0)
+                {
+                    textBoxText.deleteCharAt(textBoxText.length()-1);       //TODO undo char
+                    undo();
+                }
             }
         }
 
@@ -414,6 +425,9 @@ public class AnnotationTool extends JFrame {
         }
     }
 
+    /**
+     * Clears the board, and then paints every ShapeDef in the undo stack in descending order.
+     */
     private void paintFromUndoStack() {
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
         g.setComposite(AlphaComposite.Src);
@@ -436,10 +450,21 @@ public class AnnotationTool extends JFrame {
     private void commitShape(ShapeDef s) {
         undoStack.push(s);
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
+/*
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);         //smooths out lines as they're drawn. //TODO this in redo
+*/
         g.setComposite(AlphaComposite.Src);
         g.setPaint(s.paint);
         g.setStroke(s.stroke);
+        if(makingTextBox)
+        {
+            g.fill(s.shape);                                            //TODO is there a stroke that does this for me?
+        }
         g.draw(s.shape);
+        if(makingTextBox)
+        {
+            repaint();
+        }
         p2d = null;
     }
 
@@ -519,12 +544,27 @@ public class AnnotationTool extends JFrame {
     {
         textBoxText.append(c);
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
-        g.setPaint(Color.BLACK);
-        Font font = new Font("Arial", Font.BOLD, 100);
-        FontRenderContext frc = g.getFontRenderContext();
+        g.setPaint(textColor);                                                                                            //the paint
+        Font font = new Font(fontString, fontStyle, fontSize);
+
+        GlyphVector v = font.createGlyphVector(getFontMetrics(font).getFontRenderContext(), textBoxText.toString());
+        Shape s = v.getOutline((float)textBoxPoint.getX(),(float)textBoxPoint.getY());                                                                                           //The shape
+
+        //GeneralPath shape = new GeneralPath(s);
+        //shape.moveTo(textBoxPoint.getX(),textBoxPoint.getY());
+
+        BasicStroke stroke =new BasicStroke(1);
+        //p2d.lineTo(textBoxPoint.getX(), textBoxPoint.getY());
+
+        //new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 1, new float[]{1,0.4f,1.5f}, 0);
+
+        commitShape(new ShapeDef(stroke,textColor,s ));
+
+
+/*        FontRenderContext frc = g.getFontRenderContext();
         TextLayout layout = new TextLayout(textBoxText.toString(), font, frc);
         layout.draw(g, (float) textBoxPoint.getX(), (float)textBoxPoint.getY());
-        repaint();
+        repaint();*/
     }
 
     public static void main(final String[] args)
