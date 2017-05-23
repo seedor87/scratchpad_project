@@ -32,9 +32,17 @@ import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
 
 import com.sun.awt.AWTUtilities;
 
@@ -79,6 +87,33 @@ public class AnnotationTool extends JFrame {
     private boolean canDraw = true;
 
     private Path2D.Float borderShape;
+    
+    private class GlobalKeyListener implements NativeKeyListener {
+
+    	@Override
+    	public void nativeKeyPressed(NativeKeyEvent key) {
+			if(key.getKeyCode() == NativeKeyEvent.VC_SHIFT) {
+				suppressWindow(true);
+			}
+			if(key.getKeyCode() == NativeKeyEvent.VC_ALT) {
+				suppressWindow();
+			}
+    	}
+
+    	@Override
+    	public void nativeKeyReleased(NativeKeyEvent key) {
+    		if(key.getKeyCode() == NativeKeyEvent.VC_SHIFT) {
+				suppressWindow(false);
+			}
+    	}
+
+    	@Override
+    	public void nativeKeyTyped(NativeKeyEvent ket) {
+    		// TODO Auto-generated method stub
+    		
+    	}
+    	
+    }
 
     private KeyListener keyListener = new KeyListener()
     {
@@ -97,10 +132,6 @@ public class AnnotationTool extends JFrame {
             if(e.isControlDown())
             {
                 controlPressed = true;
-            }
-            if(e.isShiftDown())
-            {
-            	suppressWindow(true);
             }
             if(e.getExtendedKeyCode() == e.VK_Z)
             {
@@ -130,10 +161,6 @@ public class AnnotationTool extends JFrame {
             if(e.getExtendedKeyCode() == KeyEvent.VK_CONTROL)
             {
                 controlPressed = false;
-            }
-            if(e.getExtendedKeyCode() == KeyEvent.VK_SHIFT) 
-            {
-            	suppressWindow(false);
             }
             if(e.getExtendedKeyCode() == e.VK_Y)
             {
@@ -188,6 +215,24 @@ public class AnnotationTool extends JFrame {
                 + AWTEvent.MOUSE_EVENT_MASK
                 + AWTEvent.MOUSE_MOTION_EVENT_MASK);
         setVisible(true);
+        setAlwaysOnTop(true);
+        
+        try {
+        	Logger keyListenerLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        	keyListenerLogger.setLevel(Level.WARNING);
+        	
+        	keyListenerLogger.setUseParentHandlers(false);
+			GlobalScreen.registerNativeHook();
+		}
+		catch (NativeHookException ex) {
+			System.err.println("There was a problem registering the native hook.");
+			System.err.println(ex.getMessage());
+
+			System.exit(1);
+		}
+
+		GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
+		
 
         /*
         @return an off-screen drawable image, which can be used for double buffering.
@@ -219,12 +264,24 @@ public class AnnotationTool extends JFrame {
     public void suppressWindow(boolean suppression) {
     	canDraw = !suppression;
     	if(suppression) {
-    		AWTUtilities.setWindowOpacity(this, 0.01f);
+    		AWTUtilities.setWindowOpacity(this, 0.019f);
     	}
     	else {
     		AWTUtilities.setWindowOpacity(this, 1f);
     	}
     }
+    
+    public void suppressWindow() {
+    	if(AWTUtilities.getWindowOpacity(this) < 1f) {
+    		canDraw = true;
+    		AWTUtilities.setWindowOpacity(this, 1f);
+    	}
+    	else {
+    		canDraw = false;
+    		AWTUtilities.setWindowOpacity(this, .019f);
+    	}
+    }
+    
     public void setPaint(Paint paint) {
         this.paint = paint;
     }
@@ -388,6 +445,7 @@ public class AnnotationTool extends JFrame {
     {
         System.err.println("Annoation tool by simon@dancingcloudservices.com");
         System.err.println("Icons by www.iconfinder.com");
+        
         int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
         if (args.length == 2 || args.length == 4)
         {
