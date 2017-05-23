@@ -99,8 +99,10 @@ public class ControllerBox extends JFrame {
         new Color(255, 255, 0, 128),
         new Color(0, 255, 0, 128),
         new Color(0, 0, 255, 128),
-        new Color(0, 0, 0, 0)
+       // new Color(255, 255, 255, 10)
+        new Color(0f,0f,0f,0.1f)
     };
+    
 
     private static class PaintPalletteActionListener implements ActionListener {
 
