@@ -102,7 +102,8 @@ public class ControllerBox extends JFrame {
        // new Color(255, 255, 255, 10)
         new Color(0f,0f,0f,0.1f)
     };
-    
+
+
 
     private static class PaintPalletteActionListener implements ActionListener {
 
@@ -259,6 +260,21 @@ public class ControllerBox extends JFrame {
         add(redoButton, gbcb.build());
         gbcb.nextY();
 
+        JButton textBoxAdder = new JButton("Add Text");
+        textBoxAdder.addActionListener(new ActionListener()
+                                   {
+                                       @Override
+                                        public void actionPerformed(ActionEvent e)
+                                        {
+
+
+                                        }
+                                   }
+
+        );
+        add(textBoxAdder, gbcb.build());
+        gbcb.nextY();
+
         JButton killHistoryButton = new JButton("Clear History");
         killHistoryButton.addActionListener(new ActionListener() {
             @Override
@@ -303,6 +319,7 @@ public class ControllerBox extends JFrame {
         });
         add(save, gbcb.build());
         gbcb.nextY();
+
 
         JButton quit = new JButton("Exit");
         quit.addActionListener(new ActionListener() {

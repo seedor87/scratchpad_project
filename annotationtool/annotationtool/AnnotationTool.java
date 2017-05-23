@@ -1,21 +1,6 @@
 package annotationtool;
 
-import java.awt.AWTEvent;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
@@ -23,6 +8,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
@@ -33,8 +19,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import com.sun.awt.AWTUtilities;
 
@@ -79,6 +64,48 @@ public class AnnotationTool extends JFrame {
     private boolean canDraw = true;
 
     private Path2D.Float borderShape;
+
+    private abstract class TextBoxListener implements MouseListener
+    {
+        public boolean makingTextBox = false;
+    }
+    private TextBoxListener textBoxListener = textBoxListener = new TextBoxListener() {
+
+        @Override
+        public void mouseClicked(MouseEvent e)
+        {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e)
+        {
+
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e)
+        {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e)
+        {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e)
+        {
+
+        }
+    };
+    public void setMakingTextBox(boolean set)
+    {
+        textBoxListener.makingTextBox = set;
+    }
 
     private KeyListener keyListener = new KeyListener()
     {
@@ -139,8 +166,6 @@ public class AnnotationTool extends JFrame {
             {
                 yPressed = false;
             }
-
-
         }
     };
 
@@ -189,6 +214,8 @@ public class AnnotationTool extends JFrame {
                 + AWTEvent.MOUSE_MOTION_EVENT_MASK);
         setVisible(true);
 
+
+
         /*
         @return an off-screen drawable image, which can be used for double buffering.
         The return value may be null if the component is not displayable.
@@ -210,6 +237,7 @@ public class AnnotationTool extends JFrame {
                 new Color(255, 128, 0, 255),
                 borderShape);*/
     }
+
 
     /**
      * Makes the window click-through, stops drawing.
