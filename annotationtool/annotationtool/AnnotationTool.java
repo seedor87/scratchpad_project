@@ -75,6 +75,8 @@ public class AnnotationTool extends JFrame {
     private Cursor pencilCursor;
 
     private int saveImageIndex = 0;
+    
+    private boolean canDraw = true;
 
     private Path2D.Float borderShape;
 
@@ -209,7 +211,13 @@ public class AnnotationTool extends JFrame {
                 borderShape);*/
     }
 
+    /**
+     * Makes the window click-through, stops drawing.
+     * 
+     * @param suppression If the window is suppressed
+     */
     public void suppressWindow(boolean suppression) {
+    	canDraw = !suppression;
     	if(suppression) {
     		AWTUtilities.setWindowOpacity(this, 0.01f);
     	}
@@ -358,18 +366,21 @@ public class AnnotationTool extends JFrame {
     @Override
     protected void processEvent(AWTEvent evt) {
         super.processEvent(evt);
-        if (evt instanceof MouseEvent) {
-            MouseEvent me = (MouseEvent) evt;
-            if (me.getID() == MouseEvent.MOUSE_PRESSED) {
-                p2d = new Path2D.Float();
-                p2d.moveTo(me.getX(), me.getY());
-            } else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
-                p2d.lineTo(me.getX(), me.getY());
-            } else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
-                ShapeDef sd = new ShapeDef(stroke, paint, p2d);
-                commitShape(sd);
-            }
-            repaint();
+        
+        if(canDraw) {
+        	if (evt instanceof MouseEvent) {
+        		MouseEvent me = (MouseEvent) evt;
+        		if (me.getID() == MouseEvent.MOUSE_PRESSED) {
+        			p2d = new Path2D.Float();
+        			p2d.moveTo(me.getX(), me.getY());
+        		} else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
+        			p2d.lineTo(me.getX(), me.getY());
+        		} else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
+        			ShapeDef sd = new ShapeDef(stroke, paint, p2d);
+        			commitShape(sd);
+        		}
+        		repaint();
+        	}
         }
     }
 
