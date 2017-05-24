@@ -1,12 +1,19 @@
 package annotationtool;
 
 import java.awt.AWTEvent;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -14,18 +21,28 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseListener;
+import org.jnativehook.mouse.NativeMouseMotionListener;
+
+import com.sun.awt.AWTUtilities;
+import com.sun.swing.internal.plaf.basic.resources.basic;
 
 public class AnnotationToolBuilder extends JFrame {
 	
 	NativeMouseListener mListener;
+	NativeMouseMotionListener dragListener;
 	NativeKeyListener kListener;
 	
+	private static Color clearPaint = new Color(0f,0f,0f,0f);
     private static Color mostlyClearPaint = new Color(0f,0f,0f,0.1f);
+    
+    private String instructions = "Click and drag to select a portion of the screen to annotate.";
     
     private int xPos1;
     private int yPos1;
     private int xPos2;
     private int yPos2;
+    private int xPosCurr;
+    private int yPosCurr;
     
     private boolean dragging;
 	
@@ -38,6 +55,8 @@ public class AnnotationToolBuilder extends JFrame {
 		setUndecorated(true);
 		setAlwaysOnTop(true);
 		setExtendedState(MAXIMIZED_BOTH);
+		
+		AWTUtilities.setWindowOpaque(this, true);
 		setBackground(mostlyClearPaint);
 		
 		try {
@@ -55,38 +74,37 @@ public class AnnotationToolBuilder extends JFrame {
 		}
 
 		mListener = new BuilderMouseListener();
+		dragListener = new BuilderMouseDragListener();
 		kListener = new BuilderKeyListener();
 		GlobalScreen.addNativeMouseListener(mListener);
+		GlobalScreen.addNativeMouseMotionListener(dragListener);
 		GlobalScreen.addNativeKeyListener(kListener);
 		
 		setVisible(true);
 	}
 	
 	@Override
-    protected void processEvent(AWTEvent evt) {
-        super.processEvent(evt);
-        
-        if (evt instanceof MouseEvent) {
-    		MouseEvent me = (MouseEvent) evt;
-    		if (me.getID() == MouseEvent.MOUSE_PRESSED)
-    		{
-    			System.out.println("this part is working");
-    			xPos1 = me.getXOnScreen();
-    			yPos1 = me.getYOnScreen();
-    			dragging = true;
-    		} 
-    		else if (me.getID() == MouseEvent.MOUSE_DRAGGED) 
-    		{
-    			//make a marquee rectangle or something I dunno
-    		} 
-    		else if (me.getID() == MouseEvent.MOUSE_RELEASED && dragging) 
-    		{
-    			System.out.println("getting releases");
-    			xPos2 = me.getXOnScreen() - xPos1;
-    			yPos2 = me.getYOnScreen() - yPos1;
-    			dragging = false;
-    		}
-    	}
+	public void paint(Graphics g) {
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setComposite(AlphaComposite.Src);
+		g2d.setPaint(mostlyClearPaint);
+		g2d.setStroke(new BasicStroke(4));
+		g2d.fill(this.getBounds());
+		int beginX, beginY, width, height;
+		if (dragging == true) {
+			beginX = Math.min(xPos1, xPosCurr);
+			beginY = Math.min(yPos1, yPosCurr);
+			width = Math.abs(xPosCurr - xPos1);
+			height = Math.abs(yPosCurr - yPos1);
+
+			g2d.setColor(Color.RED);
+			g2d.drawRect(beginX, beginY, width, height);
+		}
+		g2d.setFont(g2d.getFont().deriveFont(3, 25f));
+		g2d.setColor(Color.BLACK);
+		g2d.drawString(instructions, 26, 26);
+		g2d.setColor(Color.RED);
+		g2d.drawString(instructions, 25, 25);
 	}
 	
 	private class BuilderMouseListener implements NativeMouseListener {
@@ -97,7 +115,6 @@ public class AnnotationToolBuilder extends JFrame {
 		@Override
 		public void nativeMousePressed(NativeMouseEvent me) {
 			if(!dragging) {
-				System.out.println("this part is working");
 				xPos1 = me.getX();
 				yPos1 = me.getY();
 				dragging = true;
@@ -107,13 +124,26 @@ public class AnnotationToolBuilder extends JFrame {
 		@Override
 		public void nativeMouseReleased(NativeMouseEvent me) {
 			if(dragging) {
-				System.out.println("getting releases");
 				xPos2 = me.getX();
 				yPos2 = me.getY();
 				dragging = false;
 				build();
 			}
 		}
+		
+	}
+
+	private class BuilderMouseDragListener implements NativeMouseMotionListener {
+
+		@Override
+		public void nativeMouseDragged(NativeMouseEvent me) {
+			xPosCurr = me.getX();
+			yPosCurr = me.getY();
+			repaint();
+		}
+
+		@Override
+		public void nativeMouseMoved(NativeMouseEvent me) {}
 		
 	}
 	
@@ -150,6 +180,7 @@ public class AnnotationToolBuilder extends JFrame {
 			String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
 			AnnotationTool.main(windowSize);
 			GlobalScreen.removeNativeKeyListener(kListener);
+			GlobalScreen.removeNativeMouseMotionListener(dragListener);
 			GlobalScreen.removeNativeMouseListener(mListener);
 			this.dispose();
 		}
