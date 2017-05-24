@@ -42,6 +42,7 @@ import com.sun.awt.AWTUtilities;
 import annotationtool.ControllerBox;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
+import sun.awt.image.ImageWatched;
 import sun.awt.image.ToolkitImage;
 
 public class AnnotationTool extends JFrame {
@@ -252,7 +253,21 @@ public class AnnotationTool extends JFrame {
         {
             canDraw = true;
         }
-
+        if(undoStack.peek() != null)
+        {
+            LinkedList<ShapeDef> temp = new LinkedList<ShapeDef>();
+            boolean addingword = false;
+            while(undoStack.peek() != null && undoStack.peek().get(0).isWord && undoStack.peek().size() < 2)
+            {
+                temp.add(undoStack.pop().get(0));
+                addingword = true;
+            }
+            if(addingword)
+            {
+                undoStack.push(temp);
+                paintFromUndoStack();
+            }
+        }
     }
     
     public AnnotationTool(int x, int y, int w, int h) {
