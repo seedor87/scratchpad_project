@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
 
 import java.awt.BasicStroke;
 
@@ -74,11 +75,20 @@ public class AnnotationTool extends JFrame {
 
     private Cursor defaultCursor;
     private Cursor pencilCursor;
+    
+    private int tempSuppressKey = NativeKeyEvent.VC_SHIFT;
+    private int toggleSuppressKey = NativeKeyEvent.VC_ALT;
+    private int moveWindowKey = NativeKeyEvent.VC_SPACE;
+    private float suppressedOpacity = 0.0f;
 
     private int saveImageIndex = 0;
     
     private boolean canDraw = true;
 
+    private boolean movingWindow = false;
+    private int mouseXPos = -1;
+    private int mouseYPos = -1;
+    
     private boolean makingTextBox = false;
     private StringBuffer textBoxText = new StringBuffer(64);
     private Point textBoxPoint;
@@ -94,43 +104,34 @@ public class AnnotationTool extends JFrame {
 
     	@Override
     	public void nativeKeyPressed(NativeKeyEvent key) {
-			if(key.getKeyCode() == NativeKeyEvent.VC_SHIFT) {
-				suppressWindow(true);
-			}
-			if(key.getKeyCode() == NativeKeyEvent.VC_ALT) {
-				suppressWindow();
-			}
+    		if(!makingTextBox) {
+    			if(key.getKeyCode() == tempSuppressKey) {
+    				suppressWindow(true);
+    			}
+    			if(key.getKeyCode() == toggleSuppressKey) {
+    				suppressWindow();
+    			}
+    			if(key.getKeyCode() == moveWindowKey) {
+    				moveWindow(true);
+    			}
+    		}
     	}
 
     	@Override
     	public void nativeKeyReleased(NativeKeyEvent key) {
-    		if(key.getKeyCode() == NativeKeyEvent.VC_SHIFT) {
-				suppressWindow(false);
-			}
+    		if(!makingTextBox) {
+    			if(key.getKeyCode() == tempSuppressKey) {
+    				suppressWindow(false);
+    			}
+    			if(key.getKeyCode() == moveWindowKey) {
+    				moveWindow(false);
+    			}
+    		}
     	}
 
     	@Override
-    	public void nativeKeyTyped(NativeKeyEvent ket) {
-    		// TODO Auto-generated method stub
-    		
-    	}
+    	public void nativeKeyTyped(NativeKeyEvent ket) {}
     	
-    }
-
-
-
-    public void setMakingTextBox(boolean set)
-    {
-        this.makingTextBox = set;
-        if(set)
-        {
-            canDraw = false;
-        }
-        else
-        {
-            canDraw = true;
-        }
-
     }
 
     private KeyListener keyListener = new KeyListener()
@@ -202,6 +203,47 @@ public class AnnotationTool extends JFrame {
         }
     };
 
+    /**
+     * Found at https://tips4java.wordpress.com/2009/06/14/moving-windows/
+     */
+    public class DragListener extends MouseInputAdapter
+    {
+        Point location;
+        MouseEvent pressed;
+     
+        public void mousePressed(MouseEvent me)
+        {
+        	if(movingWindow) {
+        		pressed = me;
+        	}
+        }
+     
+        public void mouseDragged(MouseEvent me)
+        {
+        	if(movingWindow) {
+        		Component component = me.getComponent();
+        		location = component.getLocation(location);
+        		int x = location.x - pressed.getX() + me.getX();
+        		int y = location.y - pressed.getY() + me.getY();
+        		component.setLocation(x, y);
+        	}
+         }
+    }
+    
+    public void setMakingTextBox(boolean set)
+    {
+        this.makingTextBox = set;
+        if(set)
+        {
+            canDraw = false;
+        }
+        else
+        {
+            canDraw = true;
+        }
+
+    }
+    
     public AnnotationTool(int x, int y, int w, int h) {
 
         super("Drawing Frame");
@@ -261,10 +303,13 @@ public class AnnotationTool extends JFrame {
 
 			System.exit(1);
 		}
+        
 
 		GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
 
-
+		DragListener drag = new DragListener();
+		addMouseListener( drag );
+		addMouseMotionListener( drag );
 
 
         /*
@@ -298,7 +343,7 @@ public class AnnotationTool extends JFrame {
     public void suppressWindow(boolean suppression) {
     	canDraw = !suppression;
     	if(suppression) {
-    		AWTUtilities.setWindowOpacity(this, 0.019f);
+    		AWTUtilities.setWindowOpacity(this, suppressedOpacity);
     	}
     	else {
     		AWTUtilities.setWindowOpacity(this, 1f);
@@ -312,8 +357,13 @@ public class AnnotationTool extends JFrame {
     	}
     	else {
     		canDraw = false;
-    		AWTUtilities.setWindowOpacity(this, .019f);
+    		AWTUtilities.setWindowOpacity(this, suppressedOpacity);
     	}
+    }
+    
+    public void moveWindow(boolean moving) {
+    	canDraw = !moving;
+    	movingWindow = moving;
     }
     
     public void setPaint(Paint paint) {
@@ -472,7 +522,7 @@ public class AnnotationTool extends JFrame {
     protected void processEvent(AWTEvent evt) {
         super.processEvent(evt);
         
-        if(canDraw) {
+        if(canDraw && !movingWindow) {
         	if (evt instanceof MouseEvent) {
         		MouseEvent me = (MouseEvent) evt;
         		if (me.getID() == MouseEvent.MOUSE_PRESSED) {
