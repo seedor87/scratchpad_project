@@ -182,6 +182,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        thinLine.addActionListener(setMakingTextBoxFalse);
         add(thinLine, gbcb.nextY().build());
         gbcb.nextY();
 
@@ -195,6 +196,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(15, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        mediumLine.addActionListener(setMakingTextBoxFalse);
         add(mediumLine, gbcb.build());
         gbcb.nextY();
 
@@ -206,6 +208,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(30, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        thickLine.addActionListener(setMakingTextBoxFalse);
         add(thickLine, gbcb.build());
         gbcb.nextY();
 
@@ -217,6 +220,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(70, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        hugeLine.addActionListener(setMakingTextBoxFalse);
         add(hugeLine, gbcb.build());
         gbcb.nextY();
 
