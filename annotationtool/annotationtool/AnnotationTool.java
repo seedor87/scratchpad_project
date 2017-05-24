@@ -437,6 +437,15 @@ public class AnnotationTool extends JFrame {
     public void setStroke(Stroke stroke) {
         this.stroke = stroke;
     }
+    public void setTextColor(Color color)
+    {
+        textColor = color;
+    }
+
+    public void setTextSize(int size)
+    {
+        this.fontSize = size;
+    }
 
     public void doClear(Paint paint) {
         blockOutShapeDef.paint = paint;

@@ -2,14 +2,8 @@ package annotationtool;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
+import javax.swing.*;
+
 import util.GridBagConstraintBuilder;
 
 public class ControllerBox extends JFrame {
@@ -273,20 +267,6 @@ public class ControllerBox extends JFrame {
         add(redoButton, gbcb.build());
         gbcb.nextY();
 
-        JButton textBoxAdder = new JButton("Add Text");
-        textBoxAdder.addActionListener(new ActionListener()
-                                   {
-                                       @Override
-                                        public void actionPerformed(ActionEvent e)
-                                        {
-                                            annotationTool.setMakingTextBox(true);
-                                        }
-                                   }
-
-        );
-        add(textBoxAdder, gbcb.build());
-        gbcb.nextY();
-
         JButton killHistoryButton = new JButton("Clear History");
         killHistoryButton.addActionListener(new ActionListener() {
             @Override
@@ -296,6 +276,57 @@ public class ControllerBox extends JFrame {
         });
         add(killHistoryButton, gbcb.build());
         gbcb.nextY();
+
+        add(new JLabel("----------"), gbcb.build());
+        gbcb.nextY();
+
+        JButton textBoxAdder = new JButton("Add Text");
+        textBoxAdder.addActionListener(new ActionListener()
+                                       {
+                                           @Override
+                                           public void actionPerformed(ActionEvent e)
+                                           {
+                                               annotationTool.setMakingTextBox(true);
+                                           }
+                                       }
+
+        );
+        add(textBoxAdder, gbcb.build());
+        gbcb.nextY();
+
+        add(new JLabel("Text Size:"), gbcb.build());
+        gbcb.nextY();
+
+        JComboBox textSizes = new JComboBox
+                (
+                        new Integer[]{25,50,75,100,125,150,175,200}
+                );
+        textSizes.setSelectedItem(100);
+        textSizes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                annotationTool.setTextSize((Integer) textSizes.getSelectedItem());
+            }
+        });
+        add(textSizes, gbcb.build());
+        gbcb.nextY();
+
+        add(new JLabel("Text Color:"), gbcb.build());
+        gbcb.nextY();
+
+        JComboBox textColors = new JComboBox(penColors);
+        textColors.setSelectedItem(Color.BLACK);
+        textColors.setRenderer(new MyCellRenderer());
+        textColors.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.setTextColor((Color) textColors.getSelectedItem());
+            }
+        });
+        add(textColors, gbcb.build());
+        gbcb.nextY();
+
 
         add(new JLabel("----------"), gbcb.build());
         gbcb.nextY();
@@ -358,6 +389,42 @@ public class ControllerBox extends JFrame {
             }
         });
         gbcb.nextY();
+    }
+
+    /**
+     * https://stackoverflow.com/questions/18830098/pick-color-with-jcombobox-java-swing
+     */
+    private class MyCellRenderer extends JButton implements ListCellRenderer {
+        public MyCellRenderer() {
+            setOpaque(true);
+
+        }
+        boolean b=false;
+        @Override
+        public void setBackground(Color bg) {
+            // TODO Auto-generated method stub
+            if(!b)
+            {
+                return;
+            }
+
+            super.setBackground(bg);
+        }
+        public Component getListCellRendererComponent(
+                JList list,
+                Object value,
+                int index,
+
+                boolean isSelected,
+                boolean cellHasFocus)
+        {
+
+            b=true;
+            setText(" ");
+            setBackground((Color)value);
+            b=false;
+            return this;
+        }
     }
 
 
