@@ -26,9 +26,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 
-import java.awt.BasicStroke;
-
-
 import com.sun.javafx.font.Glyph;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -101,6 +98,7 @@ public class AnnotationTool extends JFrame {
     private Point textBoxPoint;
     private int fontSize = 100;
     private int fontStyle = Font.BOLD;
+    private int borderThickness = 10;
     private String fontString = "Arial";
     private Color textColor = Color.BLACK;
 
@@ -361,6 +359,7 @@ public class AnnotationTool extends JFrame {
                 new Color(255, 128, 0, 255),
                 borderShape);*/
     }
+    
     private void generateBorder() {
     	borderShape = new Path2D.Float();
         borderShape.moveTo(0, 0);
@@ -369,7 +368,7 @@ public class AnnotationTool extends JFrame {
         borderShape.lineTo(0, getHeight());
         borderShape.closePath();
         border = new ShapeDef(
-                new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
+                new BasicStroke(borderThickness, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
                 new Color(255, 128, 0, 255),
                 borderShape);
         setBackground(mostlyClearPaint);
@@ -453,6 +452,17 @@ public class AnnotationTool extends JFrame {
         System.out.println(imageTag);
 
         try {
+        	Rectangle screenGrabArea = new Rectangle(getX() + borderThickness, getY() + borderThickness, 
+        											 getWidth() - (2 * borderThickness), getHeight() - (2 * borderThickness));
+			BufferedImage outImg = new Robot().createScreenCapture(screenGrabArea);
+			ImageIO.write(outImg, "png", outFile);
+		} catch (HeadlessException | AWTException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        /*try {
             BufferedImage outImg = null;
             if (backingMain instanceof BufferedImage) {
                 outImg = (BufferedImage) backingMain;
@@ -465,7 +475,7 @@ public class AnnotationTool extends JFrame {
             ImageIO.write(outImg, "png", outFile);
         } catch (IOException ex) {
             System.err.println("Save failed: " + ex.getMessage());
-        }
+        }*/
     }
 
     @Override
