@@ -53,7 +53,7 @@ public class AnnotationTool extends JFrame {
         Paint paint;
         Stroke stroke;
         boolean isWord = false;
-        boolean isBubbleWord = true;
+        boolean isBubbleWord = false;
 
         ShapeDef(Stroke stroke, Paint paint, Shape shape)
         {
@@ -61,7 +61,7 @@ public class AnnotationTool extends JFrame {
             this.paint = paint;
             this.shape = shape;
         }
-        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWords, boolean isBubbleWord)
+        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWord, boolean isBubbleWord)
         {
             this.stroke = stroke;
             this.paint = paint;
@@ -108,6 +108,7 @@ public class AnnotationTool extends JFrame {
     private int fontStyle = Font.BOLD;
     private String fontString = "Arial";
     private Color textColor = Color.BLACK;
+    boolean bubbleText = false;
 
     private Path2D.Float borderShape;
 
@@ -501,6 +502,10 @@ public class AnnotationTool extends JFrame {
             for(ShapeDef s : sdi.next()) {
                 g.setPaint(s.paint);
                 g.setStroke(s.stroke);
+                if(s.isWord && !s.isBubbleWord)
+                {
+                    g.fill(s.shape);
+                }
                 g.draw(s.shape);
             }
         }
@@ -519,7 +524,7 @@ public class AnnotationTool extends JFrame {
         g.setComposite(AlphaComposite.Src);
         g.setPaint(s.paint);
         g.setStroke(s.stroke);
-        if(makingTextBox)
+        if(makingTextBox && !s.isBubbleWord)
         {
             g.fill(s.shape);                                            //TODO is there a stroke that does this for me?
         }
@@ -621,7 +626,8 @@ public class AnnotationTool extends JFrame {
 
         //new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 1, new float[]{1,0.4f,1.5f}, 0);
 
-        commitShape(new ShapeDef(stroke,textColor,s ));
+        commitShape(new ShapeDef(stroke,textColor,s, makingTextBox, bubbleText ));
+
 
 
 /*        FontRenderContext frc = g.getFontRenderContext();
