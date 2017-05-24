@@ -8,7 +8,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.font.TextLayout;
@@ -16,7 +15,6 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -40,8 +38,6 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import com.sun.awt.AWTUtilities;
 
 import annotationtool.ControllerBox;
-import org.jnativehook.mouse.NativeMouseEvent;
-import org.jnativehook.mouse.NativeMouseInputListener;
 import sun.awt.image.ToolkitImage;
 
 public class AnnotationTool extends JFrame {
@@ -85,8 +81,6 @@ public class AnnotationTool extends JFrame {
     private Deque<LinkedList<ShapeDef>> undoStack = new ArrayDeque<LinkedList<ShapeDef>>();
     private Deque<LinkedList<ShapeDef>> redoStack = new ArrayDeque<LinkedList<ShapeDef>>();
 
-    private Cursor defaultCursor;
-    private Cursor pencilCursor;
     
     private int tempSuppressKey = NativeKeyEvent.VC_SHIFT;
     private int toggleSuppressKey = NativeKeyEvent.VC_ALT;
@@ -98,9 +92,10 @@ public class AnnotationTool extends JFrame {
     private boolean canDraw = true;
 
     private boolean movingWindow = false;
-    private int mouseXPos = -1;
-    private int mouseYPos = -1;
+    private boolean drawing = false;
     
+	private boolean resizingX = false;
+    private boolean resizingY = false;
     private boolean makingTextBox = false;
     private StringBuffer textBoxText = new StringBuffer(64);
     private Point textBoxPoint;
@@ -223,21 +218,50 @@ public class AnnotationTool extends JFrame {
      
         public void mousePressed(MouseEvent me)
         {
-        	if(movingWindow) {
-        		pressed = me;
-        	}
+						   
+    		pressed = me;
+		  
         }
      
         public void mouseDragged(MouseEvent me)
         {
-        	if(movingWindow) {
-        		Component component = me.getComponent();
-        		location = component.getLocation(location);
+        	Component component = me.getComponent();
+        	location = component.getLocation(location);
+        	if((resizingX || resizingY) && !drawing) {
+        		if(resizingX) {
+        			canDraw = false;
+        			int widthMod = me.getX() - component.getWidth();
+        			component.setBounds(component.getX(), component.getY(), component.getWidth() + widthMod, component.getHeight());
+        		}
+        		if(resizingY) {
+        			canDraw = false;
+        			int heightMod = me.getY() - component.getHeight();
+        			component.setBounds(component.getX(), component.getY(), component.getWidth(), component.getHeight() + heightMod);
+        		}
+        		generateBorder();
+        	}
+        	else if(movingWindow && !drawing) {
         		int x = location.x - pressed.getX() + me.getX();
         		int y = location.y - pressed.getY() + me.getY();
         		component.setLocation(x, y);
         	}
+        	else {
+        		if(Math.abs(me.getX() - component.getWidth()) < 10) {
+        			resizingX = true;
+        		}
+        		if(Math.abs(me.getY() - component.getHeight()) < 10) {
+        			resizingY = true;
+        		}
+        	}
          }
+        
+        public void mouseReleased(MouseEvent me) {
+        	if(resizingX || resizingY) {
+        		canDraw = true;
+        		resizingX = false;
+        		resizingY = false;
+        	}
+        }
     }
     
     public void setMakingTextBox(boolean set)
@@ -275,22 +299,16 @@ public class AnnotationTool extends JFrame {
         // make the window transparent
         setBackground(clearPaint);
 
-        backingScratch = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
-        backingMain = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int screenWidth = gd.getDisplayMode().getWidth();
+        int screenHeight = gd.getDisplayMode().getHeight();
+        backingScratch = new BufferedImage(screenWidth,screenHeight,BufferedImage.TRANSLUCENT);//createImage(w, h);
+        backingMain = new BufferedImage(screenWidth,screenHeight,BufferedImage.TRANSLUCENT);//createImage(w, h);
         Graphics2D gMain = (Graphics2D) backingMain.getGraphics();
         gMain.setColor(mostlyClearPaint);
-        gMain.fillRect(0, 0, this.getBounds().width, this.getBounds().height);
+        gMain.fillRect(0, 0, screenWidth, screenHeight);
 
-        borderShape = new Path2D.Float();
-        borderShape.moveTo(0, 0);
-        borderShape.lineTo(w + 10, 0);
-        borderShape.lineTo(w + 10, h + 10);
-        borderShape.lineTo(0, h + 10);
-        borderShape.closePath();
-        border = new ShapeDef(
-                new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
-                new Color(255, 128, 0, 255),
-                borderShape);
+        generateBorder();
 
         setPreferredSize(new Dimension(w + 10, h + 10));
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -342,6 +360,19 @@ public class AnnotationTool extends JFrame {
                 new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
                 new Color(255, 128, 0, 255),
                 borderShape);*/
+    }
+    private void generateBorder() {
+    	borderShape = new Path2D.Float();
+        borderShape.moveTo(0, 0);
+        borderShape.lineTo(getWidth(), 0);
+        borderShape.lineTo(getWidth(), getHeight());
+        borderShape.lineTo(0, getHeight());
+        borderShape.closePath();
+        border = new ShapeDef(
+                new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
+                new Color(255, 128, 0, 255),
+                borderShape);
+        setBackground(mostlyClearPaint);
     }
 
 
@@ -538,16 +569,20 @@ public class AnnotationTool extends JFrame {
         if(canDraw && !movingWindow) {
         	if (evt instanceof MouseEvent) {
         		MouseEvent me = (MouseEvent) evt;
-        		if (me.getID() == MouseEvent.MOUSE_PRESSED) {
-        			p2d = new Path2D.Float();
-        			p2d.moveTo(me.getX(), me.getY());
-        		} else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
-        			p2d.lineTo(me.getX(), me.getY());
-        		} else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
-        			ShapeDef sd = new ShapeDef(stroke, paint, p2d);
-        			commitShape(sd);
+        		if(Math.abs(me.getX() - getWidth()) > 10 && Math.abs(me.getY() - getHeight()) > 10 ) {
+        			if (me.getID() == MouseEvent.MOUSE_PRESSED) {
+        				drawing = true;
+        				p2d = new Path2D.Float();
+        				p2d.moveTo(me.getX(), me.getY());
+        			} else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
+        				p2d.lineTo(me.getX(), me.getY());
+        			} else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
+        				ShapeDef sd = new ShapeDef(stroke, paint, p2d);
+        				commitShape(sd);
+        				drawing = false;
+        			}
+        			repaint();
         		}
-        		repaint();
         	}
         }
         else if(makingTextBox)
