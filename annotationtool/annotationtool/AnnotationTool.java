@@ -8,7 +8,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.font.TextLayout;
@@ -16,7 +15,6 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -28,9 +26,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 
-import java.awt.BasicStroke;
-
-
 import com.sun.javafx.font.Glyph;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -40,8 +35,6 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import com.sun.awt.AWTUtilities;
 
 import annotationtool.ControllerBox;
-import org.jnativehook.mouse.NativeMouseEvent;
-import org.jnativehook.mouse.NativeMouseInputListener;
 import sun.awt.image.ToolkitImage;
 
 public class AnnotationTool extends JFrame {
@@ -61,7 +54,7 @@ public class AnnotationTool extends JFrame {
             this.paint = paint;
             this.shape = shape;
         }
-        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWord, boolean isBubbleWord)
+        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWords, boolean isBubbleWord)
         {
             this.stroke = stroke;
             this.paint = paint;
@@ -85,8 +78,6 @@ public class AnnotationTool extends JFrame {
     private Deque<LinkedList<ShapeDef>> undoStack = new ArrayDeque<LinkedList<ShapeDef>>();
     private Deque<LinkedList<ShapeDef>> redoStack = new ArrayDeque<LinkedList<ShapeDef>>();
 
-    private Cursor defaultCursor;
-    private Cursor pencilCursor;
     
     private int tempSuppressKey = NativeKeyEvent.VC_SHIFT;
     private int toggleSuppressKey = NativeKeyEvent.VC_ALT;
@@ -98,17 +89,18 @@ public class AnnotationTool extends JFrame {
     private boolean canDraw = true;
 
     private boolean movingWindow = false;
-    private int mouseXPos = -1;
-    private int mouseYPos = -1;
+    private boolean drawing = false;
     
+	private boolean resizingX = false;
+    private boolean resizingY = false;
     private boolean makingTextBox = false;
     private StringBuffer textBoxText = new StringBuffer(64);
     private Point textBoxPoint;
     private int fontSize = 100;
     private int fontStyle = Font.BOLD;
+    private int borderThickness = 10;
     private String fontString = "Arial";
     private Color textColor = Color.BLACK;
-    boolean bubbleText = false;
 
     private Path2D.Float borderShape;
 
@@ -190,10 +182,8 @@ public class AnnotationTool extends JFrame {
             {
                 if(textBoxText.length()>0)
                 {
-                    textBoxText.deleteCharAt(textBoxText.length()-1);
-                    LinkedList<ShapeDef> sd = undoStack.pop();
-                    redoStack.push(sd);
-                    paintFromUndoStack();
+                    textBoxText.deleteCharAt(textBoxText.length()-1);       //TODO undo char
+                    undo();
                 }
             }
         }
@@ -226,21 +216,50 @@ public class AnnotationTool extends JFrame {
      
         public void mousePressed(MouseEvent me)
         {
-        	if(movingWindow) {
-        		pressed = me;
-        	}
+						   
+    		pressed = me;
+		  
         }
      
         public void mouseDragged(MouseEvent me)
         {
-        	if(movingWindow) {
-        		Component component = me.getComponent();
-        		location = component.getLocation(location);
+        	Component component = me.getComponent();
+        	location = component.getLocation(location);
+        	if((resizingX || resizingY) && !drawing) {
+        		if(resizingX) {
+        			canDraw = false;
+        			int widthMod = me.getX() - component.getWidth();
+        			component.setBounds(component.getX(), component.getY(), component.getWidth() + widthMod, component.getHeight());
+        		}
+        		if(resizingY) {
+        			canDraw = false;
+        			int heightMod = me.getY() - component.getHeight();
+        			component.setBounds(component.getX(), component.getY(), component.getWidth(), component.getHeight() + heightMod);
+        		}
+        		generateBorder();
+        	}
+        	else if(movingWindow && !drawing) {
         		int x = location.x - pressed.getX() + me.getX();
         		int y = location.y - pressed.getY() + me.getY();
         		component.setLocation(x, y);
         	}
+        	else {
+        		if(Math.abs(me.getX() - component.getWidth()) < 10) {
+        			resizingX = true;
+        		}
+        		if(Math.abs(me.getY() - component.getHeight()) < 10) {
+        			resizingY = true;
+        		}
+        	}
          }
+        
+        public void mouseReleased(MouseEvent me) {
+        	if(resizingX || resizingY) {
+        		canDraw = true;
+        		resizingX = false;
+        		resizingY = false;
+        	}
+        }
     }
     
     public void setMakingTextBox(boolean set)
@@ -254,31 +273,7 @@ public class AnnotationTool extends JFrame {
         {
             canDraw = true;
         }
-        condenseText();
 
-
-    }
-
-    /**
-     * Condenses the single character text on the top of the undostack.
-     */
-    private void condenseText()
-    {
-        if(undoStack.peek() != null)
-        {
-            LinkedList<ShapeDef> temp = new LinkedList<ShapeDef>();
-            boolean addingWord = false;
-            while(undoStack.peek() != null && undoStack.peek().get(0).isWord && undoStack.peek().size() < 2)
-            {
-                temp.add(undoStack.pop().get(0));
-                addingWord = true;
-            }
-            if(addingWord)
-            {
-                undoStack.push(temp);
-                paintFromUndoStack();
-            }
-        }
     }
     
     public AnnotationTool(int x, int y, int w, int h) {
@@ -302,22 +297,16 @@ public class AnnotationTool extends JFrame {
         // make the window transparent
         setBackground(clearPaint);
 
-        backingScratch = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
-        backingMain = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int screenWidth = gd.getDisplayMode().getWidth();
+        int screenHeight = gd.getDisplayMode().getHeight();
+        backingScratch = new BufferedImage(screenWidth,screenHeight,BufferedImage.TRANSLUCENT);//createImage(w, h);
+        backingMain = new BufferedImage(screenWidth,screenHeight,BufferedImage.TRANSLUCENT);//createImage(w, h);
         Graphics2D gMain = (Graphics2D) backingMain.getGraphics();
         gMain.setColor(mostlyClearPaint);
-        gMain.fillRect(0, 0, this.getBounds().width, this.getBounds().height);
+        gMain.fillRect(0, 0, screenWidth, screenHeight);
 
-        borderShape = new Path2D.Float();
-        borderShape.moveTo(0, 0);
-        borderShape.lineTo(w + 10, 0);
-        borderShape.lineTo(w + 10, h + 10);
-        borderShape.lineTo(0, h + 10);
-        borderShape.closePath();
-        border = new ShapeDef(
-                new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
-                new Color(255, 128, 0, 255),
-                borderShape);
+        generateBorder();
 
         setPreferredSize(new Dimension(w + 10, h + 10));
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -369,6 +358,20 @@ public class AnnotationTool extends JFrame {
                 new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
                 new Color(255, 128, 0, 255),
                 borderShape);*/
+    }
+    
+    private void generateBorder() {
+    	borderShape = new Path2D.Float();
+        borderShape.moveTo(0, 0);
+        borderShape.lineTo(getWidth(), 0);
+        borderShape.lineTo(getWidth(), getHeight());
+        borderShape.lineTo(0, getHeight());
+        borderShape.closePath();
+        border = new ShapeDef(
+                new BasicStroke(borderThickness, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
+                new Color(255, 128, 0, 255),
+                borderShape);
+        setBackground(mostlyClearPaint);
     }
 
 
@@ -449,6 +452,17 @@ public class AnnotationTool extends JFrame {
         System.out.println(imageTag);
 
         try {
+        	Rectangle screenGrabArea = new Rectangle(getX() + borderThickness, getY() + borderThickness, 
+        											 getWidth() - (2 * borderThickness), getHeight() - (2 * borderThickness));
+			BufferedImage outImg = new Robot().createScreenCapture(screenGrabArea);
+			ImageIO.write(outImg, "png", outFile);
+		} catch (HeadlessException | AWTException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        /*try {
             BufferedImage outImg = null;
             if (backingMain instanceof BufferedImage) {
                 outImg = (BufferedImage) backingMain;
@@ -461,7 +475,7 @@ public class AnnotationTool extends JFrame {
             ImageIO.write(outImg, "png", outFile);
         } catch (IOException ex) {
             System.err.println("Save failed: " + ex.getMessage());
-        }
+        }*/
     }
 
     @Override
@@ -498,7 +512,6 @@ public class AnnotationTool extends JFrame {
 
     public void undo() {
         if (undoStack.size() > 0) {
-            condenseText();
             LinkedList<ShapeDef> sd = undoStack.pop();
             redoStack.push(sd);
             paintFromUndoStack();
@@ -506,7 +519,6 @@ public class AnnotationTool extends JFrame {
     }
 
     public void redo() {
-        condenseText();
         if (redoStack.size() > 0) {
             LinkedList<ShapeDef> sd = redoStack.pop();
             undoStack.push(sd);
@@ -530,10 +542,6 @@ public class AnnotationTool extends JFrame {
             for(ShapeDef s : sdi.next()) {
                 g.setPaint(s.paint);
                 g.setStroke(s.stroke);
-                if(s.isWord && !s.isBubbleWord)
-                {
-                    g.fill(s.shape);
-                }
                 g.draw(s.shape);
             }
         }
@@ -552,7 +560,7 @@ public class AnnotationTool extends JFrame {
         g.setComposite(AlphaComposite.Src);
         g.setPaint(s.paint);
         g.setStroke(s.stroke);
-        if(makingTextBox && !s.isBubbleWord)
+        if(makingTextBox)
         {
             g.fill(s.shape);                                            //TODO is there a stroke that does this for me?
         }
@@ -571,17 +579,20 @@ public class AnnotationTool extends JFrame {
         if(canDraw && !movingWindow) {
         	if (evt instanceof MouseEvent) {
         		MouseEvent me = (MouseEvent) evt;
-        		if (me.getID() == MouseEvent.MOUSE_PRESSED) {
-        		    condenseText();
-        			p2d = new Path2D.Float();
-        			p2d.moveTo(me.getX(), me.getY());
-        		} else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
-        			p2d.lineTo(me.getX(), me.getY());
-        		} else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
-        			ShapeDef sd = new ShapeDef(stroke, paint, p2d);
-        			commitShape(sd);
+        		if(Math.abs(me.getX() - getWidth()) > 10 && Math.abs(me.getY() - getHeight()) > 10 ) {
+        			if (me.getID() == MouseEvent.MOUSE_PRESSED) {
+        				drawing = true;
+        				p2d = new Path2D.Float();
+        				p2d.moveTo(me.getX(), me.getY());
+        			} else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
+        				p2d.lineTo(me.getX(), me.getY());
+        			} else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
+        				ShapeDef sd = new ShapeDef(stroke, paint, p2d);
+        				commitShape(sd);
+        				drawing = false;
+        			}
+        			repaint();
         		}
-        		repaint();
         	}
         }
         else if(makingTextBox)
@@ -592,7 +603,6 @@ public class AnnotationTool extends JFrame {
 
                 if(me.getID() == MouseEvent.MOUSE_RELEASED)
                 {
-                    condenseText();
                     textBoxText.delete(0,textBoxText.length());
                     //ShapeDef def = new ShapeDef(,Color.BLACK,);
                     Graphics2D g = (Graphics2D) backingMain.getGraphics();
@@ -628,7 +638,11 @@ public class AnnotationTool extends JFrame {
                     //this.add(textField);
                 }
                 //         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
+                //
+                //
+                //
                 //TODO make it so you can highlight text
+                //TODO make it so you can undo
             }
 
         }
@@ -652,7 +666,7 @@ public class AnnotationTool extends JFrame {
 
         //new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 1, new float[]{1,0.4f,1.5f}, 0);
 
-        commitShape(new ShapeDef(stroke,textColor,s , makingTextBox, bubbleText));
+        commitShape(new ShapeDef(stroke,textColor,s ));
 
 
 /*        FontRenderContext frc = g.getFontRenderContext();
