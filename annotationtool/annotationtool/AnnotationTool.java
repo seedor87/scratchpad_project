@@ -529,10 +529,10 @@ public class AnnotationTool extends JFrame {
                   //  textField.setForeground(Color.BLACK);
                     //this.add(textField);
                 }
-                //TODO create a text box at the given point         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
-                //TODO make it so the text box can be exited out of
-                //TODO make it so the text box isn't accessible once created
-                //TODO make it so you can delete text
+                //         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
+                //
+                //
+                //
                 //TODO make it so you can highlight text
                 //TODO make it so you can undo
             }
