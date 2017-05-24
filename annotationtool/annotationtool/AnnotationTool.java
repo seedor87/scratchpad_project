@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,11 +52,22 @@ public class AnnotationTool extends JFrame {
         Shape shape;
         Paint paint;
         Stroke stroke;
+        boolean isWord = false;
+        boolean isBubbleWord = true;
 
-        ShapeDef(Stroke stroke, Paint paint, Shape shape) {
+        ShapeDef(Stroke stroke, Paint paint, Shape shape)
+        {
             this.stroke = stroke;
             this.paint = paint;
             this.shape = shape;
+        }
+        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWords, boolean isBubbleWord)
+        {
+            this.stroke = stroke;
+            this.paint = paint;
+            this.shape = shape;
+            this.isWord = isWord;
+            this.isBubbleWord = isBubbleWord;
         }
     }
 
@@ -70,8 +82,8 @@ public class AnnotationTool extends JFrame {
     private ShapeDef blockOutShapeDef;
     private ShapeDef border;
 
-    private Deque<ShapeDef> undoStack = new ArrayDeque<ShapeDef>();
-    private Deque<ShapeDef> redoStack = new ArrayDeque<ShapeDef>();
+    private Deque<LinkedList<ShapeDef>> undoStack = new ArrayDeque<LinkedList<ShapeDef>>();
+    private Deque<LinkedList<ShapeDef>> redoStack = new ArrayDeque<LinkedList<ShapeDef>>();
 
     private Cursor defaultCursor;
     private Cursor pencilCursor;
@@ -148,8 +160,6 @@ public class AnnotationTool extends JFrame {
             {
                 appendToTextBox(c);
             }
-
-
         }
 
         @Override
@@ -461,7 +471,7 @@ public class AnnotationTool extends JFrame {
 
     public void undo() {
         if (undoStack.size() > 0) {
-            ShapeDef sd = undoStack.pop();
+            LinkedList<ShapeDef> sd = undoStack.pop();
             redoStack.push(sd);
             paintFromUndoStack();
         }
@@ -469,7 +479,7 @@ public class AnnotationTool extends JFrame {
 
     public void redo() {
         if (redoStack.size() > 0) {
-            ShapeDef sd = redoStack.pop();
+            LinkedList<ShapeDef> sd = redoStack.pop();
             undoStack.push(sd);
             paintFromUndoStack();
         }
@@ -486,19 +496,22 @@ public class AnnotationTool extends JFrame {
         g.setStroke(new BasicStroke(10));
         g.fill(borderShape);
 
-        Iterator<ShapeDef> sdi = undoStack.descendingIterator();
+        Iterator<LinkedList<ShapeDef>> sdi = undoStack.descendingIterator();
         while (sdi.hasNext()) {
-            ShapeDef s = sdi.next();
-            g.setPaint(s.paint);
-            g.setStroke(s.stroke);
-            g.draw(s.shape);
+            for(ShapeDef s : sdi.next()) {
+                g.setPaint(s.paint);
+                g.setStroke(s.stroke);
+                g.draw(s.shape);
+            }
         }
 
         repaint();
     }
 
     private void commitShape(ShapeDef s) {
-        undoStack.push(s);
+        LinkedList<ShapeDef> temp = new LinkedList<>();
+        temp.add(s);
+        undoStack.push(temp);
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
 /*
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);         //smooths out lines as they're drawn. //TODO this in redo
