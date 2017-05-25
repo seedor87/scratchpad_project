@@ -5,6 +5,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -15,6 +16,7 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.security.spec.ECField;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -64,9 +66,11 @@ public class AnnotationTool extends JFrame {
         }
     }
 
+    private boolean clickable = true;
+
     private Image backingMain;
     private Image backingScratch;
-    private static Color clearPaint = new Color(0, 0, 0, 0);
+    private static Color clearPaint = new Color(255, 255, 255, 0);
     private static Color mostlyClearPaint = new Color(0f,0f,0f,0.1f);
 
     private Paint paint;
@@ -615,56 +619,92 @@ public class AnnotationTool extends JFrame {
     protected void processEvent(AWTEvent evt) {
         super.processEvent(evt);
 
-        if(canDraw && !movingWindow) {
+        if(!clickable)
+        {
+            Robot robot = null;
+            try
+            {
+                robot = new Robot(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
+            }
+            catch (Exception e)
+            {
+                System.err.println(e);
+            }
             if (evt instanceof MouseEvent) {
                 MouseEvent me = (MouseEvent) evt;
-                if(Math.abs(me.getX() - getWidth()) > 10 && Math.abs(me.getY() - getHeight()) > 10 ) {
-                    if (me.getID() == MouseEvent.MOUSE_PRESSED) {
-                        condenseText();
-                        drawing = true;
-                        p2d = new Path2D.Float();
-                        p2d.moveTo(me.getX(), me.getY());
-                    } else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
-                        p2d.lineTo(me.getX(), me.getY());
-                    } else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
-                        ShapeDef sd = new ShapeDef(stroke, paint, p2d);
-                        commitShape(sd);
-                        drawing = false;
+                if(me.getID() == MouseEvent.MOUSE_PRESSED)
+                {
+                    //robot.mouseMove(me.getX(), me.getY());
+                    setAlwaysOnTop(false);
+                    this.toBack();
+                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+/*                    try
+                    {
+                        wait(100);
                     }
-                    repaint();
+                    catch (Exception e)
+                    {
+
+                    }*/
+                    this.toFront();
+                    setAlwaysOnTop(true);
+                }
+                if(me.getID() == MouseEvent.MOUSE_RELEASED)
+                {
+                    //robot.mouseMove(me.getX(), me.getY());
+                    setBackground(clearPaint);
+                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                 }
             }
         }
-        else if(makingTextBox)
-        {
-            if(evt instanceof MouseEvent)
-            {
-                MouseEvent me  = (MouseEvent) evt;
+        else {
 
-                if(me.getID() == MouseEvent.MOUSE_RELEASED)
-                {
-                    condenseText();
-                    textBoxText.delete(0,textBoxText.length());
-                    //ShapeDef def = new ShapeDef(,Color.BLACK,);
-                    Graphics2D g = (Graphics2D) backingMain.getGraphics();
-                    g.setPaint(Color.BLACK);
-                    textBoxPoint = me.getPoint();
-                    Font font = new Font("Arial", Font.BOLD, 100);
-                    FontRenderContext frc = g.getFontRenderContext();
-                    TextLayout layout = new TextLayout("This is a string", font, frc);
-                    //layout.draw(g, (float) point.getX(), (float)point.getY());
-                    //repaint();
-                    //use a key listener to change some stuff here :)
+            if (canDraw && !movingWindow) {
+                if (evt instanceof MouseEvent) {
+                    MouseEvent me = (MouseEvent) evt;
+                    if (Math.abs(me.getX() - getWidth()) > 10 && Math.abs(me.getY() - getHeight()) > 10) {
+                        if (me.getID() == MouseEvent.MOUSE_PRESSED) {
+                            condenseText();
+                            drawing = true;
+                            p2d = new Path2D.Float();
+                            p2d.moveTo(me.getX(), me.getY());
+                        } else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
+                            p2d.lineTo(me.getX(), me.getY());
+                        } else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
+                            ShapeDef sd = new ShapeDef(stroke, paint, p2d);
+                            commitShape(sd);
+                            drawing = false;
+                        }
+                        repaint();
+                    }
+                }
+            } else if (makingTextBox) {
+                if (evt instanceof MouseEvent) {
+                    MouseEvent me = (MouseEvent) evt;
+
+                    if (me.getID() == MouseEvent.MOUSE_RELEASED) {
+                        condenseText();
+                        textBoxText.delete(0, textBoxText.length());
+                        //ShapeDef def = new ShapeDef(,Color.BLACK,);
+                        Graphics2D g = (Graphics2D) backingMain.getGraphics();
+                        g.setPaint(Color.BLACK);
+                        textBoxPoint = me.getPoint();
+                        Font font = new Font("Arial", Font.BOLD, 100);
+                        FontRenderContext frc = g.getFontRenderContext();
+                        TextLayout layout = new TextLayout("This is a string", font, frc);
+                        //layout.draw(g, (float) point.getX(), (float)point.getY());
+                        //repaint();
+                        //use a key listener to change some stuff here :)
 
 
-                    //g.setPaint(Color.BLACK);
-                    //g.setFont(font);
-                    //FontMetrics fm = g.getFontMetrics();
-                    //int x = backingMain.getWidth(this) - fm.stringWidth("This is a String") - 5;
-                    //int y = fm.getHeight();
+                        //g.setPaint(Color.BLACK);
+                        //g.setFont(font);
+                        //FontMetrics fm = g.getFontMetrics();
+                        //int x = backingMain.getWidth(this) - fm.stringWidth("This is a String") - 5;
+                        //int y = fm.getHeight();
 
 //                    g.draw(layout.getCaretShape(layout.hitTestChar((float)point.getX(), (float)point.getY())));
-                    //g.drawString("This is a string", x, y);
+                        //g.drawString("This is a string", x, y);
 
 
 /*                    Rectangle2D bounds = layout.getBounds();
@@ -674,18 +714,19 @@ public class AnnotationTool extends JFrame {
                             bounds.getHeight());
                     g.draw(bounds);*/
 
-                    // textField.setBackground(mostlyClearPaint);
-                    //  textField.setForeground(Color.BLACK);
-                    //this.add(textField);
+                        // textField.setBackground(mostlyClearPaint);
+                        //  textField.setForeground(Color.BLACK);
+                        //this.add(textField);
+                    }
+                    //         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
+                    //
+                    //
+                    //
+                    //TODO make it so you can highlight text
+                    //TODO make it so you can undo
                 }
-                //         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
-                //
-                //
-                //
-                //TODO make it so you can highlight text
-                //TODO make it so you can undo
-            }
 
+            }
         }
     }
 
@@ -713,6 +754,10 @@ public class AnnotationTool extends JFrame {
         TextLayout layout = new TextLayout(textBoxText.toString(), font, frc);
         layout.draw(g, (float) textBoxPoint.getX(), (float)textBoxPoint.getY());
         repaint();*/
+    }
+    public void toggleClickable()
+    {
+        this.clickable = !this.clickable;
     }
 
     public static void main(final String[] args)

@@ -277,6 +277,17 @@ public class ControllerBox extends JFrame {
         add(killHistoryButton, gbcb.build());
         gbcb.nextY();
 
+        JButton toggleClickableButton = new JButton("Toggle Clickable");
+        toggleClickableButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.toggleClickable();
+            }
+        });
+        add(toggleClickableButton, gbcb.build());
+        gbcb.nextY();
+
+
         add(new JLabel("----------"), gbcb.build());
         gbcb.nextY();
 
@@ -315,7 +326,7 @@ public class ControllerBox extends JFrame {
         add(new JLabel("Text Color:"), gbcb.build());
         gbcb.nextY();
 
-        JComboBox textColors = new JComboBox(penColors);
+        JComboBox textColors = new JComboBox(penColors);                                // could replace with a separate array if desired.
         textColors.setSelectedItem(Color.BLACK);
         textColors.setRenderer(new MyCellRenderer());
         textColors.addActionListener(new ActionListener() {
