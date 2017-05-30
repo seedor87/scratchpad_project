@@ -2,14 +2,8 @@ package annotationtool;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
+import javax.swing.*;
+
 import util.GridBagConstraintBuilder;
 
 public class ControllerBox extends JFrame {
@@ -31,7 +25,7 @@ public class ControllerBox extends JFrame {
         @Override
         public void componentMoved(ComponentEvent e)
         {
-            annotationTool.setLocation(new Point(thisBox.getX() -1300, thisBox.getY()));
+            //annotationTool.setLocation(new Point(thisBox.getX() -1300, thisBox.getY()));
 
         }
 
@@ -99,8 +93,11 @@ public class ControllerBox extends JFrame {
         new Color(255, 255, 0, 128),
         new Color(0, 255, 0, 128),
         new Color(0, 0, 255, 128),
-        new Color(0, 0, 0, 0)
+       // new Color(255, 255, 255, 10)
+        new Color(0f,0f,0f,0.1f)
     };
+
+
 
     private static class PaintPalletteActionListener implements ActionListener {
 
@@ -123,6 +120,7 @@ public class ControllerBox extends JFrame {
     private JRadioButton thickLine;
     private JRadioButton hugeLine;
 
+
     public ControllerBox(AnnotationTool at) {
         super("Tools");
 
@@ -135,6 +133,12 @@ public class ControllerBox extends JFrame {
         this.setAlwaysOnTop(true);
 
         ButtonGroup toolGroup = new ButtonGroup();
+        ActionListener setMakingTextBoxFalse = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.setMakingTextBox(false);
+            }
+        };
 
         add(new JLabel("Pens"), gbcb.fullWidth().build());
         gbcb.nextY().singleWidth();
@@ -142,6 +146,7 @@ public class ControllerBox extends JFrame {
         for (Color ppi : penColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
+            jrb.addActionListener(setMakingTextBoxFalse);
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
@@ -156,6 +161,7 @@ public class ControllerBox extends JFrame {
         for (Color ppi : highlighterColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
+            jrb.addActionListener(setMakingTextBoxFalse);
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
@@ -170,6 +176,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        thinLine.addActionListener(setMakingTextBoxFalse);
         add(thinLine, gbcb.nextY().build());
         gbcb.nextY();
 
@@ -183,6 +190,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(15, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        mediumLine.addActionListener(setMakingTextBoxFalse);
         add(mediumLine, gbcb.build());
         gbcb.nextY();
 
@@ -194,6 +202,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(30, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        thickLine.addActionListener(setMakingTextBoxFalse);
         add(thickLine, gbcb.build());
         gbcb.nextY();
 
@@ -205,6 +214,7 @@ public class ControllerBox extends JFrame {
                         new BasicStroke(70, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
+        hugeLine.addActionListener(setMakingTextBoxFalse);
         add(hugeLine, gbcb.build());
         gbcb.nextY();
 
@@ -267,6 +277,68 @@ public class ControllerBox extends JFrame {
         add(killHistoryButton, gbcb.build());
         gbcb.nextY();
 
+        JButton toggleClickableButton = new JButton("Toggle Clickable");
+        toggleClickableButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.toggleClickable();
+            }
+        });
+        add(toggleClickableButton, gbcb.build());
+        gbcb.nextY();
+
+
+        add(new JLabel("----------"), gbcb.build());
+        gbcb.nextY();
+
+        JButton textBoxAdder = new JButton("Add Text");
+        textBoxAdder.addActionListener(new ActionListener()
+                                       {
+                                           @Override
+                                           public void actionPerformed(ActionEvent e)
+                                           {
+                                               annotationTool.setMakingTextBox(true);
+                                           }
+                                       }
+
+        );
+        add(textBoxAdder, gbcb.build());
+        gbcb.nextY();
+
+        add(new JLabel("Text Size:"), gbcb.build());
+        gbcb.nextY();
+
+        JComboBox textSizes = new JComboBox
+                (
+                        new Integer[]{25,50,75,100,125,150,175,200}
+                );
+        textSizes.setSelectedItem(100);
+        textSizes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                annotationTool.setTextSize((Integer) textSizes.getSelectedItem());
+            }
+        });
+        add(textSizes, gbcb.build());
+        gbcb.nextY();
+
+        add(new JLabel("Text Color:"), gbcb.build());
+        gbcb.nextY();
+
+        JComboBox textColors = new JComboBox(penColors);                                // could replace with a separate array if desired.
+        textColors.setSelectedItem(Color.BLACK);
+        textColors.setRenderer(new MyCellRenderer());
+        textColors.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.setTextColor((Color) textColors.getSelectedItem());
+            }
+        });
+        add(textColors, gbcb.build());
+        gbcb.nextY();
+
+
         add(new JLabel("----------"), gbcb.build());
         gbcb.nextY();
 
@@ -302,6 +374,7 @@ public class ControllerBox extends JFrame {
         add(save, gbcb.build());
         gbcb.nextY();
 
+
         JButton quit = new JButton("Exit");
         quit.addActionListener(new ActionListener() {
             @Override
@@ -327,6 +400,42 @@ public class ControllerBox extends JFrame {
             }
         });
         gbcb.nextY();
+    }
+
+    /**
+     * https://stackoverflow.com/questions/18830098/pick-color-with-jcombobox-java-swing
+     */
+    private class MyCellRenderer extends JButton implements ListCellRenderer {
+        public MyCellRenderer() {
+            setOpaque(true);
+
+        }
+        boolean b=false;
+        @Override
+        public void setBackground(Color bg) {
+            // TODO Auto-generated method stub
+            if(!b)
+            {
+                return;
+            }
+
+            super.setBackground(bg);
+        }
+        public Component getListCellRendererComponent(
+                JList list,
+                Object value,
+                int index,
+
+                boolean isSelected,
+                boolean cellHasFocus)
+        {
+
+            b=true;
+            setText(" ");
+            setBackground((Color)value);
+            b=false;
+            return this;
+        }
     }
 
 

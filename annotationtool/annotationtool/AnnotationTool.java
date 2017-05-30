@@ -1,40 +1,40 @@
 package annotationtool;
 
-import java.awt.AWTEvent;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
+import java.awt.font.TextLayout;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.security.spec.ECField;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
+
+import com.sun.javafx.font.Glyph;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+
+import com.sun.awt.AWTUtilities;
 
 import annotationtool.ControllerBox;
 import sun.awt.image.ToolkitImage;
@@ -47,17 +47,30 @@ public class AnnotationTool extends JFrame {
         Shape shape;
         Paint paint;
         Stroke stroke;
+        boolean isWord = false;
+        boolean isBubbleWord = false;
 
-        ShapeDef(Stroke stroke, Paint paint, Shape shape) {
+        ShapeDef(Stroke stroke, Paint paint, Shape shape)
+        {
             this.stroke = stroke;
             this.paint = paint;
             this.shape = shape;
         }
+        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWord, boolean isBubbleWord)
+        {
+            this.stroke = stroke;
+            this.paint = paint;
+            this.shape = shape;
+            this.isWord = isWord;
+            this.isBubbleWord = isBubbleWord;
+        }
     }
+
+    private boolean clickable = true;
 
     private Image backingMain;
     private Image backingScratch;
-    private static Color clearPaint = new Color(0, 0, 0, 0);
+    private static Color clearPaint = new Color(255, 255, 255, 0);
     private static Color mostlyClearPaint = new Color(0f,0f,0f,0.1f);
 
     private Paint paint;
@@ -66,15 +79,70 @@ public class AnnotationTool extends JFrame {
     private ShapeDef blockOutShapeDef;
     private ShapeDef border;
 
-    private Deque<ShapeDef> undoStack = new ArrayDeque<ShapeDef>();
-    private Deque<ShapeDef> redoStack = new ArrayDeque<ShapeDef>();
+    private Deque<LinkedList<ShapeDef>> undoStack = new ArrayDeque<LinkedList<ShapeDef>>();
+    private Deque<LinkedList<ShapeDef>> redoStack = new ArrayDeque<LinkedList<ShapeDef>>();
 
-    private Cursor defaultCursor;
-    private Cursor pencilCursor;
+
+    private int tempSuppressKey = NativeKeyEvent.VC_SHIFT;
+    private int toggleSuppressKey = NativeKeyEvent.VC_ALT;
+    private int moveWindowKey = NativeKeyEvent.VC_SPACE;
+    private float suppressedOpacity = 0.0f;
 
     private int saveImageIndex = 0;
 
+    private boolean canDraw = true;
+
+    private boolean movingWindow = false;
+    private boolean drawing = false;
+
+    private boolean resizingX = false;
+    private boolean resizingY = false;
+    private boolean makingTextBox = false;
+    private StringBuffer textBoxText = new StringBuffer(64);
+    private Point textBoxPoint;
+    private int fontSize = 100;
+    private int fontStyle = Font.BOLD;
+    private int borderThickness = 10;
+    private String fontString = "Arial";
+    private Color textColor = Color.BLACK;
+    boolean bubbleText = false;
+
     private Path2D.Float borderShape;
+
+
+    private class GlobalKeyListener implements NativeKeyListener {
+
+        @Override
+        public void nativeKeyPressed(NativeKeyEvent key) {
+            if(!makingTextBox) {
+                if(key.getKeyCode() == tempSuppressKey) {
+                    suppressWindow(true);
+                }
+                if(key.getKeyCode() == toggleSuppressKey) {
+                    suppressWindow();
+                }
+                if(key.getKeyCode() == moveWindowKey) {
+                    moveWindow(true);
+                }
+            }
+        }
+
+        @Override
+        public void nativeKeyReleased(NativeKeyEvent key) {
+            if(!makingTextBox) {
+                if(key.getKeyCode() == tempSuppressKey) {
+                    suppressWindow(false);
+                }
+                if(key.getKeyCode() == moveWindowKey) {
+                    moveWindow(false);
+                }
+            }
+        }
+
+        @Override
+        public void nativeKeyTyped(NativeKeyEvent ket) {}
+
+    }
 
     private KeyListener keyListener = new KeyListener()
     {
@@ -83,8 +151,13 @@ public class AnnotationTool extends JFrame {
         private boolean yPressed = false;
 
         @Override
-        public void keyTyped(KeyEvent e) {
-
+        public void keyTyped(KeyEvent e)
+        {
+            char c = e.getKeyChar();
+            if(makingTextBox && ( c > 31)&&(c < 127))
+            {
+                appendToTextBox(c);
+            }
         }
 
         @Override
@@ -110,6 +183,15 @@ public class AnnotationTool extends JFrame {
             {
                 redo();
             }
+            if(makingTextBox && e.getExtendedKeyCode() == e.VK_BACK_SPACE )
+            {
+                if(textBoxText.length()>0)
+                {
+                    textBoxText.deleteCharAt(textBoxText.length()-1);
+                    undoStack.pop();
+                    paintFromUndoStack();
+                }
+            }
         }
 
         @Override
@@ -127,10 +209,100 @@ public class AnnotationTool extends JFrame {
             {
                 yPressed = false;
             }
-
-
         }
     };
+
+    /**
+     * Found at https://tips4java.wordpress.com/2009/06/14/moving-windows/
+     */
+    public class DragListener extends MouseInputAdapter
+    {
+        Point location;
+        MouseEvent pressed;
+
+        public void mousePressed(MouseEvent me)
+        {
+
+            pressed = me;
+
+        }
+
+        public void mouseDragged(MouseEvent me)
+        {
+            Component component = me.getComponent();
+            location = component.getLocation(location);
+            if((resizingX || resizingY) && !drawing) {
+                if(resizingX) {
+                    canDraw = false;
+                    int widthMod = me.getX() - component.getWidth();
+                    component.setBounds(component.getX(), component.getY(), component.getWidth() + widthMod, component.getHeight());
+                }
+                if(resizingY) {
+                    canDraw = false;
+                    int heightMod = me.getY() - component.getHeight();
+                    component.setBounds(component.getX(), component.getY(), component.getWidth(), component.getHeight() + heightMod);
+                }
+                generateBorder();
+            }
+            else if(movingWindow && !drawing) {
+                int x = location.x - pressed.getX() + me.getX();
+                int y = location.y - pressed.getY() + me.getY();
+                component.setLocation(x, y);
+            }
+            else {
+                if(Math.abs(me.getX() - component.getWidth()) < 10) {
+                    resizingX = true;
+                }
+                if(Math.abs(me.getY() - component.getHeight()) < 10) {
+                    resizingY = true;
+                }
+            }
+        }
+
+        public void mouseReleased(MouseEvent me) {
+            if(resizingX || resizingY) {
+                canDraw = true;
+                resizingX = false;
+                resizingY = false;
+            }
+        }
+    }
+
+    public void setMakingTextBox(boolean set)
+    {
+        this.makingTextBox = set;
+        if(set)
+        {
+            canDraw = false;
+        }
+        else
+        {
+            canDraw = true;
+        }
+        condenseText();
+    }
+
+    /**
+     * Condenses the single character text on the top of the undostack.
+     */
+    private void condenseText()
+    {
+        if(undoStack.peek() != null)
+        {
+            LinkedList<ShapeDef> temp = new LinkedList<ShapeDef>();
+            boolean addingWord = false;
+            while(undoStack.peek() != null && undoStack.peek().get(0).isWord && undoStack.peek().size() < 2)
+            {
+                temp.add(undoStack.pop().get(0));
+                addingWord = true;
+            }
+            if(addingWord)
+            {
+                undoStack.push(temp);
+                paintFromUndoStack();
+            }
+        }
+    }
 
     public AnnotationTool(int x, int y, int w, int h) {
 
@@ -139,17 +311,6 @@ public class AnnotationTool extends JFrame {
         this.addKeyListener(keyListener);
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-
-      /*  try {*/
-            InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
-            System.out.println("Stream is " + imageStream);
-//            Image image = ImageIO.read(imageStream);
-//            pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
-            defaultCursor = getCursor();
-//            setCursor(pencilCursor);
-       /* } /*catch (IOException ioe) {
-            ioe.printStackTrace(System.err);
-        }*/
 
         setBounds(x - 5, y - 5, w + 10, h + 10);
 
@@ -164,22 +325,16 @@ public class AnnotationTool extends JFrame {
         // make the window transparent
         setBackground(clearPaint);
 
-        backingScratch = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
-        backingMain = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int screenWidth = gd.getDisplayMode().getWidth();
+        int screenHeight = gd.getDisplayMode().getHeight();
+        backingScratch = new BufferedImage(screenWidth,screenHeight,BufferedImage.TRANSLUCENT);//createImage(w, h);
+        backingMain = new BufferedImage(screenWidth,screenHeight,BufferedImage.TRANSLUCENT);//createImage(w, h);
         Graphics2D gMain = (Graphics2D) backingMain.getGraphics();
         gMain.setColor(mostlyClearPaint);
-        gMain.fillRect(0, 0, this.getBounds().width, this.getBounds().height);
+        gMain.fillRect(0, 0, screenWidth, screenHeight);
 
-        borderShape = new Path2D.Float();
-        borderShape.moveTo(0, 0);
-        borderShape.lineTo(w + 10, 0);
-        borderShape.lineTo(w + 10, h + 10);
-        borderShape.lineTo(0, h + 10);
-        borderShape.closePath();
-        border = new ShapeDef(
-                new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
-                new Color(255, 128, 0, 255),
-                borderShape);
+        generateBorder();
 
         setPreferredSize(new Dimension(w + 10, h + 10));
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -187,6 +342,29 @@ public class AnnotationTool extends JFrame {
                 + AWTEvent.MOUSE_EVENT_MASK
                 + AWTEvent.MOUSE_MOTION_EVENT_MASK);
         setVisible(true);
+        setAlwaysOnTop(true);
+
+        try {
+            Logger keyListenerLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+            keyListenerLogger.setLevel(Level.WARNING);
+
+            keyListenerLogger.setUseParentHandlers(false);
+            GlobalScreen.registerNativeHook();
+        }
+        catch (NativeHookException ex) {
+            System.err.println("There was a problem registering the native hook.");
+            System.err.println(ex.getMessage());
+
+            System.exit(1);
+        }
+
+
+        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
+
+        DragListener drag = new DragListener();
+        addMouseListener( drag );
+        addMouseMotionListener( drag );
+
 
         /*
         @return an off-screen drawable image, which can be used for double buffering.
@@ -210,12 +388,67 @@ public class AnnotationTool extends JFrame {
                 borderShape);*/
     }
 
+    private void generateBorder() {
+        borderShape = new Path2D.Float();
+        borderShape.moveTo(0, 0);
+        borderShape.lineTo(getWidth(), 0);
+        borderShape.lineTo(getWidth(), getHeight());
+        borderShape.lineTo(0, getHeight());
+        borderShape.closePath();
+        border = new ShapeDef(
+                new BasicStroke(borderThickness, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
+                new Color(255, 128, 0, 255),
+                borderShape);
+        setBackground(mostlyClearPaint);
+    }
+
+
+    /**
+     * Makes the window click-through, stops drawing.
+     *
+     * @param suppression If the window is suppressed
+     */
+    public void suppressWindow(boolean suppression) {
+        canDraw = !suppression;
+        if(suppression) {
+            AWTUtilities.setWindowOpacity(this, suppressedOpacity);
+        }
+        else {
+            AWTUtilities.setWindowOpacity(this, 1f);
+        }
+    }
+
+    public void suppressWindow() {
+        if(AWTUtilities.getWindowOpacity(this) < 1f) {
+            canDraw = true;
+            AWTUtilities.setWindowOpacity(this, 1f);
+        }
+        else {
+            canDraw = false;
+            AWTUtilities.setWindowOpacity(this, suppressedOpacity);
+        }
+    }
+
+    public void moveWindow(boolean moving) {
+        canDraw = !moving;
+        movingWindow = moving;
+    }
+
     public void setPaint(Paint paint) {
         this.paint = paint;
     }
 
     public void setStroke(Stroke stroke) {
         this.stroke = stroke;
+    }
+    public void setTextColor(Color color)
+    {
+        textColor = color;
+    }
+
+    public void setTextSize(int size)
+    {
+        this.fontSize = size;
     }
 
     public void doClear(Paint paint) {
@@ -256,6 +489,17 @@ public class AnnotationTool extends JFrame {
         System.out.println(imageTag);
 
         try {
+            Rectangle screenGrabArea = new Rectangle(getX() + borderThickness, getY() + borderThickness,
+                    getWidth() - (2 * borderThickness), getHeight() - (2 * borderThickness));
+            BufferedImage outImg = new Robot().createScreenCapture(screenGrabArea);
+            ImageIO.write(outImg, "png", outFile);
+        } catch (HeadlessException | AWTException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*try {
             BufferedImage outImg = null;
             if (backingMain instanceof BufferedImage) {
                 outImg = (BufferedImage) backingMain;
@@ -268,7 +512,7 @@ public class AnnotationTool extends JFrame {
             ImageIO.write(outImg, "png", outFile);
         } catch (IOException ex) {
             System.err.println("Save failed: " + ex.getMessage());
-        }
+        }*/
     }
 
     @Override
@@ -305,20 +549,25 @@ public class AnnotationTool extends JFrame {
 
     public void undo() {
         if (undoStack.size() > 0) {
-            ShapeDef sd = undoStack.pop();
+            condenseText();
+            LinkedList<ShapeDef> sd = undoStack.pop();
             redoStack.push(sd);
             paintFromUndoStack();
         }
     }
 
     public void redo() {
+        condenseText();
         if (redoStack.size() > 0) {
-            ShapeDef sd = redoStack.pop();
+            LinkedList<ShapeDef> sd = redoStack.pop();
             undoStack.push(sd);
             paintFromUndoStack();
         }
     }
 
+    /**
+     * Clears the board, and then paints every ShapeDef in the undo stack in descending order.
+     */
     private void paintFromUndoStack() {
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
         g.setComposite(AlphaComposite.Src);
@@ -327,49 +576,195 @@ public class AnnotationTool extends JFrame {
         g.setStroke(new BasicStroke(10));
         g.fill(borderShape);
 
-        Iterator<ShapeDef> sdi = undoStack.descendingIterator();
+        Iterator<LinkedList<ShapeDef>> sdi = undoStack.descendingIterator();
         while (sdi.hasNext()) {
-            ShapeDef s = sdi.next();
-            g.setPaint(s.paint);
-            g.setStroke(s.stroke);
-            g.draw(s.shape);
+            for(ShapeDef s : sdi.next()) {
+                g.setPaint(s.paint);
+                g.setStroke(s.stroke);
+                if(s.isWord && !s.isBubbleWord)
+                {
+                    g.fill(s.shape);
+                }
+                g.draw(s.shape);
+            }
         }
 
         repaint();
     }
 
     private void commitShape(ShapeDef s) {
-        undoStack.push(s);
+        LinkedList<ShapeDef> temp = new LinkedList<>();
+        temp.add(s);
+        undoStack.push(temp);
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
+/*
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);         //smooths out lines as they're drawn. //TODO this in redo
+*/
         g.setComposite(AlphaComposite.Src);
         g.setPaint(s.paint);
         g.setStroke(s.stroke);
+        if(makingTextBox)
+        {
+            g.fill(s.shape);                                            //TODO is there a stroke that does this for me?
+        }
         g.draw(s.shape);
+        if(makingTextBox)
+        {
+            repaint();
+        }
         p2d = null;
     }
 
     @Override
     protected void processEvent(AWTEvent evt) {
         super.processEvent(evt);
-        if (evt instanceof MouseEvent) {
-            MouseEvent me = (MouseEvent) evt;
-            if (me.getID() == MouseEvent.MOUSE_PRESSED) {
-                p2d = new Path2D.Float();
-                p2d.moveTo(me.getX(), me.getY());
-            } else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
-                p2d.lineTo(me.getX(), me.getY());
-            } else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
-                ShapeDef sd = new ShapeDef(stroke, paint, p2d);
-                commitShape(sd);
+
+        if(!clickable)
+        {
+            Robot robot = null;
+            try
+            {
+                robot = new Robot(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
             }
-            repaint();
+            catch (Exception e)
+            {
+                System.err.println(e);
+            }
+            if (evt instanceof MouseEvent) {
+                MouseEvent me = (MouseEvent) evt;
+                if(me.getID() == MouseEvent.MOUSE_PRESSED)
+                {
+                    //robot.mouseMove(me.getX(), me.getY());
+                    setAlwaysOnTop(false);
+                    this.toBack();
+                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+/*                    try
+                    {
+                        wait(100);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }*/
+                    this.toFront();
+                    setAlwaysOnTop(true);
+                }
+                if(me.getID() == MouseEvent.MOUSE_RELEASED)
+                {
+                    //robot.mouseMove(me.getX(), me.getY());
+                    setBackground(clearPaint);
+                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                }
+            }
         }
+        else {
+
+            if (canDraw && !movingWindow) {
+                if (evt instanceof MouseEvent) {
+                    MouseEvent me = (MouseEvent) evt;
+                    if (Math.abs(me.getX() - getWidth()) > 10 && Math.abs(me.getY() - getHeight()) > 10) {
+                        if (me.getID() == MouseEvent.MOUSE_PRESSED) {
+                            condenseText();
+                            drawing = true;
+                            p2d = new Path2D.Float();
+                            p2d.moveTo(me.getX(), me.getY());
+                        } else if (p2d != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
+                            p2d.lineTo(me.getX(), me.getY());
+                        } else if (p2d != null && me.getID() == MouseEvent.MOUSE_RELEASED) {
+                            ShapeDef sd = new ShapeDef(stroke, paint, p2d);
+                            commitShape(sd);
+                            drawing = false;
+                        }
+                        repaint();
+                    }
+                }
+            } else if (makingTextBox) {
+                if (evt instanceof MouseEvent) {
+                    MouseEvent me = (MouseEvent) evt;
+
+                    if (me.getID() == MouseEvent.MOUSE_RELEASED) {
+                        condenseText();
+                        textBoxText.delete(0, textBoxText.length());
+                        //ShapeDef def = new ShapeDef(,Color.BLACK,);
+                        Graphics2D g = (Graphics2D) backingMain.getGraphics();
+                        g.setPaint(Color.BLACK);
+                        textBoxPoint = me.getPoint();
+                        Font font = new Font("Arial", Font.BOLD, 100);
+                        FontRenderContext frc = g.getFontRenderContext();
+                        TextLayout layout = new TextLayout("This is a string", font, frc);
+                        //layout.draw(g, (float) point.getX(), (float)point.getY());
+                        //repaint();
+                        //use a key listener to change some stuff here :)
+
+
+                        //g.setPaint(Color.BLACK);
+                        //g.setFont(font);
+                        //FontMetrics fm = g.getFontMetrics();
+                        //int x = backingMain.getWidth(this) - fm.stringWidth("This is a String") - 5;
+                        //int y = fm.getHeight();
+
+//                    g.draw(layout.getCaretShape(layout.hitTestChar((float)point.getX(), (float)point.getY())));
+                        //g.drawString("This is a string", x, y);
+
+
+/*                    Rectangle2D bounds = layout.getBounds();
+                    bounds.setRect(bounds.getX()+getLocation().getX(),
+                            bounds.getY()+getLocation().getY(),
+                            bounds.getWidth(),
+                            bounds.getHeight());
+                    g.draw(bounds);*/
+
+                        // textField.setBackground(mostlyClearPaint);
+                        //  textField.setForeground(Color.BLACK);
+                        //this.add(textField);
+                    }
+                    //         http://docs.oracle.com/javase/7/docs/api/java/awt/font/TextLayout.html
+                    //
+                    //
+                    //
+                    //TODO make it so you can highlight text
+                    //TODO make it so you can undo
+                }
+
+            }
+        }
+    }
+
+    private void appendToTextBox(char c)
+    {
+        textBoxText.append(c);
+        Graphics2D g = (Graphics2D) backingMain.getGraphics();
+        g.setPaint(textColor);                                                                                            //the paint
+        Font font = new Font(fontString, fontStyle, fontSize);
+
+        GlyphVector v = font.createGlyphVector(getFontMetrics(font).getFontRenderContext(), textBoxText.toString());
+        Shape s = v.getOutline((float)textBoxPoint.getX(),(float)textBoxPoint.getY());                                                                                           //The shape
+
+        //GeneralPath shape = new GeneralPath(s);
+        //shape.moveTo(textBoxPoint.getX(),textBoxPoint.getY());
+
+        BasicStroke stroke =new BasicStroke(1);
+        //p2d.lineTo(textBoxPoint.getX(), textBoxPoint.getY());
+
+        //new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 1, new float[]{1,0.4f,1.5f}, 0);
+
+        commitShape(new ShapeDef(stroke,textColor,s , makingTextBox, bubbleText));
+
+/*        FontRenderContext frc = g.getFontRenderContext();
+        TextLayout layout = new TextLayout(textBoxText.toString(), font, frc);
+        layout.draw(g, (float) textBoxPoint.getX(), (float)textBoxPoint.getY());
+        repaint();*/
+    }
+    public void toggleClickable()
+    {
+        this.clickable = !this.clickable;
     }
 
     public static void main(final String[] args)
     {
         System.err.println("Annoation tool by simon@dancingcloudservices.com");
         System.err.println("Icons by www.iconfinder.com");
+
         int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
         if (args.length == 2 || args.length == 4)
         {
