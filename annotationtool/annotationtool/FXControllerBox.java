@@ -174,8 +174,7 @@ public class FXControllerBox extends JFrame {
         thinLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(
-                        new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                annotationTool.setStroke(5);
             }
         });
         thinLine.addActionListener(setMakingTextBoxFalse);
@@ -188,8 +187,7 @@ public class FXControllerBox extends JFrame {
         mediumLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(
-                        new BasicStroke(15, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                annotationTool.setStroke(15);
             }
         });
         mediumLine.addActionListener(setMakingTextBoxFalse);
@@ -200,8 +198,7 @@ public class FXControllerBox extends JFrame {
         thickLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(
-                        new BasicStroke(30, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                annotationTool.setStroke(30);
             }
         });
         thickLine.addActionListener(setMakingTextBoxFalse);
@@ -212,8 +209,7 @@ public class FXControllerBox extends JFrame {
         hugeLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(
-                        new BasicStroke(70, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                annotationTool.setStroke(70);
             }
         });
         hugeLine.addActionListener(setMakingTextBoxFalse);

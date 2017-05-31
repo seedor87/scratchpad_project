@@ -3,25 +3,33 @@ package annotationtool;/**
  */
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Path;
+import javafx.scene.shape.*;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.input.MouseEvent;
+import sun.security.provider.SHA;
 
 import java.awt.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
 
 public class AnnotationToolApplication extends Application
 {
     private final Color clickablyClearPaint = new Color(1,1,1,1d/255d);
+    private final Color clearPaint = new Color(0,0,0,0);
     private Stage stage;
     private Scene scene;
     private VBox box;
@@ -29,12 +37,17 @@ public class AnnotationToolApplication extends Application
     private Path path;
     private javafx.scene.paint.Paint paint = Color.YELLOW;
     private Stroke stroke;
+    private boolean mouseTransparent = false;
+    private double strokeWidth;
+    private boolean clickable = true;
+    private Deque<Shape> undoStack = new ArrayDeque<Shape>();
+
 
 
     private boolean makingTextBox = false;
-    public void setStroke(Stroke stroke)
+    public void setStroke(double strokeWidth)
     {
-        this.stroke = stroke;        //TODO this
+        this.strokeWidth = strokeWidth;        //TODO this
     }
     public void doClear()
     {
@@ -50,15 +63,30 @@ public class AnnotationToolApplication extends Application
     }
     public void undo()
     {
-        //TODO this
+        Shape temp = undoStack.pop();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                root.getChildren().remove(temp);
+            }
+        });
     }
     public void clearHistory()
-    {        //TODO this
-
+    {
+        //TODO this
     }
     public void toggleClickable()
     {
-        //TODO this
+        clickable = !clickable;
+        if(clickable)
+        {
+            scene.setFill(clickablyClearPaint);
+        }
+        else
+        {
+            scene.setFill(clearPaint);
+        }
+        root.setMouseTransparent(!clickable);
     }
 
 
@@ -99,7 +127,7 @@ public class AnnotationToolApplication extends Application
 
         root.getChildren().add(box);
 
-        scene = new Scene(root, 400, 200);
+        scene = new Scene(root);
 
         //final Scene scene = new Scene(box,300, 250);
         scene.setFill(clickablyClearPaint);
@@ -117,7 +145,8 @@ public class AnnotationToolApplication extends Application
     }
     private void setupListeners()
     {
-        scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
+        //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
+        scene.addEventFilter(MouseEvent.ANY, new DrawingHandler());
     }
     private class CircleHandler implements EventHandler<MouseEvent>
     {
@@ -125,11 +154,35 @@ public class AnnotationToolApplication extends Application
         public void handle(MouseEvent event)
         {
             Circle circle = new Circle(event.getSceneX(), event.getSceneY(),30);
-            circle.setFill(getPaint());
+            circle.setFill(paint);
             //System.out.println(paint);
             //System.out.println(Color.YELLOW);
             root.getChildren().add(circle);
             System.out.println(event);
+        }
+    }
+    private class DrawingHandler implements EventHandler<MouseEvent>
+    {
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                path = new Path();
+                path.setStrokeWidth(strokeWidth);
+                MoveTo moveTo = new MoveTo(event.getX(),event.getY());
+                path.getElements().add(moveTo);
+                root.getChildren().add(path);
+                path.setStroke(paint);
+            } else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                LineTo moveTo = new LineTo(event.getX(),event.getY());
+                path.getElements().add(moveTo);
+            } else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+                //root.getChildren().add(path);
+                undoStack.push(path);
+                path = null;
+
+            }
+
         }
     }
     private Paint getPaint()
@@ -137,7 +190,8 @@ public class AnnotationToolApplication extends Application
         return this.paint;
     }
 
-    public void setTextSize(Integer textSize) {
+    public void setTextSize(Integer textSize)
+    {
         //this.textSize = textSize;
         //TODO this
 
@@ -154,9 +208,9 @@ public class AnnotationToolApplication extends Application
         //TODO this
     }
 
-    public void setAlwaysOnTop(boolean alwaysOnTop) {
-        //this.alwaysOnTop = alwaysOnTop;
-        //TODO this
+    public void setAlwaysOnTop(boolean alwaysOnTop)
+    {
+//TODO this
     }
 
     public void doSave()
