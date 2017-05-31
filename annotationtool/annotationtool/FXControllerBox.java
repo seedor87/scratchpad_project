@@ -345,7 +345,9 @@ public class FXControllerBox extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 annotationTool.toFront();
-                annotationTool.setAlwaysOnTop(true);
+                //annotationTool.setAlwaysOnTop(true);
+                toFront();
+                //setAlwaysOnTop(true);
             }
         });
         add(bringToTop, gbcb.build());
