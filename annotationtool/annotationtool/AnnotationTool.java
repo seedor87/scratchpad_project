@@ -647,14 +647,16 @@ public class AnnotationTool extends JFrame {
                     {
 
                     }*/
-                    this.toFront();
-                    setAlwaysOnTop(true);
+                    //this.toFront();
+                    //setAlwaysOnTop(true);
                 }
                 if(me.getID() == MouseEvent.MOUSE_RELEASED)
                 {
                     //robot.mouseMove(me.getX(), me.getY());
                     setBackground(clearPaint);
                     robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                    this.toFront();
+                    setAlwaysOnTop(true);
                 }
             }
         }
