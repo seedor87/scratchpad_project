@@ -413,7 +413,8 @@ public class AnnotationTool extends JFrame {
         if(suppression) {
             AWTUtilities.setWindowOpacity(this, suppressedOpacity);
         }
-        else {
+        else
+        {
             AWTUtilities.setWindowOpacity(this, 1f);
         }
     }
@@ -762,7 +763,7 @@ public class AnnotationTool extends JFrame {
 
     public static void main(final String[] args)
     {
-        System.err.println("Annoation tool by simon@dancingcloudservices.com");
+        System.err.println("Annotation tool by simon@dancingcloudservices.com");
         System.err.println("Icons by www.iconfinder.com");
 
         int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
