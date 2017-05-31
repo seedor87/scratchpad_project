@@ -41,6 +41,7 @@ public class AnnotationToolApplication extends Application
     private double strokeWidth;
     private boolean clickable = true;
     private Deque<Shape> undoStack = new ArrayDeque<Shape>();
+    private Deque<Shape> redoStack = new ArrayDeque<Shape>();
 
 
 
@@ -59,18 +60,34 @@ public class AnnotationToolApplication extends Application
     }
     public void redo()
     {
-        //TODO this
+        if(redoStack.size() > 0)
+        {
+            Shape temp = redoStack.pop();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    root.getChildren().add(temp);
+                }
+            });
+            undoStack.push(temp);
+        }
     }
     public void undo()
     {
+        if(undoStack.size() > 0)
+        {
         Shape temp = undoStack.pop();
         Platform.runLater(new Runnable() {
             @Override
-            public void run() {
+            public void run()
+            {
                 root.getChildren().remove(temp);
             }
         });
+        redoStack.push(temp);
+        }
     }
+
     public void clearHistory()
     {
         //TODO this
