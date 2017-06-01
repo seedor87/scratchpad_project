@@ -278,7 +278,7 @@ public class AnnotationToolApplication extends Application {
     {
         //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
-        scene.addEventHandler(ZoomEvent.ZOOM_FINISHED, touchSendToBackHandler);
+        scene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
@@ -302,21 +302,30 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     * Sends the box to the back when triggered. Should be implemented with ZoomEvent.ZOOM_FINISHED
+     * Sends the box to the back when triggered. Should be implemented with ZoomEvent.ANY
      */
     private class TouchSendToBackHandler implements EventHandler<ZoomEvent>
     {
         @Override
         public void handle(ZoomEvent event)
         {
-            if(event.getTotalZoomFactor() > 1)          // if the user triggers a zoom in event.
+            if(event.getEventType() == ZoomEvent.ZOOM_STARTED)
             {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        toBack();
-                    }
-                });
+                resetHandlers();
+            }
+            if(event.getEventType() == ZoomEvent.ZOOM_FINISHED)
+            {
+                if(event.getTotalZoomFactor() < 1)          // if the user triggers a zoom out event.
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run()
+                        {
+                            toggleClickable();
+                        }
+                    });
+                }
+                scene.addEventHandler(MouseEvent.ANY, drawingHandler);
             }
         }
     }
@@ -328,7 +337,8 @@ public class AnnotationToolApplication extends Application {
      */
     private class DrawingHandler implements EventHandler<MouseEvent> {
         @Override
-        public void handle(MouseEvent event) {
+        public void handle(MouseEvent event)
+        {
             if(clickable)
             {
                 if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
