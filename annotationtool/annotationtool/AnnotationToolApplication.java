@@ -394,14 +394,18 @@ public class AnnotationToolApplication extends Application {
                 clip.setContent(new HashMap<DataFormat, Object>());
                 System.out.println(imageTag);
 
-                try {
+                try
+                {
                     java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)stage.getX() /*+ borderThickness*/, (int)stage.getY() /* + borderThickness*/,
                             (int)stage.getWidth()/* - (2 * borderThickness)*/, (int)stage.getHeight()/* - (2 * borderThickness)*/);
                     BufferedImage outImg = new Robot().createScreenCapture(screenGrabArea);
                     ImageIO.write(outImg, "png", outFile);
-                } catch (HeadlessException | AWTException e) {
+                }
+                catch (HeadlessException | AWTException e)
+                {
                     e.printStackTrace();
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                 }
             }
