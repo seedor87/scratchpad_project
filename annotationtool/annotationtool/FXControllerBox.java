@@ -239,7 +239,7 @@ public class FXControllerBox extends JFrame {
         eraseWhiteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.doClear(new Color(255, 255, 255, 255));
+                annotationTool.doClear(new javafx.scene.paint.Color(1d, 1d, 1d, 1d));
             }
         });
         add(eraseWhiteButton, gbcb.build());

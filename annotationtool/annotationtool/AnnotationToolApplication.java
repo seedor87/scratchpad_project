@@ -3,12 +3,16 @@ package annotationtool;
  * Created by remem on 5/30/2017.
  */
 
+import com.sun.corba.se.spi.ior.Writeable;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TouchEvent;
@@ -25,7 +29,10 @@ import javafx.stage.StageStyle;
 import javafx.scene.input.MouseEvent;
 import sun.security.provider.SHA;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -54,17 +61,40 @@ public class AnnotationToolApplication extends Application {
 
 
     private boolean makingTextBox = false;
+    private int saveImageIndex = 0;
 
     public void setStroke(double strokeWidth) {
         this.strokeWidth = strokeWidth;        //TODO this
     }
 
-    public void doClear() {
-
+    public void doClear()
+    {
+        doClear(clickablyClearPaint);
     }
 
-    public void doClear(java.awt.Color color) {
-        //TODO this
+    public void doClear(Color color)
+    {
+        //TODO this does not work.
+        double h = stage.getHeight();
+        double w = stage.getWidth();
+        Path blockOutShape = new Path();
+        blockOutShape.setStrokeWidth(h);
+        blockOutShape.getElements().add(new MoveTo(0,h/2));
+        blockOutShape.getElements().add(new LineTo(w, h/2));
+        blockOutShape.setFill(clearPaint);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run()
+            {
+                commitShape(blockOutShape);
+            }
+        });
+    }
+    private void commitShape(Shape shape)
+    {
+        undoStack.push(shape);
+        root.getChildren().add(shape);
     }
 
     public void redo() {
@@ -98,6 +128,7 @@ public class AnnotationToolApplication extends Application {
     }
 
     public void toggleClickable() {
+        //TODO remove event handlers for drawing, and then add them back in.
         clickable = !clickable;
         if (clickable) {
             scene.setFill(clickablyClearPaint);
@@ -107,7 +138,9 @@ public class AnnotationToolApplication extends Application {
                     stage.setAlwaysOnTop(false);
                 }
             });
-        } else {
+        }
+        else
+            {
             scene.setFill(clearPaint);
             Platform.runLater(new Runnable() {
                 @Override
@@ -116,7 +149,6 @@ public class AnnotationToolApplication extends Application {
                 }
             });
         }
-        root.setMouseTransparent(!clickable);
     }
 
 
@@ -154,13 +186,6 @@ public class AnnotationToolApplication extends Application {
 
         root = new Group();
 
-        Text text = new Text("Transparent!");
-        text.setFont(new Font(40));
-        box = new VBox();
-        box.getChildren().add(text);
-
-        root.getChildren().add(box);
-
         scene = new Scene(root);
 
         //final Scene scene = new Scene(box,300, 250);
@@ -171,7 +196,7 @@ public class AnnotationToolApplication extends Application {
         setupListeners();
 
         FXControllerBox controllerBox = new FXControllerBox(this);
-        controllerBox.setBounds(300, 0, 0, 0);
+        controllerBox.setBounds(300, 0, 300, 0);
         controllerBox.pack();
         controllerBox.setVisible(true);
 
@@ -237,7 +262,7 @@ public class AnnotationToolApplication extends Application {
         public void handle(KeyEvent event)
         {
             char c = event.getCharacter().charAt(0);
-            if(( c > 31)&&(c < 127))
+            if((( c > 31)&&(c < 127)))
             {
                 textBoxText.append(c);
                 text.setText(textBoxText.toString());
@@ -249,6 +274,11 @@ public class AnnotationToolApplication extends Application {
                     textBoxText.deleteCharAt(textBoxText.length()-1);
                     text.setText(textBoxText.toString());
                 }
+            }
+            else if(c == 13)
+            {
+                textBoxText.append(System.lineSeparator());
+                text.setText(textBoxText.toString());
             }
         }
     }
