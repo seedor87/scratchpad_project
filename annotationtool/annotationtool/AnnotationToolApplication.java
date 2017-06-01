@@ -302,7 +302,7 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     * Sends the box to the back when triggered. Should be implemented with ZoomEvent.ANY
+     * Triggers toggleClickable when triggered. Should be implemented with ZoomEvent.ANY
      */
     private class TouchSendToBackHandler implements EventHandler<ZoomEvent>
     {
