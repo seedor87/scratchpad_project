@@ -13,28 +13,30 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.TouchEvent;
+import javafx.scene.input.*;
+import javafx.scene.input.Clipboard;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.input.MouseEvent;
 import sun.security.provider.SHA;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.datatransfer.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 
 public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
@@ -62,6 +64,12 @@ public class AnnotationToolApplication extends Application {
 
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
+
+    final ClipboardOwner clipboardOwner = new ClipboardOwner() {
+        @Override
+        public void lostOwnership(java.awt.datatransfer.Clipboard clipboard, Transferable contents) {
+        }
+    };
 
     public void setStroke(double strokeWidth) {
         this.strokeWidth = strokeWidth;        //TODO this
@@ -136,12 +144,14 @@ public class AnnotationToolApplication extends Application {
         redoStack.clear();
     }
 
-    public void toggleClickable() {
-        //TODO remove event handlers for drawing, and then add them back in.
+    public void toggleClickable()
+    {
         clickable = !clickable;
-        if (clickable) {
+        if (clickable)
+        {
             scene.setFill(clickablyClearPaint);
-            Platform.runLater(new Runnable() {
+            Platform.runLater(new Runnable()
+            {
                 @Override
                 public void run()
                 {
@@ -153,9 +163,11 @@ public class AnnotationToolApplication extends Application {
         else
             {
             scene.setFill(clearPaint);
-            Platform.runLater(new Runnable() {
+            Platform.runLater(new Runnable()
+            {
                 @Override
-                public void run() {
+                public void run()
+                {
                     stage.setAlwaysOnTop(true);
                 }
             });
@@ -165,11 +177,14 @@ public class AnnotationToolApplication extends Application {
 
 
     public void setMakingTextBox(boolean makingTextBox) {
-        if (makingTextBox) {
+        if (makingTextBox)
+        {
             this.scene.removeEventHandler(MouseEvent.ANY, drawingHandler);
             this.scene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
             this.scene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
-        } else {
+        }
+        else
+        {
             this.scene.removeEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
             this.scene.removeEventHandler(KeyEvent.KEY_PRESSED, textBoxKeyHandler);
             this.scene.addEventHandler(MouseEvent.ANY, drawingHandler);
@@ -177,7 +192,12 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-    public void setPaint(java.awt.Color paintColor) {
+    /**
+     * Sets the paint color based on a java.awt color object.
+     * @param paintColor The color to convert to a javafx color object.
+     */
+    public void setPaint(java.awt.Color paintColor)
+    {
         this.paint = new javafx.scene.paint.Color(
                 paintColor.getRed() / 255d,
                 paintColor.getGreen() / 255d,
@@ -186,12 +206,18 @@ public class AnnotationToolApplication extends Application {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         launch(args);
     }
 
+    /**
+     * The code starts here.
+     * @param primaryStage
+     */
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage)
+    {
         this.stage = primaryStage;
         this.stage.initStyle(StageStyle.TRANSPARENT);
         this.stage.setMaximized(true);
@@ -215,11 +241,18 @@ public class AnnotationToolApplication extends Application {
         primaryStage.show();
     }
 
-    private void setupListeners() {
+    /**
+     * Sets up all default listeners that the code might need.
+     */
+    private void setupListeners()
+    {
         //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
     }
 
+    /**
+     * Adds a circle at the given location of the MouseEvent.
+     */
     private class CircleHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
@@ -232,6 +265,11 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Draws lines based on the location of various mouse events.
+     * Pressing the mouse starts the line, dragging it extends.
+     * Releasing ends the line.
+     */
     private class DrawingHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
@@ -255,10 +293,15 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
+     * TextBoxKeyHandler changes the text in the box if needed.
+     */
     private class TextBoxHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
-            text = new Text(event.getX(), event.getY(), "Text");
+            String defaultText = "Text";
+            text = new Text(event.getX(), event.getY(), defaultText);
             text.setFont(new Font(textSize));
             text.setFill(textColor);
             undoStack.push(text);
@@ -267,7 +310,9 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-
+    /**
+     * Edits the current text box based on key inputs. should be implemented with KeyEvent.KEY_TYPED
+     */
     private class TextBoxKeyHandler implements EventHandler<KeyEvent>
     {
         @Override
@@ -332,17 +377,35 @@ public class AnnotationToolApplication extends Application {
 
     public void doSave()
     {
-        WritableImage image = root.snapshot(new SnapshotParameters(), null);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run()
+            {
+                File outFile;
+                String fname;
+                do {
+                    fname = String.format("image-%06d.png", saveImageIndex++);
+                    System.out.println("Trying " + fname);
+                    outFile = new File(fname);
+                } while (outFile.exists());
 
-        File file = new File("SomeFileName.png");
+                String imageTag = "<img src='" + fname +"'>";
+                Clipboard clip = Clipboard.getSystemClipboard();//this.getToolkit().getSystemClipboard();
+                clip.setContent(new HashMap<DataFormat, Object>());
+                System.out.println(imageTag);
 
-        try
-        {
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+                try {
+                    java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)stage.getX() /*+ borderThickness*/, (int)stage.getY() /* + borderThickness*/,
+                            (int)stage.getWidth()/* - (2 * borderThickness)*/, (int)stage.getHeight()/* - (2 * borderThickness)*/);
+                    BufferedImage outImg = new Robot().createScreenCapture(screenGrabArea);
+                    ImageIO.write(outImg, "png", outFile);
+                } catch (HeadlessException | AWTException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         //TODO this
     }
 
