@@ -143,10 +143,12 @@ public class AnnotationToolApplication extends Application {
             scene.setFill(clickablyClearPaint);
             Platform.runLater(new Runnable() {
                 @Override
-                public void run() {
+                public void run()
+                {
                     stage.setAlwaysOnTop(false);
                 }
             });
+            this.scene.addEventHandler(MouseEvent.ANY, drawingHandler);
         }
         else
             {
@@ -157,7 +159,8 @@ public class AnnotationToolApplication extends Application {
                     stage.setAlwaysOnTop(true);
                 }
             });
-        }
+                this.scene.removeEventHandler(MouseEvent.ANY, drawingHandler);
+            }
     }
 
 
@@ -329,6 +332,17 @@ public class AnnotationToolApplication extends Application {
 
     public void doSave()
     {
+        WritableImage image = root.snapshot(new SnapshotParameters(), null);
+
+        File file = new File("SomeFileName.png");
+
+        try
+        {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
         //TODO this
     }
 
