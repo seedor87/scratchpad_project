@@ -123,8 +123,17 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-    public void clearHistory() {
-        //TODO this
+    public void clearHistory()
+    {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run()
+            {
+                root.getChildren().clear();
+            }
+        });
+        undoStack.clear();
+        redoStack.clear();
     }
 
     public void toggleClickable() {
@@ -204,7 +213,7 @@ public class AnnotationToolApplication extends Application {
     }
 
     private void setupListeners() {
-        //scene.addEventHandler(MouseEvent.ANY, new CircleHandler());
+        //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
     }
 
@@ -255,9 +264,9 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+
     private class TextBoxKeyHandler implements EventHandler<KeyEvent>
     {
-
         @Override
         public void handle(KeyEvent event)
         {
