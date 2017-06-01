@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -15,6 +16,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -26,6 +28,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.w3c.dom.events.*;
 import sun.security.provider.SHA;
 
 import javax.imageio.ImageIO;
@@ -34,11 +37,22 @@ import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
+import java.util.*;
+import java.util.List;
+import java.util.logging.Handler;
 
 public class AnnotationToolApplication extends Application {
+
+    private class HandlerGroup
+    {
+        EventType eventType;
+        EventHandler handler;
+        HandlerGroup(EventType eventType, EventHandler handler)
+        {
+            this.eventType = eventType;
+            this.handler = handler;
+        }
+    }
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private Stage stage;
@@ -60,6 +74,9 @@ public class AnnotationToolApplication extends Application {
     private TextBoxHandler textBoxHandler = new TextBoxHandler();
     private StringBuffer textBoxText = new StringBuffer(64);
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
+    private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
+
+    private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
 
 
     private boolean makingTextBox = false;
@@ -171,7 +188,7 @@ public class AnnotationToolApplication extends Application {
                     stage.setAlwaysOnTop(true);
                 }
             });
-                this.scene.removeEventHandler(MouseEvent.ANY, drawingHandler);
+                this.resetHandlers();
             }
     }
 
@@ -179,16 +196,27 @@ public class AnnotationToolApplication extends Application {
     public void setMakingTextBox(boolean makingTextBox) {
         if (makingTextBox)
         {
-            this.scene.removeEventHandler(MouseEvent.ANY, drawingHandler);
+            this.resetHandlers();
             this.scene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
             this.scene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
         }
         else
         {
-            this.scene.removeEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
-            this.scene.removeEventHandler(KeyEvent.KEY_PRESSED, textBoxKeyHandler);
+            this.resetHandlers();
             this.scene.addEventHandler(MouseEvent.ANY, drawingHandler);
             textBoxText.delete(0,textBoxText.length());
+        }
+    }
+
+    /**
+     * Removes all handlers from the scene.
+     * Should be called before adding more in to prevent multiple handlers trying to handle the same event(S).
+     */
+    private void resetHandlers()
+    {
+        for (HandlerGroup h : eventHandlers)
+        {
+            this.scene.removeEventHandler(h.eventType,h.handler);
         }
     }
 
@@ -243,11 +271,19 @@ public class AnnotationToolApplication extends Application {
 
     /**
      * Sets up all default listeners that the code might need.
+     * adds all listeners to the list of handlers so all can be removed at once if needed.
+     * Should only ever use handlers that are added to eventHandlers
      */
     private void setupListeners()
     {
         //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
+        scene.addEventHandler(ZoomEvent.ZOOM_FINISHED, touchSendToBackHandler);
+
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
+        eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
+        //eventHandlers.add(new HandlerGroup(ZoomEvent.ZOOM_FINISHED,touchSendToBackHandler ));
     }
 
     /**
@@ -266,6 +302,26 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
+     * Sends the box to the back when triggered. Should be implemented with ZoomEvent.ZOOM_FINISHED
+     */
+    private class TouchSendToBackHandler implements EventHandler<ZoomEvent>
+    {
+        @Override
+        public void handle(ZoomEvent event)
+        {
+            if(event.getTotalZoomFactor() > 1)          // if the user triggers a zoom in event.
+            {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        toBack();
+                    }
+                });
+            }
+        }
+    }
+
+    /**
      * Draws lines based on the location of various mouse events.
      * Pressing the mouse starts the line, dragging it extends.
      * Releasing ends the line.
@@ -273,7 +329,9 @@ public class AnnotationToolApplication extends Application {
     private class DrawingHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+            if(clickable)
+            {
+                if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
                 path = new Path();
                 path.setStrokeWidth(strokeWidth);
                 path.setSmooth(true);
@@ -281,13 +339,17 @@ public class AnnotationToolApplication extends Application {
                 path.getElements().add(moveTo);
                 root.getChildren().add(path);
                 path.setStroke(paint);
-            } else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                }
+                else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
                 path.getElements().add(moveTo);
-            } else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+                }
+                else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
+                {
                 //root.getChildren().add(path);
                 undoStack.push(path);
                 path = null;
+                }
 
             }
         }
