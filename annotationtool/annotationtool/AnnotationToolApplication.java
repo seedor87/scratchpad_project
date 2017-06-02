@@ -136,15 +136,21 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void run()
             {
-                eraseShapes(eraseShape);
-                undoStack.push(eraseShape);
+                commitShape(eraseShape);
             }
         });
     }
     private void commitShape(Shape shape)
     {
+        if(shape instanceof EraseShape)
+        {
+            eraseShapes((EraseShape) shape);
+        }
+        else
+        {
+            root.getChildren().add(shape);
+        }
         undoStack.push(shape);
-        root.getChildren().add(shape);
     }
 
     public void redo()
@@ -152,20 +158,13 @@ public class AnnotationToolApplication extends Application {
         if (redoStack.size() > 0)
         {
             Shape temp = redoStack.pop();
-            if (temp instanceof EraseShape)
-            {
-                eraseShapes((EraseShape)temp);
-            }
-            else
-            {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        root.getChildren().add(temp);
-                    }
-                });
-            }
-            undoStack.push(temp);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run()
+                {
+                    commitShape(temp);
+                }
+            });
         }
     }
 
@@ -521,8 +520,7 @@ public class AnnotationToolApplication extends Application {
             {
                 root.getChildren().remove(eraserPath);
                 EraseShape eraseShape = new EraseShape(eraserPath);
-                eraseShapes(eraseShape);
-                undoStack.push(eraseShape);
+                commitShape(eraseShape);
                 eraseShape = null;
             }
         }
