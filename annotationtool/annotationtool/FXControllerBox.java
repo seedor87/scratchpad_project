@@ -285,6 +285,19 @@ public class FXControllerBox extends JFrame {
         add(toggleClickableButton, gbcb.build());
         gbcb.nextY();
 
+        add(new JLabel("----------"), gbcb.build());
+        gbcb.nextY();
+
+        JButton circleAdder = new JButton("Add circle");
+        circleAdder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                annotationTool.makeCircles();
+            }
+        });
+        add(circleAdder, gbcb.build());
+        gbcb.nextY();
 
         add(new JLabel("----------"), gbcb.build());
         gbcb.nextY();

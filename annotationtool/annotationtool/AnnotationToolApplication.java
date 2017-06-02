@@ -78,6 +78,9 @@ public class AnnotationToolApplication extends Application {
 
     private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
 
+    private Circle circle;
+    private CircleHandler circleHandler = new CircleHandler();
+
 
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
@@ -159,6 +162,11 @@ public class AnnotationToolApplication extends Application {
         });
         undoStack.clear();
         redoStack.clear();
+    }
+    public void makeCircles()
+    {
+        this.resetHandlers();
+        this.scene.addEventHandler(MouseEvent.ANY, circleHandler);
     }
 
     public void toggleClickable()
@@ -279,10 +287,12 @@ public class AnnotationToolApplication extends Application {
         //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
         scene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);
+        //scene.addEventHandler(MouseEvent.ANY, new CircleHandler());
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         //eventHandlers.add(new HandlerGroup(ZoomEvent.ZOOM_FINISHED,touchSendToBackHandler ));
     }
 
@@ -291,14 +301,32 @@ public class AnnotationToolApplication extends Application {
      */
     private class CircleHandler implements EventHandler<MouseEvent> {
         @Override
-        public void handle(MouseEvent event) {
-            Circle circle = new Circle(event.getSceneX(), event.getSceneY(), 30);
-            circle.setFill(paint);
-            //System.out.println(paint);
-            //System.out.println(Color.YELLOW);
-            root.getChildren().add(circle);
-            System.out.println(event);
+        public void handle(MouseEvent event)
+        {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                circle = new Circle(event.getSceneX(), event.getSceneY(),10, paint);
+                commitShape(circle);
+
+            }
+            else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                double xDistance = event.getX() - circle.getCenterX();
+                double yDistance = event.getY() - circle.getCenterY();
+                circle.setRadius(pythagorize(xDistance,yDistance));
+            }
+            else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                circle = null;
+            }
         }
+    }
+    private double pythagorize(double x, double y)
+    {
+        double result;
+        result = x * x;
+        result = result + (y*y);
+        return Math.sqrt(result);
     }
 
     /**
