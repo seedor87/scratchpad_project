@@ -225,6 +225,7 @@ public class AnnotationToolApplication extends Application {
     public void toggleClickable()
     {
         clickable = !clickable;
+        this.resetHandlers();
         if (clickable)
         {
             scene.setFill(clickablyClearPaint);
@@ -249,7 +250,6 @@ public class AnnotationToolApplication extends Application {
                     stage.setAlwaysOnTop(true);
                 }
             });
-                this.resetHandlers();
             }
     }
 
@@ -337,10 +337,8 @@ public class AnnotationToolApplication extends Application {
      */
     private void setupListeners()
     {
-        //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
         scene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
-        //scene.addEventHandler(MouseEvent.ANY, new CircleHandler());
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
@@ -660,3 +658,16 @@ public class AnnotationToolApplication extends Application {
         });
     }
 }
+//TODO list
+/*
+ * Add in more shapes
+ *      also arrows
+ * Make controller box dynamically resize as needed
+ * Color picker
+ * Make save image work in linux.
+ * Click text to select it and edit it
+ * Click nodes to move them.
+ * Click nodes to erase them.
+ * Resizable stage
+ * moveable stage.
+ */
