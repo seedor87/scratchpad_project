@@ -37,6 +37,7 @@ import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.chrono.Era;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Handler;
@@ -53,6 +54,23 @@ public class AnnotationToolApplication extends Application {
             this.handler = handler;
         }
     }
+    private class ErasedContainer
+    {
+        Shape oldShape;
+        ErasedContainer(Shape oldShape)
+        {
+            this.oldShape = oldShape;
+        }
+    }
+    private class EraseShape extends Path
+    {
+        Path eraseArea;
+        Stack<ErasedContainer> shapesPartiallyErased = new Stack<>();
+        EraseShape(Path eraseArea)
+        {
+            this.eraseArea = eraseArea;
+        }
+    }
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private Stage stage;
@@ -60,13 +78,14 @@ public class AnnotationToolApplication extends Application {
     private VBox box;
     private Group root;
     private Path path;
+    private Path eraserPath;
     private javafx.scene.paint.Paint paint = Color.YELLOW;
     private Stroke stroke;
     private boolean mouseTransparent = false;
     private double strokeWidth;
     private boolean clickable = true;
-    private Deque<Shape> undoStack = new ArrayDeque<Shape>();
-    private Deque<Shape> redoStack = new ArrayDeque<Shape>();
+    private Stack<Shape> undoStack = new Stack<>();
+    private Stack<Shape> redoStack = new Stack<>();
     private DrawingHandler drawingHandler = new DrawingHandler();
     private Text text;
     private Color textColor = Color.BLACK;
@@ -80,6 +99,8 @@ public class AnnotationToolApplication extends Application {
 
     private Circle circle;
     private CircleHandler circleHandler = new CircleHandler();
+
+    private EraseHandler eraseHandler = new EraseHandler();
 
 
     private boolean makingTextBox = false;
@@ -125,28 +146,61 @@ public class AnnotationToolApplication extends Application {
         root.getChildren().add(shape);
     }
 
-    public void redo() {
-        if (redoStack.size() > 0) {
+    public void redo()
+    {
+        if (redoStack.size() > 0)
+        {
             Shape temp = redoStack.pop();
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    root.getChildren().add(temp);
-                }
-            });
+            if (temp instanceof EraseShape)
+            {
+                eraseShapes((EraseShape)temp);
+            }
+            else
+            {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        root.getChildren().add(temp);
+                    }
+                });
+            }
             undoStack.push(temp);
         }
     }
 
-    public void undo() {
-        if (undoStack.size() > 0) {
+    public void undo()
+    {
+        if (undoStack.size() > 0)
+        {
             Shape temp = undoStack.pop();
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    root.getChildren().remove(temp);
+            if(temp instanceof EraseShape)
+            {
+                Shape temp2;
+                EraseShape eraseShape = (EraseShape) temp;
+                undoStack.clear();
+                while(!(eraseShape.shapesPartiallyErased.isEmpty()))
+                {
+                    undoStack.push(eraseShape.shapesPartiallyErased.pop().oldShape);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run()
+                        {
+                            paintFromUndoStack();
+                        }
+                    });
                 }
-            });
+
+            }
+            else
+                {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        root.getChildren().remove(temp);
+                    }
+                });
+            }
             redoStack.push(temp);
         }
     }
@@ -293,6 +347,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         //eventHandlers.add(new HandlerGroup(ZoomEvent.ZOOM_FINISHED,touchSendToBackHandler ));
     }
 
@@ -384,6 +439,8 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
+                //path.setFillRule(FillRule.EVEN_ODD);
+                //path.setFill(paint);
                 //root.getChildren().add(path);
                 undoStack.push(path);
                 path = null;
@@ -438,6 +495,91 @@ public class AnnotationToolApplication extends Application {
                 text.setText(textBoxText.toString());
             }
         }
+    }
+    private class EraseHandler implements EventHandler<MouseEvent>
+    {
+        Color eraserColor = new Color(0,0,0,.1);
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                eraserPath = new Path();
+                eraserPath.setStrokeWidth(strokeWidth);
+                eraserPath.setSmooth(true);
+                MoveTo moveTo = new MoveTo(event.getX(), event.getY());
+                eraserPath.getElements().add(moveTo);
+                root.getChildren().add(eraserPath);
+                eraserPath.setStroke(eraserColor);
+            }
+            else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                LineTo moveTo = new LineTo(event.getX(), event.getY());
+                eraserPath.getElements().add(moveTo);
+            }
+            else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                root.getChildren().remove(eraserPath);
+                EraseShape eraseShape = new EraseShape(eraserPath);
+                eraseShapes(eraseShape);
+                undoStack.push(eraseShape);
+                eraseShape = null;
+            }
+        }
+    }
+
+    /**
+     * Goes through the undo stack and erases parts of shapes contained in a given path.
+     */
+    private void eraseShapes(EraseShape eraseShape)
+    {
+        Shape oldShape;
+        Shape newShape;
+        ListIterator<Shape> iterator = undoStack.listIterator(undoStack.size());
+        while(iterator.hasPrevious())
+        {
+            oldShape = iterator.previous();
+            if(!(oldShape instanceof EraseShape))   //not instance of eraseshape
+            {
+                newShape = Shape.subtract(oldShape, eraseShape.eraseArea);
+
+                //newShape.setStroke(oldShape.getStroke());
+                newShape.setFill(oldShape.getFill());
+                if(oldShape.getFill() == null)
+                {
+                    newShape.setFill(oldShape.getStroke());
+                }
+                eraseShape.shapesPartiallyErased.add(new ErasedContainer(oldShape));
+                iterator.set(newShape);
+            }
+            else
+            {
+                eraseShape.shapesPartiallyErased.add(new ErasedContainer(oldShape));
+            }
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run()
+            {
+                paintFromUndoStack();
+            }
+        });
+        //TODO I think I can use this method in implementing undo if the undo is an eraseShape.
+    }
+    private void paintFromUndoStack()
+    {
+        root.getChildren().clear();
+        for(Shape s : undoStack)
+        {
+            if(!(s instanceof EraseShape))
+            {
+                root.getChildren().add(s);
+            }
+        }
+    }
+    public void turnOnErasing()
+    {
+        this.resetHandlers();
+        this.scene.addEventHandler(MouseEvent.ANY, eraseHandler);
     }
 
     public void setTextSize(Integer textSize)
@@ -510,7 +652,7 @@ public class AnnotationToolApplication extends Application {
                 }
             }
         });
-        //TODO this
+        //TODO this in linux
     }
 
     public void toBack()

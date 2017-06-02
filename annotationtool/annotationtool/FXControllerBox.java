@@ -245,6 +245,17 @@ public class FXControllerBox extends JFrame {
         add(eraseWhiteButton, gbcb.build());
         gbcb.nextY();
 
+        JButton eraserButton = new JButton("Eraser");
+        eraserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                annotationTool.turnOnErasing();
+            }
+        });
+        add(eraserButton, gbcb.build());
+        gbcb.nextY();
+
         JButton undoButton = new JButton("Undo");
         undoButton.addActionListener(new ActionListener() {
             @Override
