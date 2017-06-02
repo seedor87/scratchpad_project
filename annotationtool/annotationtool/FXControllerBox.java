@@ -235,7 +235,7 @@ public class FXControllerBox extends JFrame {
         add(eraseButton, gbcb.build());
         gbcb.nextY();
 
-        JButton eraseWhiteButton = new JButton("Erase White");
+/*        JButton eraseWhiteButton = new JButton("Erase White");
         eraseWhiteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -243,7 +243,7 @@ public class FXControllerBox extends JFrame {
             }
         });
         add(eraseWhiteButton, gbcb.build());
-        gbcb.nextY();
+        gbcb.nextY();*/
 
         JButton eraserButton = new JButton("Eraser");
         eraserButton.addActionListener(new ActionListener() {
