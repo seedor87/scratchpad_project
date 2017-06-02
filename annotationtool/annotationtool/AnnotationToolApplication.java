@@ -131,12 +131,13 @@ public class AnnotationToolApplication extends Application {
         blockOutShape.getElements().add(new MoveTo(0,h/2));
         blockOutShape.getElements().add(new LineTo(w, h/2));
         blockOutShape.setFill(clearPaint);
-
+        EraseShape eraseShape = new EraseShape(blockOutShape);
         Platform.runLater(new Runnable() {
             @Override
             public void run()
             {
-                commitShape(blockOutShape);
+                eraseShapes(eraseShape);
+                undoStack.push(eraseShape);
             }
         });
     }
