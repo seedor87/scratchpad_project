@@ -54,18 +54,10 @@ public class AnnotationToolApplication extends Application {
             this.handler = handler;
         }
     }
-    private class ErasedContainer
-    {
-        Shape oldShape;
-        ErasedContainer(Shape oldShape)
-        {
-            this.oldShape = oldShape;
-        }
-    }
     private class EraseShape extends Path
     {
         Path eraseArea;
-        Stack<ErasedContainer> shapesPartiallyErased = new Stack<>();
+        Stack<Shape> shapesPartiallyErased = new Stack<>();
         EraseShape(Path eraseArea)
         {
             this.eraseArea = eraseArea;
@@ -121,9 +113,14 @@ public class AnnotationToolApplication extends Application {
         doClear(clickablyClearPaint);
     }
 
+    /**
+     * Currently clears the screen transparently.
+     * To do for a color, can simply commit the "blockOutShape"
+     * If implemented, move the code up to doClear() and then do that.
+     * @param color
+     */
     public void doClear(Color color)
     {
-        //TODO this does not work.
         double h = stage.getHeight();
         double w = stage.getWidth();
         Path blockOutShape = new Path();
@@ -175,22 +172,7 @@ public class AnnotationToolApplication extends Application {
             Shape temp = undoStack.pop();
             if(temp instanceof EraseShape)
             {
-                Shape temp2;
-                EraseShape eraseShape = (EraseShape) temp;
-                undoStack.clear();
-                while(!(eraseShape.shapesPartiallyErased.isEmpty()))
-                {
-                    undoStack.push(eraseShape.shapesPartiallyErased.pop().oldShape);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run()
-                        {
-                            paintFromUndoStack();
-                        }
-                    });
-                }
-
+                undoAnEraseShape((EraseShape) temp);
             }
             else
                 {
@@ -203,6 +185,23 @@ public class AnnotationToolApplication extends Application {
             }
             redoStack.push(temp);
         }
+    }
+
+    private void undoAnEraseShape(EraseShape eraseShape)
+    {
+        undoStack.clear();
+        while(!(eraseShape.shapesPartiallyErased.isEmpty()))
+        {
+            undoStack.push(eraseShape.shapesPartiallyErased.pop());
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run()
+            {
+                paintFromUndoStack();
+            }
+        });
+
     }
 
     public void clearHistory()
@@ -340,7 +339,7 @@ public class AnnotationToolApplication extends Application {
     {
         //scene.addEventHandler(MouseEvent.MOUSE_CLICKED, new CircleHandler());
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
-        scene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);
+        scene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
         //scene.addEventHandler(MouseEvent.ANY, new CircleHandler());
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
@@ -533,26 +532,24 @@ public class AnnotationToolApplication extends Application {
     {
         Shape oldShape;
         Shape newShape;
-        ListIterator<Shape> iterator = undoStack.listIterator(undoStack.size());
+        ListIterator<Shape> iterator = undoStack.listIterator(undoStack.size());        //list iterator starting from top of stack.
         while(iterator.hasPrevious())
         {
             oldShape = iterator.previous();
-            if(!(oldShape instanceof EraseShape))   //not instance of eraseshape
+            if(!(oldShape instanceof EraseShape))                                       //not instance of eraseshape
             {
                 newShape = Shape.subtract(oldShape, eraseShape.eraseArea);
-
-                //newShape.setStroke(oldShape.getStroke());
                 newShape.setFill(oldShape.getFill());
                 if(oldShape.getFill() == null)
                 {
                     newShape.setFill(oldShape.getStroke());
                 }
-                eraseShape.shapesPartiallyErased.add(new ErasedContainer(oldShape));
+                eraseShape.shapesPartiallyErased.add(oldShape);
                 iterator.set(newShape);
             }
             else
             {
-                eraseShape.shapesPartiallyErased.add(new ErasedContainer(oldShape));
+                eraseShape.shapesPartiallyErased.add(oldShape);                         //add should probably be push (same for a few lines up)?
             }
         }
         Platform.runLater(new Runnable() {
@@ -562,7 +559,6 @@ public class AnnotationToolApplication extends Application {
                 paintFromUndoStack();
             }
         });
-        //TODO I think I can use this method in implementing undo if the undo is an eraseShape.
     }
     private void paintFromUndoStack()
     {
