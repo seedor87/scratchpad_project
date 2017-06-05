@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.logging.Handler;
 
 public class AnnotationToolApplication extends Application {
-    FXControllerBox controllerBox;
+    private FXControllerBox controllerBox;
 
     private class HandlerGroup
     {
@@ -95,6 +95,7 @@ public class AnnotationToolApplication extends Application {
 
     private EraseHandler eraseHandler = new EraseHandler();
 
+    private int boxWidth = 0;
 
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
@@ -138,6 +139,7 @@ public class AnnotationToolApplication extends Application {
                 commitShape(eraseShape);
             }
         });
+        redoStack.clear();
     }
     private void commitShape(Shape shape)
     {
@@ -325,6 +327,7 @@ public class AnnotationToolApplication extends Application {
         setupListeners();
 
         controllerBox = new FXControllerBox(this);
+        boxWidth = controllerBox.getWidth();
 
 
         primaryStage.show();
@@ -369,6 +372,7 @@ public class AnnotationToolApplication extends Application {
             }
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
+                redoStack.clear();
                 circle = null;
             }
         }
@@ -441,6 +445,7 @@ public class AnnotationToolApplication extends Application {
                 //root.getChildren().add(path);
                 undoStack.push(path);
                 path = null;
+                redoStack.clear();
                 }
 
             }
@@ -461,6 +466,7 @@ public class AnnotationToolApplication extends Application {
             undoStack.push(text);
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
+            redoStack.clear();
         }
     }
 
@@ -519,6 +525,7 @@ public class AnnotationToolApplication extends Application {
                 EraseShape eraseShape = new EraseShape(eraserPath);
                 commitShape(eraseShape);
                 eraseShape = null;
+                redoStack.clear();
             }
         }
     }
@@ -533,7 +540,7 @@ public class AnnotationToolApplication extends Application {
         {
             if(event.getEventType() == MouseEvent.MOUSE_ENTERED)
             {
-                controllerBox.setBounds(controllerBox.getX(), controllerBox.getY(), 0,0);
+                controllerBox.setBounds(controllerBox.getX(), controllerBox.getY(), boxWidth,0);
             }
             else if(event.getEventType() == MouseEvent.MOUSE_EXITED)
             {
@@ -646,11 +653,13 @@ public class AnnotationToolApplication extends Application {
                 }
                 File outFile;
                 String fname;
-                do {
+                do
+                {
                     fname = String.format("image-%06d.png", saveImageIndex++);
                     System.out.println("Trying " + fname);
                     outFile = new File(fname);
-                } while (outFile.exists());
+                }
+                while (outFile.exists());
 
                 String imageTag = "<img src='" + fname +"'>";
                 Clipboard clip = Clipboard.getSystemClipboard();//this.getToolkit().getSystemClipboard();
@@ -696,9 +705,11 @@ public class AnnotationToolApplication extends Application {
  * Click text to select it and edit it
  * Click nodes to move them.
  * Click nodes to erase them.
- * Resizable stage
- * moveable stage.
+ *
+ * Resizable stage?
+ * moveable stage?
  * Snipping tool?
+ *
  * reset the redo stack if things happen.
  */
 /*
