@@ -522,6 +522,9 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+    /**
+     * Hides the box when not being used.
+     */
     private class BoxHidingHandler implements EventHandler<MouseEvent>
     {
 
@@ -632,6 +635,15 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void run()
             {
+                Robot robot;
+                try
+                {
+                    robot = new Robot();
+                }
+                catch (AWTException e)
+                {
+                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+                }
                 File outFile;
                 String fname;
                 do {
@@ -649,13 +661,14 @@ public class AnnotationToolApplication extends Application {
                 {
                     java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)stage.getX() /*+ borderThickness*/, (int)stage.getY() /* + borderThickness*/,
                             (int)stage.getWidth()/* - (2 * borderThickness)*/, (int)stage.getHeight()/* - (2 * borderThickness)*/);
-                    BufferedImage outImg = new Robot().createScreenCapture(screenGrabArea);
+                    BufferedImage outImg = robot.createScreenCapture(screenGrabArea);
                     ImageIO.write(outImg, "png", outFile);
                 }
-                catch (HeadlessException | AWTException e)
+                catch (HeadlessException e)
                 {
                     e.printStackTrace();
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     e.printStackTrace();
                 }
@@ -677,7 +690,7 @@ public class AnnotationToolApplication extends Application {
 /*
  * Add in more shapes
  *      also arrows
- * Make controller box dynamically resize as needed
+ * Make controller box dynamically resize as needed             sort of done
  * Color picker
  * Make save image work in linux.
  * Click text to select it and edit it
