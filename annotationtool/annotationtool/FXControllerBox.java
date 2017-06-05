@@ -2,7 +2,10 @@ package annotationtool;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import javax.swing.*;
+import javax.swing.Timer;
+import javax.swing.event.MouseInputAdapter;
 
 import util.GridBagConstraintBuilder;
 
@@ -388,6 +391,17 @@ public class FXControllerBox extends JFrame {
         add(sendBack, gbcb.build());
         gbcb.nextY();
 
+        JButton hideButton = new JButton("Hide");
+        hideButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                thisBox.setBounds(thisBox.getX(), thisBox.getY(), thisBox.getWidth(), 50);
+            }
+        });
+        add(hideButton, gbcb.build());
+        gbcb.nextY();
+
         JButton save = new JButton("Save image");
         save.addActionListener(new ActionListener() {
             @Override
@@ -424,6 +438,10 @@ public class FXControllerBox extends JFrame {
             }
         });
         gbcb.nextY();
+
+        this.setBounds(300, 0, 0, 0);
+        this.pack();
+        this.setVisible(true);
     }
 
     /**

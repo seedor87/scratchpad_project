@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.logging.Handler;
 
 public class AnnotationToolApplication extends Application {
+    FXControllerBox controllerBox;
 
     private class HandlerGroup
     {
@@ -104,8 +105,9 @@ public class AnnotationToolApplication extends Application {
         }
     };
 
-    public void setStroke(double strokeWidth) {
-        this.strokeWidth = strokeWidth;        //TODO this
+    public void setStroke(double strokeWidth)
+    {
+        this.strokeWidth = strokeWidth;
     }
 
     public void doClear()
@@ -322,10 +324,8 @@ public class AnnotationToolApplication extends Application {
 
         setupListeners();
 
-        FXControllerBox controllerBox = new FXControllerBox(this);
-        controllerBox.setBounds(300, 0, 300, 0);
-        controllerBox.pack();
-        controllerBox.setVisible(true);
+        controllerBox = new FXControllerBox(this);
+
 
         primaryStage.show();
     }
@@ -339,13 +339,13 @@ public class AnnotationToolApplication extends Application {
     {
         scene.addEventHandler(MouseEvent.ANY, drawingHandler);
         scene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
+        scene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
-        //eventHandlers.add(new HandlerGroup(ZoomEvent.ZOOM_FINISHED,touchSendToBackHandler ));
     }
 
     /**
@@ -522,6 +522,22 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+    private class BoxHidingHandler implements EventHandler<MouseEvent>
+    {
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_ENTERED)
+            {
+                controllerBox.setBounds(controllerBox.getX(), controllerBox.getY(), 0,0);
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_EXITED)
+            {
+                controllerBox.pack();
+            }
+        }
+    }
 
     /**
      * Goes through the undo stack and erases parts of shapes contained in a given path.
@@ -645,7 +661,6 @@ public class AnnotationToolApplication extends Application {
                 }
             }
         });
-        //TODO this in linux
     }
 
     public void toBack()
@@ -670,4 +685,11 @@ public class AnnotationToolApplication extends Application {
  * Click nodes to erase them.
  * Resizable stage
  * moveable stage.
+ * Snipping tool?
+ * reset the redo stack if things happen.
+ */
+/*
+ *Meeting stuff
+ * Implement Snipping tool instead of resizing?
+   *
  */
