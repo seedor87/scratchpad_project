@@ -605,7 +605,7 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
-                    addArrowToEndOfLine();
+                    addArrowToEndOfLine(event);
                     //undoStack.push(path);
                     line = null;
                     redoStack.clear();
@@ -614,29 +614,57 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
-    private void addArrowToEndOfLine()
+
+    /**
+     *
+     * @param mouseEvent
+     */
+    private void addArrowToEndOfLine(MouseEvent mouseEvent)
     {
+        final double halfBaseDistance = 2;
+        final double heightDistance = 4;
         double slope;
+        double xDistance = line.getEndX() - line.getStartX();
+        double yDistance = line.getEndY() - line.getStartY();
         if(line.getEndY() == line.getStartY())
         {
             slope = Double.POSITIVE_INFINITY;
         }
         else
         {
-            slope =  (line.getEndY() - line.getStartY())/ (line.getEndX() - line.getStartX());
+            slope =  xDistance - yDistance;
         }
-        if(slope == Double.POSITIVE_INFINITY)//straight upwards line.
+        Polygon triangle = new Polygon();
+        if(slope == Double.POSITIVE_INFINITY)//straight upwards line.//TODO check which direction. //DO I really need this check/part?
         {
-
+            //System.out.println("Thing");
+            triangle.getPoints().addAll( (mouseEvent.getX() - halfBaseDistance*strokeWidth), mouseEvent.getY());
+            triangle.getPoints().addAll( (mouseEvent.getX() + halfBaseDistance*strokeWidth), mouseEvent.getY());
+            triangle.getPoints().addAll( mouseEvent.getX(), (mouseEvent.getY() - heightDistance*strokeWidth));
         }
         else
         {
-
+            //point 1
+            triangle.getPoints().
+                    addAll( (line.getEndX() - (halfBaseDistance*strokeWidth * Math.sin(Math.atan2(yDistance, xDistance)))),
+                            line.getEndY() + (halfBaseDistance*strokeWidth * Math.cos(Math.atan2(yDistance,xDistance))));
+            //point 2
+            triangle.getPoints().
+                    addAll( (line.getEndX() + (halfBaseDistance*strokeWidth * Math.sin(Math.atan2(yDistance, xDistance)))),
+                            line.getEndY() - (halfBaseDistance*strokeWidth * Math.cos(Math.atan2(yDistance,xDistance))));
+            //triangle.getPoints().addAll( (mouseEvent.getX() + 2*strokeWidth), mouseEvent.getY());
+            //point 3
+            triangle.getPoints().
+                    addAll(line.getEndX() + strokeWidth*heightDistance*Math.cos(Math.atan2(yDistance,xDistance)),
+                            line.getEndY() + (strokeWidth*heightDistance*Math.sin(Math.atan2(yDistance, xDistance))));
+            //triangle.getPoints().addAll( mouseEvent.getX() + 6), (mouseEvent.getY() + strokeWidth*4*Math.sin(Math.atan2(yDistance,xDistance)));
+            //triangle.setRotate(90);
+            Shape newShape = Shape.union(triangle, line);
+            newShape.setFill(line.getStroke());
+            undo();
+            commitShape(newShape);
         }
-        Polygon triangle = new Polygon();
-        //triangle.getPoints().add();
-        //triangle.getPoints().add();
-        //triangle.getPoints().add();
+
     }
     public void makeLines()
     {
