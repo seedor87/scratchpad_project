@@ -21,6 +21,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
@@ -80,6 +81,7 @@ public class AnnotationToolApplication extends Application {
     private VBox box;
     private Group root;
     private Path path;
+    private Line line;
     private Path eraserPath;
     private javafx.scene.paint.Paint paint = Color.BLACK;
     private Stroke stroke;
@@ -89,6 +91,7 @@ public class AnnotationToolApplication extends Application {
     private Stack<Shape> undoStack = new Stack<>();
     private Stack<Shape> redoStack = new Stack<>();
     private DrawingHandler drawingHandler = new DrawingHandler();
+    private ArrowHandler arrowHandler = new ArrowHandler();
     private Text text;
     private Color textColor = Color.BLACK;
     private double textSize = 100d;
@@ -362,6 +365,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
     }
 
     /**
@@ -570,6 +574,76 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+    /**
+     * Creates arrows. should be implemented with MouseEvent.ANY.
+     */
+    private class ArrowHandler implements EventHandler<MouseEvent>
+    {
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(clickable)
+            {
+                if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                    line = new Line(event.getX(), event.getY(), event.getX(), event.getY());
+                    line.setStroke(paint);
+                    line.setStrokeWidth(strokeWidth);
+                    //line.setStartX(event.getX());
+                    //line.setStartY(event.getY());
+                    //path.setStrokeWidth(strokeWidth);
+                    //path.setSmooth(true);
+                    //MoveTo moveTo = new MoveTo(event.getX(), event.getY());
+                    //path.getElements().add(moveTo);
+                    commitShape(line);
+                    //root.getChildren().add(path);
+                }
+                else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                    line.setEndX(event.getX());
+                    line.setEndY(event.getY());
+                    //LineTo moveTo = new LineTo(event.getX(), event.getY());
+                    //path.getElements().add(moveTo);
+                }
+                else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
+                {
+                    addArrowToEndOfLine();
+                    //undoStack.push(path);
+                    line = null;
+                    redoStack.clear();
+                }
+
+            }
+        }
+    }
+    private void addArrowToEndOfLine()
+    {
+        double slope;
+        if(line.getEndY() == line.getStartY())
+        {
+            slope = Double.POSITIVE_INFINITY;
+        }
+        else
+        {
+            slope =  (line.getEndY() - line.getStartY())/ (line.getEndX() - line.getStartX());
+        }
+        if(slope == Double.POSITIVE_INFINITY)//straight upwards line.
+        {
+
+        }
+        else
+        {
+
+        }
+        Polygon triangle = new Polygon();
+        //triangle.getPoints().add();
+        //triangle.getPoints().add();
+        //triangle.getPoints().add();
+    }
+    public void makeLines()
+    {
+        this.resetHandlers();
+        this.scene.addEventHandler(MouseEvent.ANY, arrowHandler);
+    }
+
 
     /**
      * Goes through the undo stack and erases parts of shapes contained in a given path.
@@ -769,4 +843,7 @@ public class AnnotationToolApplication extends Application {
  *
  * Circle thing
  * Arrows
+ * moving/deleting shapes
+ *
+ * do similar paint fix that I did with circles to lines.
  */

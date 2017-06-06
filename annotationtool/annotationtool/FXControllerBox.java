@@ -342,6 +342,16 @@ public class FXControllerBox extends JFrame {
         add(circleAdder, gbcb.build());
         gbcb.nextY();
 
+        JButton lineAdder = new JButton("Add Arrow");
+        lineAdder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.makeLines();
+            }
+        });
+        add(lineAdder, gbcb.build());
+        gbcb.nextY();
+
         JButton setDrawButton = new JButton("Draw");
         setDrawButton.addActionListener(new ActionListener() {
             @Override
