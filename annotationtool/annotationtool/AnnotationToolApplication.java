@@ -194,7 +194,7 @@ public class AnnotationToolApplication extends Application {
                     public void run() {
                         //root.getChildren().remove(root.getChildren().size() -1);
                         root.getChildren().remove(temp);        // above line probably more efficient.
-                        paintFromUndoStack();                   //inefficient but solves problem. 
+                        paintFromUndoStack();                   //inefficient but solves problem.
                         //System.out.println("removing shape");
                     }
                 });
@@ -748,5 +748,16 @@ public class AnnotationToolApplication extends Application {
  * Implement Snipping tool instead of resizing?
  * Weird issue where undo doesn't undo if node is on top of thing sometimes. Can be fixed with repaint, but like...
  *
+ * check into fill property of circles for circling things
  *
+ */
+/**Priority stuff
+ * Make sure it works on linux.
+ *      Then do pull request.
+ * Make sure save image works on linux.
+ *
+ * Less Priority
+ *
+ * Circle thing
+ * Arrows
  */
