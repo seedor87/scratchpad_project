@@ -373,7 +373,7 @@ public class AnnotationToolApplication extends Application {
         {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
             {
-                //                circle = new Circle(event.getSceneX(), event.getSceneY(),10, paint);      //just this line for full circle. 
+                //                circle = new Circle(event.getSceneX(), event.getSceneY(),10, paint);      //just this line for full circle.
                 circle = new Circle(event.getSceneX(), event.getSceneY(),10, Color.TRANSPARENT);
                 circle.setStroke(paint);
                 circle.setStrokeWidth(strokeWidth);
@@ -388,6 +388,12 @@ public class AnnotationToolApplication extends Application {
             }
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
+                undo();
+                circle.setFill(paint);
+                Shape newCircle = Shape.subtract(circle, new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius() - (strokeWidth/2)));
+                newCircle.setFill(paint);
+                commitShape(newCircle);
+
                 redoStack.clear();
                 circle = null;
             }
