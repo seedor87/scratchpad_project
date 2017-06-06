@@ -158,7 +158,7 @@ public class FXControllerBox extends JFrame {
         Group root  =  new  Group();
         Scene  scene  =  new  Scene(root);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        ColorPicker colorPicker = new ColorPicker();
+        ColorPicker colorPicker = new ColorPicker(javafx.scene.paint.Color.BLACK);
         colorPicker.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override
             public void handle(javafx.event.ActionEvent event)

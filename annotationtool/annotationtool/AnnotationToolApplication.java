@@ -81,7 +81,7 @@ public class AnnotationToolApplication extends Application {
     private Group root;
     private Path path;
     private Path eraserPath;
-    private javafx.scene.paint.Paint paint = Color.YELLOW;
+    private javafx.scene.paint.Paint paint = Color.BLACK;
     private Stroke stroke;
     private boolean mouseTransparent = false;
     private double strokeWidth;
@@ -192,7 +192,10 @@ public class AnnotationToolApplication extends Application {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        root.getChildren().remove(temp);
+                        //root.getChildren().remove(root.getChildren().size() -1);
+                        root.getChildren().remove(temp);        // above line probably more efficient.
+                        paintFromUndoStack();                   //inefficient but solves problem. 
+                        //System.out.println("removing shape");
                     }
                 });
             }
@@ -743,5 +746,7 @@ public class AnnotationToolApplication extends Application {
 /*
  *Meeting stuff
  * Implement Snipping tool instead of resizing?
+ * Weird issue where undo doesn't undo if node is on top of thing sometimes. Can be fixed with repaint, but like...
+ *
  *
  */
