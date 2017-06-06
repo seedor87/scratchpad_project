@@ -32,17 +32,26 @@ import org.w3c.dom.events.*;
 import sun.security.provider.SHA;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.chrono.Era;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Handler;
 
 public class AnnotationToolApplication extends Application {
+
+    static
+    {
+        System.setProperty("java.awt.headless", "false");           //TODO test in linux.
+        //https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically
+        //TODO that link might help with getting images in ubuntu.
+    }
     private FXControllerBox controllerBox;
 
     private class HandlerGroup
@@ -289,13 +298,14 @@ public class AnnotationToolApplication extends Application {
      * Sets the paint color based on a java.awt color object.
      * @param paintColor The color to convert to a javafx color object.
      */
-    public void setPaint(java.awt.Color paintColor)
+    public void setPaint(Color paintColor)
     {
-        this.paint = new javafx.scene.paint.Color(
+        this.paint = paintColor;
+/*        this.paint = new javafx.scene.paint.Color(
                 paintColor.getRed() / 255d,
                 paintColor.getGreen() / 255d,
                 paintColor.getBlue() / 255d,
-                paintColor.getAlpha() / 255d);
+                paintColor.getAlpha() / 255d);*/
     }
 
 
@@ -462,7 +472,7 @@ public class AnnotationToolApplication extends Application {
             String defaultText = "Text";
             text = new Text(event.getX(), event.getY(), defaultText);
             text.setFont(new Font(textSize));
-            text.setFill(textColor);
+            text.setFill(paint);
             undoStack.push(text);
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
@@ -638,6 +648,24 @@ public class AnnotationToolApplication extends Application {
 
     public void doSave()
     {
+        try
+        {
+            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
+            defaultHeadlessField.setAccessible(true);
+            defaultHeadlessField.set(null,Boolean.TRUE);
+            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
+            headlessField.setAccessible(true);
+            headlessField.set(null,Boolean.FALSE);
+        }
+        catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+        catch (NoSuchFieldException e)
+        {
+            e.printStackTrace();
+            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
+        }
         Platform.runLater(new Runnable() {
             @Override
             public void run()
@@ -710,10 +738,10 @@ public class AnnotationToolApplication extends Application {
  * moveable stage?
  * Snipping tool?
  *
- * reset the redo stack if things happen.
+ * reset the redo stack if things happen.                       done
  */
 /*
  *Meeting stuff
  * Implement Snipping tool instead of resizing?
-   *
+ *
  */
