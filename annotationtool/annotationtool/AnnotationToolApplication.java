@@ -6,6 +6,8 @@ package annotationtool;
 import com.sun.corba.se.spi.ior.Writeable;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -76,8 +78,9 @@ public class AnnotationToolApplication extends Application {
     }
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
-    private Stage stage;
+    private Stage mouseCatchingStage;
     private Scene mouseCatchingScene;
+    private Scene drawingScene;
     private VBox box;
     private Group root;
     private Path path;
@@ -138,8 +141,8 @@ public class AnnotationToolApplication extends Application {
      */
     public void doClear(Color color)
     {
-        double h = stage.getHeight();
-        double w = stage.getWidth();
+        double h = mouseCatchingStage.getHeight();
+        double w = mouseCatchingStage.getWidth();
         Path blockOutShape = new Path();
         blockOutShape.setStrokeWidth(h);
         blockOutShape.getElements().add(new MoveTo(0,h/2));
@@ -255,7 +258,7 @@ public class AnnotationToolApplication extends Application {
                 @Override
                 public void run()
                 {
-                    stage.setAlwaysOnTop(false);
+                    mouseCatchingStage.setAlwaysOnTop(false);
                 }
             });
             this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
@@ -268,7 +271,7 @@ public class AnnotationToolApplication extends Application {
                       @Override
                     public void run()
                     {
-                        stage.setAlwaysOnTop(true);
+                        mouseCatchingStage.setAlwaysOnTop(true);
                     }
                 });
             }
@@ -329,17 +332,17 @@ public class AnnotationToolApplication extends Application {
     @Override
     public void start(Stage primaryStage)
     {
-        this.stage = primaryStage;
+        this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
         //this.stage.setMaximized(true);
-        this.stage.setFullScreen(true);
-        this.stage.setOpacity(0.004);
+        this.mouseCatchingStage.setFullScreen(true);
+        this.mouseCatchingStage.setOpacity(0.004);
 
         root = new Group();
 
         Group notRoot = new Group();
         mouseCatchingScene = new Scene(notRoot);         // the scene that catches all the mouse events
-        Scene drawingScene = new Scene(root);   // the scene that renders all the drawings.
+        drawingScene = new Scene(root);   // the scene that renders all the drawings.
         drawingScene.setFill(clearPaint);
 
         mouseCatchingScene.setFill(clickablyClearPaint);
@@ -358,15 +361,16 @@ public class AnnotationToolApplication extends Application {
         stage2.setFullScreen(true);
         //stage2.setMaximized(true);
 
-        primaryStage.setScene(mouseCatchingScene);
+        mouseCatchingStage.setScene(mouseCatchingScene);
 
         setupListeners();
 
         controllerBox = new FXControllerBox(this);
         boxWidth = controllerBox.getWidth();
 
+        setUpMoveListeners(stage2);
 
-        primaryStage.show();
+        mouseCatchingStage.show();
         stage2.show();
     }
 
@@ -387,6 +391,46 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
+    }
+
+    /**
+     * Sets up the two stages so that they move and resize with each other.
+     */
+    private void setUpMoveListeners(Stage drawingStage)
+    {
+        mouseCatchingStage.widthProperty().addListener(new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+            {
+                drawingStage.setWidth(mouseCatchingStage.getWidth());
+            }
+        });
+
+        mouseCatchingStage.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+            {
+                drawingStage.setHeight(mouseCatchingStage.getHeight());
+            }
+        });
+
+        mouseCatchingStage.xProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+            {
+                drawingStage.setX(mouseCatchingStage.getX());
+            }
+        });
+
+        mouseCatchingStage.yProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+            {
+                drawingStage.setY(mouseCatchingStage.getY());
+            }
+        });
+
     }
 
     /**
@@ -765,7 +809,7 @@ public class AnnotationToolApplication extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                stage.toFront();
+                mouseCatchingStage.toFront();
             }
         });
     }
@@ -776,7 +820,7 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void run()
             {
-                stage.setAlwaysOnTop(alwaysOnTop);
+                mouseCatchingStage.setAlwaysOnTop(alwaysOnTop);
             }
         });
     }
@@ -831,8 +875,8 @@ public class AnnotationToolApplication extends Application {
 
                 try
                 {
-                    java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)stage.getX() /*+ borderThickness*/, (int)stage.getY() /* + borderThickness*/,
-                            (int)stage.getWidth()/* - (2 * borderThickness)*/, (int)stage.getHeight()/* - (2 * borderThickness)*/);
+                    java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)mouseCatchingStage.getX() /*+ borderThickness*/, (int)mouseCatchingStage.getY() /* + borderThickness*/,
+                            (int)mouseCatchingStage.getWidth()/* - (2 * borderThickness)*/, (int)mouseCatchingStage.getHeight()/* - (2 * borderThickness)*/);
                     BufferedImage outImg = robot.createScreenCapture(screenGrabArea);
                     ImageIO.write(outImg, "png", outFile);
                 }
@@ -853,7 +897,7 @@ public class AnnotationToolApplication extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                stage.toBack();
+                mouseCatchingStage.toBack();
             }
         });
     }
