@@ -112,7 +112,7 @@ public class AnnotationToolApplication extends Application {
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
 
-    private final double TITLE_BAR_Y_DISTANCE = 25;
+    private final double TITLE_BAR_Y_DISTANCE = 60;
 
     final ClipboardOwner clipboardOwner = new ClipboardOwner() {
         @Override
@@ -331,7 +331,8 @@ public class AnnotationToolApplication extends Application {
     {
         this.stage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
-        this.stage.setMaximized(true);
+        //this.stage.setMaximized(true);
+        this.stage.setFullScreen(true);
         this.stage.setOpacity(0.004);
 
         root = new Group();
@@ -354,7 +355,8 @@ public class AnnotationToolApplication extends Application {
         Stage stage2 = new Stage();
         stage2.initStyle(StageStyle.TRANSPARENT);
         stage2.setScene(drawingScene);
-        stage2.setMaximized(true);
+        stage2.setFullScreen(true);
+        //stage2.setMaximized(true);
 
         primaryStage.setScene(mouseCatchingScene);
 
