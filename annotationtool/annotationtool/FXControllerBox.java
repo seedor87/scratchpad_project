@@ -6,6 +6,7 @@ import java.awt.Paint;
 import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.util.*;
+import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputAdapter;
@@ -169,7 +170,10 @@ public class FXControllerBox extends JFrame {
         });
         root.getChildren().add(colorPicker);
         jfxPanel.setScene(scene);
-        add(jfxPanel, gbcb.fullWidth().nextY().build());
+        JPanel fxPanelHolder = new JPanel(new GridBagLayout());
+        fxPanelHolder.add(jfxPanel);
+        add(fxPanelHolder, gbcb.fullWidth().nextY().build());
+
 
         //gbcb.nextY();
 
@@ -489,6 +493,7 @@ public class FXControllerBox extends JFrame {
         gbcb.nextY();
 
         this.setBounds(300, 0, 0, 0);
+        this.setMinimumSize(new Dimension(275, this.getHeight()));
         this.pack();
         this.setVisible(true);
     }
