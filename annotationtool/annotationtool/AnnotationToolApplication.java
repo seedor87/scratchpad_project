@@ -79,10 +79,12 @@ public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private Stage mouseCatchingStage;
+    private Stage stage2;
     private Scene mouseCatchingScene;
     private Scene drawingScene;
     private VBox box;
     private Group root;
+    private Group notRoot;
     private Path path;
     private Line line;
     private Path eraserPath;
@@ -258,7 +260,9 @@ public class AnnotationToolApplication extends Application {
                 @Override
                 public void run()
                 {
-                    mouseCatchingStage.setAlwaysOnTop(false);
+                	stage2.setAlwaysOnTop(false);
+                	mouseCatchingStage.setAlwaysOnTop(false);
+                    mouseCatchingStage.setOpacity(0.004);
                 }
             });
             this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
@@ -271,7 +275,10 @@ public class AnnotationToolApplication extends Application {
                       @Override
                     public void run()
                     {
-                        mouseCatchingStage.setAlwaysOnTop(true);
+                    	  stage2.setAlwaysOnTop(true);
+                    	  mouseCatchingStage.setAlwaysOnTop(true);
+                    	  mouseCatchingStage.setOpacity(0.0);
+                        
                     }
                 });
             }
@@ -334,13 +341,13 @@ public class AnnotationToolApplication extends Application {
     {
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
-        //this.stage.setMaximized(true);
         this.mouseCatchingStage.setFullScreen(true);
+        //this.mouseCatchingStage.setMaximized(true);
         this.mouseCatchingStage.setOpacity(0.004);
 
         root = new Group();
 
-        Group notRoot = new Group();
+        notRoot = new Group();
         mouseCatchingScene = new Scene(notRoot);         // the scene that catches all the mouse events
         drawingScene = new Scene(root);   // the scene that renders all the drawings.
         drawingScene.setFill(clearPaint);
@@ -355,11 +362,11 @@ public class AnnotationToolApplication extends Application {
         root.getChildren().add(bg);
         notRoot.getChildren().add(bg);
 
-        Stage stage2 = new Stage();
+        stage2 = new Stage();
         stage2.initStyle(StageStyle.TRANSPARENT);
         stage2.setScene(drawingScene);
-        stage2.setFullScreen(true);
         //stage2.setMaximized(true);
+        stage2.setFullScreen(true);
 
         mouseCatchingStage.setScene(mouseCatchingScene);
 
@@ -809,7 +816,9 @@ public class AnnotationToolApplication extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mouseCatchingStage.toFront();
+//                mouseCatchingStage.toFront();
+//                stage2.toFront();
+            	mouseCatchingStage.setIconified(false);
             }
         });
     }
@@ -897,7 +906,9 @@ public class AnnotationToolApplication extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mouseCatchingStage.toBack();
+//                mouseCatchingStage.toBack();
+//                stage2.toBack();
+            	mouseCatchingStage.setIconified(true);
             }
         });
     }
