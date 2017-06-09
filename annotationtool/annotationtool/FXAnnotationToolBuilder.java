@@ -4,8 +4,6 @@ import java.awt.Canvas;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jnativehook.GlobalScreen;
-
 import com.sun.corba.se.pept.transport.EventHandler;
 
 import javafx.application.Application;
@@ -47,7 +45,8 @@ public class FXAnnotationToolBuilder extends Application {
     @Override
     public void start(Stage stage) throws Exception {
     	this.stage = stage;
-    	this.stage.initStyle(StageStyle.TRANSPARENT);
+    	this.stage.initStyle(StageStyle.UNDECORATED);
+    	this.stage.setOpacity(0.004);
     	this.stage.setMaximized(true);
     	Group root = new Group();
         javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());

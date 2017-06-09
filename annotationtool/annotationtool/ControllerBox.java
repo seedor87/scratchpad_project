@@ -1,4 +1,4 @@
-package annotationtool;
+/*package annotationtool;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -402,9 +402,9 @@ public class ControllerBox extends JFrame {
         gbcb.nextY();
     }
 
-    /**
+    *//**
      * https://stackoverflow.com/questions/18830098/pick-color-with-jcombobox-java-swing
-     */
+     *//*
     private class MyCellRenderer extends JButton implements ListCellRenderer {
         public MyCellRenderer() {
             setOpaque(true);
@@ -440,3 +440,4 @@ public class ControllerBox extends JFrame {
 
 
 }
+*/
