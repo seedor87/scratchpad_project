@@ -117,7 +117,7 @@ public class AnnotationToolApplication extends Application {
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
 
-    private final double TITLE_BAR_Y_DISTANCE = 60;
+    private final double TITLE_BAR_Y_DISTANCE = 25;
 
     final ClipboardOwner clipboardOwner = new ClipboardOwner() {
         @Override
@@ -326,23 +326,30 @@ public class AnnotationToolApplication extends Application {
                 paintColor.getAlpha() / 255d);*/
     }
 
-
-    public static void main(String[] args)
-    {
-        launch(args);
+	public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
+    	start(primaryStage, secondaryStage, x, y, sizedWindow);
+    }
+    
+    public void start(Stage primaryStage) {
+    	start(primaryStage, new Stage(), 0, 0, false);
     }
 
     /**
      * The code starts here.
      * @param primaryStage
      */
-    @Override
-    public void start(Stage primaryStage)
+    public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow)
     {
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
-        this.mouseCatchingStage.setFullScreen(true);
-        //this.mouseCatchingStage.setMaximized(true);
+        if(!sizedWindow) {
+        	//this.mouseCatchingStage.setFullScreen(true);
+        	this.mouseCatchingStage.setMaximized(true);
+        }
+        else {
+        	this.mouseCatchingStage.setX(x);
+        	this.mouseCatchingStage.setY(y);
+        }
         this.mouseCatchingStage.setOpacity(0.004);
 
         root = new Group();
@@ -362,11 +369,17 @@ public class AnnotationToolApplication extends Application {
         root.getChildren().add(bg);
         notRoot.getChildren().add(bg);
 
-        stage2 = new Stage();
+        stage2 = secondaryStage;
         stage2.initStyle(StageStyle.TRANSPARENT);
         stage2.setScene(drawingScene);
-        //stage2.setMaximized(true);
-        stage2.setFullScreen(true);
+        if(!sizedWindow) {
+        	stage2.setMaximized(true);
+        	//stage2.setFullScreen(true);
+        }
+        else {
+        	stage2.setX(x);
+        	stage2.setY(y);
+        }
 
         mouseCatchingStage.setScene(mouseCatchingScene);
 
@@ -816,8 +829,8 @@ public class AnnotationToolApplication extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-//                mouseCatchingStage.toFront();
-//                stage2.toFront();
+                mouseCatchingStage.toFront();
+                stage2.toFront();
             	mouseCatchingStage.setIconified(false);
             }
         });
