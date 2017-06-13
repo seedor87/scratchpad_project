@@ -1,4 +1,4 @@
-package annotationtool;
+/*package annotationtool;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -212,9 +212,9 @@ public class AnnotationTool extends JFrame {
         }
     };
 
-    /**
+    *//**
      * Found at https://tips4java.wordpress.com/2009/06/14/moving-windows/
-     */
+     *//*
     public class DragListener extends MouseInputAdapter
     {
         Point location;
@@ -282,9 +282,9 @@ public class AnnotationTool extends JFrame {
         condenseText();
     }
 
-    /**
+    *//**
      * Condenses the single character text on the top of the undostack.
-     */
+     *//*
     private void condenseText()
     {
         if(undoStack.peek() != null)
@@ -366,17 +366,17 @@ public class AnnotationTool extends JFrame {
         addMouseMotionListener( drag );
 
 
-        /*
+        
         @return an off-screen drawable image, which can be used for double buffering.
         The return value may be null if the component is not displayable.
         This will always happen if GraphicsEnvironment.isHeadless() returns true.
-        */
+        
         // backingScratch = createImage(w, h);
 
         //  backingScratch = new BufferedImage(w,h,BufferedImage.TRANSLUCENT);//createImage(w, h);
 
 
-/*        Path2D.Float borderShape = new Path2D.Float();
+        Path2D.Float borderShape = new Path2D.Float();
         borderShape.moveTo(0, 0);
         borderShape.lineTo(w + 10, 0);
         borderShape.lineTo(w + 10, h + 10);
@@ -385,7 +385,7 @@ public class AnnotationTool extends JFrame {
         border = new ShapeDef(
                 new BasicStroke(10, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER),
                 new Color(255, 128, 0, 255),
-                borderShape);*/
+                borderShape);
     }
 
     private void generateBorder() {
@@ -403,17 +403,18 @@ public class AnnotationTool extends JFrame {
     }
 
 
-    /**
+    *//**
      * Makes the window click-through, stops drawing.
      *
      * @param suppression If the window is suppressed
-     */
+     *//*
     public void suppressWindow(boolean suppression) {
         canDraw = !suppression;
         if(suppression) {
             AWTUtilities.setWindowOpacity(this, suppressedOpacity);
         }
-        else {
+        else
+        {
             AWTUtilities.setWindowOpacity(this, 1f);
         }
     }
@@ -499,7 +500,7 @@ public class AnnotationTool extends JFrame {
             e.printStackTrace();
         }
 
-        /*try {
+        try {
             BufferedImage outImg = null;
             if (backingMain instanceof BufferedImage) {
                 outImg = (BufferedImage) backingMain;
@@ -512,7 +513,7 @@ public class AnnotationTool extends JFrame {
             ImageIO.write(outImg, "png", outFile);
         } catch (IOException ex) {
             System.err.println("Save failed: " + ex.getMessage());
-        }*/
+        }
     }
 
     @Override
@@ -565,9 +566,9 @@ public class AnnotationTool extends JFrame {
         }
     }
 
-    /**
+    *//**
      * Clears the board, and then paints every ShapeDef in the undo stack in descending order.
-     */
+     *//*
     private void paintFromUndoStack() {
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
         g.setComposite(AlphaComposite.Src);
@@ -597,9 +598,9 @@ public class AnnotationTool extends JFrame {
         temp.add(s);
         undoStack.push(temp);
         Graphics2D g = (Graphics2D) backingMain.getGraphics();
-/*
+
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);         //smooths out lines as they're drawn. //TODO this in redo
-*/
+
         g.setComposite(AlphaComposite.Src);
         g.setPaint(s.paint);
         g.setStroke(s.stroke);
@@ -638,22 +639,24 @@ public class AnnotationTool extends JFrame {
                     setAlwaysOnTop(false);
                     this.toBack();
                     robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-/*                    try
+                    try
                     {
                         wait(100);
                     }
                     catch (Exception e)
                     {
 
-                    }*/
-                    this.toFront();
-                    setAlwaysOnTop(true);
+                    }
+                    //this.toFront();
+                    //setAlwaysOnTop(true);
                 }
                 if(me.getID() == MouseEvent.MOUSE_RELEASED)
                 {
                     //robot.mouseMove(me.getX(), me.getY());
                     setBackground(clearPaint);
                     robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                    this.toFront();
+                    setAlwaysOnTop(true);
                 }
             }
         }
@@ -707,12 +710,12 @@ public class AnnotationTool extends JFrame {
                         //g.drawString("This is a string", x, y);
 
 
-/*                    Rectangle2D bounds = layout.getBounds();
+                    Rectangle2D bounds = layout.getBounds();
                     bounds.setRect(bounds.getX()+getLocation().getX(),
                             bounds.getY()+getLocation().getY(),
                             bounds.getWidth(),
                             bounds.getHeight());
-                    g.draw(bounds);*/
+                    g.draw(bounds);
 
                         // textField.setBackground(mostlyClearPaint);
                         //  textField.setForeground(Color.BLACK);
@@ -750,10 +753,10 @@ public class AnnotationTool extends JFrame {
 
         commitShape(new ShapeDef(stroke,textColor,s , makingTextBox, bubbleText));
 
-/*        FontRenderContext frc = g.getFontRenderContext();
+        FontRenderContext frc = g.getFontRenderContext();
         TextLayout layout = new TextLayout(textBoxText.toString(), font, frc);
         layout.draw(g, (float) textBoxPoint.getX(), (float)textBoxPoint.getY());
-        repaint();*/
+        repaint();
     }
     public void toggleClickable()
     {
@@ -762,7 +765,7 @@ public class AnnotationTool extends JFrame {
 
     public static void main(final String[] args)
     {
-        System.err.println("Annoation tool by simon@dancingcloudservices.com");
+        System.err.println("Annotation tool by simon@dancingcloudservices.com");
         System.err.println("Icons by www.iconfinder.com");
 
         int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
@@ -807,4 +810,4 @@ public class AnnotationTool extends JFrame {
             }
         });
     }
-}
+}*/
