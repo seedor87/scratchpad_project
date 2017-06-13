@@ -142,15 +142,17 @@ public class FXAnnotationToolBuilder extends Application {
 			newStage.setHeight(h);			newSecondaryStage.setHeight(h);
 			
 			AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
-			Platform.runLater(new Runnable() {
-			    @Override
-			    public void run() {
-			        stage.close();
-			    }
-			});
+
 		} else if (w < 50 && h < 50) {
 			AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
 		}
+		
+		Platform.runLater(new Runnable() {
+		    @Override
+		    public void run() {
+		        stage.close();
+		    }
+		});
 	}
 	
 	private void close() {
