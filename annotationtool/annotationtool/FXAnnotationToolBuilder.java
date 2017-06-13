@@ -46,7 +46,7 @@ public class FXAnnotationToolBuilder extends Application {
     public void start(Stage stage) throws Exception {
     	this.stage = stage;
     	this.stage.initStyle(StageStyle.UNDECORATED);
-    	this.stage.setOpacity(0.004);
+    	this.stage.setOpacity(0.2d);
     	this.stage.setMaximized(true);
     	Group root = new Group();
         javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());

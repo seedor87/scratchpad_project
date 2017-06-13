@@ -117,7 +117,7 @@ public class AnnotationToolApplication extends Application {
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
 
-    private final double TITLE_BAR_Y_DISTANCE = 25;
+    //private final double TITLE_BAR_Y_DISTANCE = 25;
 
     final ClipboardOwner clipboardOwner = new ClipboardOwner() {
         @Override
@@ -351,6 +351,7 @@ public class AnnotationToolApplication extends Application {
         	this.mouseCatchingStage.setY(y);
         }
         this.mouseCatchingStage.setOpacity(0.004);
+        this.mouseCatchingStage.initStyle(StageStyle.UNDECORATED);
 
         root = new Group();
 
@@ -463,7 +464,7 @@ public class AnnotationToolApplication extends Application {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
             {
                 //                circle = new Circle(event.getSceneX(), event.getSceneY(),10, paint);      //just this line for full circle.
-                circle = new Circle(event.getSceneX(), event.getSceneY() + TITLE_BAR_Y_DISTANCE,10, Color.TRANSPARENT);
+                circle = new Circle(event.getSceneX(), event.getSceneY() ,10, Color.TRANSPARENT);
                 circle.setStroke(paint);
                 circle.setStrokeWidth(strokeWidth);
                 commitShape(circle);
@@ -473,7 +474,7 @@ public class AnnotationToolApplication extends Application {
             {
                 double xDistance = event.getX() - circle.getCenterX();
                 double yDistance = event.getY() - circle.getCenterY();
-                circle.setRadius(pythagorize(xDistance,yDistance + TITLE_BAR_Y_DISTANCE));
+                circle.setRadius(pythagorize(xDistance,yDistance ));
             }
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
@@ -540,13 +541,13 @@ public class AnnotationToolApplication extends Application {
                 path = new Path();
                 path.setStrokeWidth(strokeWidth);
                 path.setSmooth(true);
-                MoveTo moveTo = new MoveTo(event.getX(), event.getY() +TITLE_BAR_Y_DISTANCE);
+                MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                 path.getElements().add(moveTo);
                 root.getChildren().add(path);
                 path.setStroke(paint);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                LineTo moveTo = new LineTo(event.getX(), event.getY()+TITLE_BAR_Y_DISTANCE);
+                LineTo moveTo = new LineTo(event.getX(), event.getY());
                 path.getElements().add(moveTo);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
@@ -571,7 +572,7 @@ public class AnnotationToolApplication extends Application {
         @Override
         public void handle(MouseEvent event) {
             String defaultText = "Text";
-            text = new Text(event.getX(), event.getY() + TITLE_BAR_Y_DISTANCE, defaultText);
+            text = new Text(event.getX(), event.getY() , defaultText);
             text.setFont(new Font(textSize));
             text.setFill(paint);
             undoStack.push(text);
@@ -621,13 +622,13 @@ public class AnnotationToolApplication extends Application {
                 eraserPath = new Path();
                 eraserPath.setStrokeWidth(strokeWidth);
                 eraserPath.setSmooth(true);
-                MoveTo moveTo = new MoveTo(event.getX(), event.getY() + TITLE_BAR_Y_DISTANCE);
+                MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                 eraserPath.getElements().add(moveTo);
                 root.getChildren().add(eraserPath);
                 eraserPath.setStroke(eraserColor);
             }
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                LineTo moveTo = new LineTo(event.getX(), event.getY() + TITLE_BAR_Y_DISTANCE);
+                LineTo moveTo = new LineTo(event.getX(), event.getY());
                 eraserPath.getElements().add(moveTo);
             }
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
@@ -670,7 +671,7 @@ public class AnnotationToolApplication extends Application {
             if(clickable)
             {
                 if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                    line = new Line(event.getX(), event.getY() + TITLE_BAR_Y_DISTANCE, event.getX(), event.getY() + TITLE_BAR_Y_DISTANCE);
+                    line = new Line(event.getX(), event.getY(), event.getX(), event.getY());
                     line.setStroke(paint);
                     line.setStrokeWidth(strokeWidth);
                     //line.setStartX(event.getX());
@@ -684,7 +685,7 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                     line.setEndX(event.getX());
-                    line.setEndY(event.getY() + TITLE_BAR_Y_DISTANCE);
+                    line.setEndY(event.getY());
                     //LineTo moveTo = new LineTo(event.getX(), event.getY());
                     //path.getElements().add(moveTo);
                 }
