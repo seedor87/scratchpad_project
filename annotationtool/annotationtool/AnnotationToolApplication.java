@@ -328,7 +328,7 @@ public class AnnotationToolApplication extends Application {
     public void start(Stage primaryStage)
     {
         this.stage = primaryStage;
-        this.stage.initStyle(StageStyle.TRANSPARENT);
+        //this.stage.initStyle(StageStyle.UNDECORATED);
         this.stage.setMaximized(true);
 
         root = new Group();
@@ -391,7 +391,7 @@ public class AnnotationToolApplication extends Application {
                 circle.setRadius(pythagorize(xDistance,yDistance));
             }
             else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
-            {
+            {//TODO fix issue that you get when you draw a circle that is very thick, but very small as well.
                 undo();
                 circle.setFill(paint);
                 Shape newCircle = Shape.subtract(circle, new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius() - (strokeWidth/2)));
@@ -869,8 +869,8 @@ public class AnnotationToolApplication extends Application {
  *
  * Less Priority
  *
- * Circle thing
- * Arrows
+ * Circle thing                                                 done
+ * Arrows                                                       done
  * moving/deleting shapes
  *
  * do similar paint fix that I did with circles to lines.
