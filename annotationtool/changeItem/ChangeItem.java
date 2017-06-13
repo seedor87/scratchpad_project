@@ -1,9 +1,14 @@
 package changeItem;
 
+import annotationtool.AnnotationToolApplication;
+import javafx.stage.Stage;
+
 /**
- * Created by Resea on 6/13/2017.
+ * Created by Brennan on 6/13/2017.
  */
 public interface ChangeItem
 {
-
+    public void addChangeToStage(AnnotationToolApplication annotationToolApplication);
+    public void undoChangeToStage(AnnotationToolApplication annotationToolApplication);
+    public void redoChangeToStage(AnnotationToolApplication annotationToolApplication);
 }

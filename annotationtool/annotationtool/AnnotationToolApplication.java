@@ -3,6 +3,9 @@ package annotationtool;
  * Created by remem on 5/30/2017.
  */
 
+import changeItem.AddShape;
+import changeItem.ChangeItem;
+import changeItem.EraseShape;
 import com.sun.corba.se.spi.ior.Writeable;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -67,7 +70,7 @@ public class AnnotationToolApplication extends Application {
             this.handler = handler;
         }
     }
-    private class EraseShape extends Path
+/*    private class EraseShape extends Path
     {
         Path eraseArea;
         Stack<Shape> shapesPartiallyErased = new Stack<>();
@@ -75,7 +78,7 @@ public class AnnotationToolApplication extends Application {
         {
             this.eraseArea = eraseArea;
         }
-    }
+    }*/
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private Stage mouseCatchingStage;
@@ -93,8 +96,8 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private double strokeWidth;
     private boolean clickable = true;
-    private Stack<Shape> undoStack = new Stack<>();
-    private Stack<Shape> redoStack = new Stack<>();
+    private Stack<ChangeItem> undoStack = new Stack<>();
+    private Stack<ChangeItem> redoStack = new Stack<>();
     private DrawingHandler drawingHandler = new DrawingHandler();
     private ArrowHandler arrowHandler = new ArrowHandler();
     private Text text;
@@ -160,9 +163,12 @@ public class AnnotationToolApplication extends Application {
         });
         redoStack.clear();
     }
-    private void commitShape(Shape shape)
+    private void commitShape(ChangeItem changeItem)
     {
-        if(shape instanceof EraseShape)
+        changeItem.addChangeToStage(this);
+        undoStack.push(changeItem);
+
+ /*       if(shape instanceof EraseShape)
         {
             eraseShapes((EraseShape) shape);
         }
@@ -170,11 +176,23 @@ public class AnnotationToolApplication extends Application {
         {
             root.getChildren().add(shape);
         }
-        undoStack.push(shape);
+        undoStack.push(shape);*/
+    }
+
+    public Group getRoot()
+    {
+        return this.root;
     }
 
     public void redo()
     {
+        if(redoStack.size() > 0)
+        {
+            ChangeItem temp = redoStack.pop();
+            temp.redoChangeToStage(this);
+            undoStack.push(temp);
+        }
+        /*
         if (redoStack.size() > 0)
         {
             Shape temp = redoStack.pop();
@@ -185,12 +203,18 @@ public class AnnotationToolApplication extends Application {
                     commitShape(temp);
                 }
             });
-        }
+        }*/
     }
 
     public void undo()
     {
-        if (undoStack.size() > 0)
+        if(undoStack.size() > 0)
+        {
+            ChangeItem temp = undoStack.pop();
+            temp.undoChangeToStage(this);
+            redoStack.push(temp);
+        }
+/*        if (undoStack.size() > 0)
         {
             Shape temp = undoStack.pop();
             if(temp instanceof EraseShape)
@@ -210,10 +234,10 @@ public class AnnotationToolApplication extends Application {
                 });
             }
             redoStack.push(temp);
-        }
+        }*/
     }
 
-    private void undoAnEraseShape(EraseShape eraseShape)
+/*    private void undoAnEraseShape(EraseShape eraseShape)
     {
         undoStack.clear();
         while(!(eraseShape.shapesPartiallyErased.isEmpty()))
@@ -228,7 +252,7 @@ public class AnnotationToolApplication extends Application {
             }
         });
 
-    }
+    }*/
 
     public void clearHistory()
     {
@@ -467,22 +491,23 @@ public class AnnotationToolApplication extends Application {
                 circle = new Circle(event.getSceneX(), event.getSceneY() ,10, Color.TRANSPARENT);
                 circle.setStroke(paint);
                 circle.setStrokeWidth(strokeWidth);
-                commitShape(circle);
+                commitShape(new AddShape(circle));
 
             }
-            else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            else if (circle != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED)
             {
                 double xDistance = event.getX() - circle.getCenterX();
                 double yDistance = event.getY() - circle.getCenterY();
                 circle.setRadius(pythagorize(xDistance,yDistance ));
             }
-            else if (event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            else if (circle != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
                 undo();
                 circle.setFill(paint);
                 Shape newCircle = Shape.subtract(circle, new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius() - (strokeWidth/2)));
                 newCircle.setFill(paint);
-                commitShape(newCircle);
+                AddShape addShape = new AddShape(newCircle);
+                commitShape(addShape);
 
                 redoStack.clear();
                 circle = null;
@@ -555,7 +580,7 @@ public class AnnotationToolApplication extends Application {
                 //path.setFillRule(FillRule.EVEN_ODD);
                 //path.setFill(paint);
                 //root.getChildren().add(path);
-                undoStack.push(path);
+                undoStack.push(new AddShape(path));
                 path = null;
                 redoStack.clear();
                 }
@@ -575,7 +600,7 @@ public class AnnotationToolApplication extends Application {
             text = new Text(event.getX(), event.getY() , defaultText);
             text.setFont(new Font(textSize));
             text.setFill(paint);
-            undoStack.push(text);
+            undoStack.push(new AddShape(text));
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
             redoStack.clear();
@@ -634,7 +659,7 @@ public class AnnotationToolApplication extends Application {
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
                 root.getChildren().remove(eraserPath);
-                EraseShape eraseShape = new EraseShape(eraserPath);
+                changeItem.EraseShape eraseShape = new changeItem.EraseShape(eraserPath);
                 commitShape(eraseShape);
                 eraseShape = null;
                 redoStack.clear();
@@ -680,7 +705,7 @@ public class AnnotationToolApplication extends Application {
                     //path.setSmooth(true);
                     //MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                     //path.getElements().add(moveTo);
-                    commitShape(line);
+                    commitShape(new AddShape(line));
                     //root.getChildren().add(path);
                 }
                 else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -748,7 +773,7 @@ public class AnnotationToolApplication extends Application {
             Shape newShape = Shape.union(triangle, line);
             newShape.setFill(line.getStroke());
             undo();
-            commitShape(newShape);
+            commitShape(new AddShape(newShape));
         }
 
     }
@@ -762,11 +787,11 @@ public class AnnotationToolApplication extends Application {
     /**
      * Goes through the undo stack and erases parts of shapes contained in a given path.
      */
-    private void eraseShapes(EraseShape eraseShape)
+/*    private void eraseShapes(EraseShape eraseShape)
     {
         Shape oldShape;
         Shape newShape;
-        ListIterator<Shape> iterator = undoStack.listIterator(undoStack.size());        //list iterator starting from top of stack.
+        ListIterator<ChangeItem> iterator = undoStack.listIterator(undoStack.size());        //list iterator starting from top of stack.
         while(iterator.hasPrevious())
         {
             oldShape = iterator.previous();
@@ -793,15 +818,19 @@ public class AnnotationToolApplication extends Application {
                 paintFromUndoStack();
             }
         });
+    }*/
+    public Stack<ChangeItem> getUndoStack()
+    {
+        return undoStack;
     }
-    private void paintFromUndoStack()
+    public void paintFromUndoStack()
     {
         root.getChildren().clear();
-        for(Shape s : undoStack)
+        for(ChangeItem changeItem : undoStack)
         {
-            if(!(s instanceof EraseShape))
+            if(!(changeItem instanceof changeItem.EraseShape))          // infinite callse to paintFromUndoStack() if it is an EraseShape
             {
-                root.getChildren().add(s);
+                changeItem.addChangeToStage(this);
             }
         }
     }
@@ -930,9 +959,7 @@ public class AnnotationToolApplication extends Application {
 //TODO list
 /*
  * Add in more shapes
- *      also arrows
  * Make controller box dynamically resize as needed             sort of done
- * Color picker
  * Make save image work in linux.
  * Click text to select it and edit it
  * Click nodes to move them.
@@ -942,16 +969,8 @@ public class AnnotationToolApplication extends Application {
  * moveable stage?
  * Snipping tool?
  *
- * reset the redo stack if things happen.                       done
  */
-/*
- *Meeting stuff
- * Implement Snipping tool instead of resizing?
- * Weird issue where undo doesn't undo if node is on top of thing sometimes. Can be fixed with repaint, but like...
- *
- * check into fill property of circles for circling things
- *
- */
+
 /**Priority stuff
  * Make sure it works on linux.
  *      Then do pull request.
@@ -959,8 +978,6 @@ public class AnnotationToolApplication extends Application {
  *
  * Less Priority
  *
- * Circle thing
- * Arrows
  * moving/deleting shapes
  *
  * do similar paint fix that I did with circles to lines.
