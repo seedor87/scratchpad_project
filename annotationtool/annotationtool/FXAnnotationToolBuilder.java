@@ -4,13 +4,7 @@ import java.awt.Canvas;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jnativehook.GlobalScreen;
-import org.jnativehook.NativeHookException;
-import org.jnativehook.keyboard.NativeKeyEvent;
-import org.jnativehook.keyboard.NativeKeyListener;
-import org.jnativehook.mouse.NativeMouseEvent;
-import org.jnativehook.mouse.NativeMouseListener;
-import org.jnativehook.mouse.NativeMouseMotionListener;
+import com.sun.corba.se.pept.transport.EventHandler;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -23,24 +17,24 @@ import javafx.scene.shape.ArcType;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 
 public class FXAnnotationToolBuilder extends Application {
 	
-	NativeMouseListener mListener;
-	NativeMouseMotionListener dragListener;
-	NativeKeyListener kListener;
 	
 	private Stage stage;
 	private GraphicsContext gc;
     
     private String instructions = "Click and drag to select a portion of the screen to annotate.";
     
-    private int xPos1;
-    private int yPos1;
-    private int xPos2;
-    private int yPos2;
-    private int xPosCurr;
-    private int yPosCurr;
+    private double xPos1;
+    private double yPos1;
+    private double xPos2;
+    private double yPos2;
+    private double xPosCurr;
+    private double yPosCurr;
     
     private boolean dragging;
 
@@ -51,7 +45,8 @@ public class FXAnnotationToolBuilder extends Application {
     @Override
     public void start(Stage stage) throws Exception {
     	this.stage = stage;
-    	this.stage.initStyle(StageStyle.TRANSPARENT);
+    	this.stage.initStyle(StageStyle.UNDECORATED);
+    	this.stage.setOpacity(0.004);
     	this.stage.setMaximized(true);
     	Group root = new Group();
         javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
@@ -61,26 +56,8 @@ public class FXAnnotationToolBuilder extends Application {
         stage.getScene().setFill(Color.rgb(0, 0, 0, 1d / 255d));
         this.stage.show();
         
-        try {
-			Logger keyListenerLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        	keyListenerLogger.setLevel(Level.WARNING);
-        	
-        	keyListenerLogger.setUseParentHandlers(false);
-			GlobalScreen.registerNativeHook();
-		}
-		catch (NativeHookException ex) {
-			System.err.println("There was a problem registering the native hook.");
-			System.err.println(ex.getMessage());
-
-			System.exit(1);
-		}
-
-		mListener = new BuilderMouseListener();
-		dragListener = new BuilderMouseDragListener();
-		kListener = new BuilderKeyListener();
-		GlobalScreen.addNativeMouseListener(mListener);
-		GlobalScreen.addNativeMouseMotionListener(dragListener);
-		GlobalScreen.addNativeKeyListener(kListener);
+		stage.getScene().addEventHandler(KeyEvent.KEY_PRESSED, new BuilderKeyHandler());
+		stage.getScene().addEventHandler(MouseEvent.ANY, new BuilderMouseHandler());
 		
 		gc.setStroke(Color.RED);
     	gc.setLineWidth(4);
@@ -90,7 +67,7 @@ public class FXAnnotationToolBuilder extends Application {
     	gc.clearRect(0, 0, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
     	gc.setStroke(new Color(1, 0, 0, 0.5f));
     	gc.setLineWidth(4);
-    	int beginX, beginY, width, height;
+    	double beginX, beginY, width, height;
     	if (dragging == true) {
 			beginX = Math.min(xPos1, xPosCurr);
 			beginY = Math.min(yPos1, yPosCurr);
@@ -107,90 +84,75 @@ public class FXAnnotationToolBuilder extends Application {
     	
     	
     }
-    
-	private class BuilderMouseListener implements NativeMouseListener {
+
+	private class BuilderMouseHandler implements javafx.event.EventHandler<MouseEvent>
+	{
 
 		@Override
-		public void nativeMouseClicked(NativeMouseEvent me) {		}
-
-		@Override
-		public void nativeMousePressed(NativeMouseEvent me) {
-			if(!dragging) {
-				xPos1 = me.getX();
-				yPos1 = me.getY();
+		public void handle(MouseEvent event) {
+			if(event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+				xPos1 = event.getX();
+				yPos1 = event.getY();
 				dragging = true;
 			}
-		}
-
-		@Override
-		public void nativeMouseReleased(NativeMouseEvent me) {
-			if(dragging) {
-				xPos2 = me.getX();
-				yPos2 = me.getY();
+			
+			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+				xPos2 = event.getX();
+				yPos2 = event.getY();
 				dragging = false;
 				build();
 			}
+			
+			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+				xPosCurr = event.getX();
+				yPosCurr = event.getY();
+				highlight(gc);
+			}
+			
 		}
-		
-	}
-
-	private class BuilderMouseDragListener implements NativeMouseMotionListener {
-
-		@Override
-		public void nativeMouseDragged(NativeMouseEvent me) {
-			xPosCurr = me.getX();
-			yPosCurr = me.getY();
-			highlight(gc);
-		}
-
-		@Override
-		public void nativeMouseMoved(NativeMouseEvent me) {}
 		
 	}
 	
-	private class BuilderKeyListener implements NativeKeyListener {
+	private class BuilderKeyHandler implements javafx.event.EventHandler<KeyEvent>
+	{
 
 		@Override
-		public void nativeKeyPressed(NativeKeyEvent ke) {
-			if(ke.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
+		public void handle(KeyEvent event) {
+			if(event.getCode() == KeyCode.ESCAPE) {
 				close();
 			}
 		}
-
-		@Override
-		public void nativeKeyReleased(NativeKeyEvent ke) {}
-
-		@Override
-		public void nativeKeyTyped(NativeKeyEvent ke) {}
 		
 	}
 	
-	
 	private void build() {
-		int x;
-		int y;
-		int w;
-		int h;
+		double x, y, w, h;
 		
-		x = Integer.min(xPos1, xPos2);
-		y = Integer.min(yPos1, yPos2);
+		x = Double.min(xPos1, xPos2);
+		y = Double.min(yPos1, yPos2);
 		
-		w = Integer.max(xPos1, xPos2) - x;
-		h = Integer.max(yPos1, yPos2) - y;
+		w = Double.max(xPos1, xPos2) - x;
+		h = Double.max(yPos1, yPos2) - y;
 		
 		if(w >= 50 && h >= 50) {
 			String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
-			AnnotationTool.main(windowSize);
-			GlobalScreen.removeNativeKeyListener(kListener);
-			GlobalScreen.removeNativeMouseMotionListener(dragListener);
-			GlobalScreen.removeNativeMouseListener(mListener);
-			Platform.runLater(new Runnable() {
-			    @Override
-			    public void run() {
-			        stage.close();
-			    }
-			});
+			
+			Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
+			newStage.setWidth(w);			newSecondaryStage.setWidth(w);
+			newStage.setHeight(h);			newSecondaryStage.setHeight(h);
+			
+			AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
+
+		} else if (w < 50 && h < 50) {
+			AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
 		}
+		
+		Platform.runLater(new Runnable() {
+		    @Override
+		    public void run() {
+		        stage.close();
+		    }
+		});
 	}
 	
 	private void close() {

@@ -1,4 +1,4 @@
-package annotationtool;
+/*package annotationtool;
 
 import java.awt.AWTEvent;
 import java.awt.AlphaComposite;
@@ -190,3 +190,4 @@ public class AnnotationToolBuilder extends JFrame {
 		System.exit(0);
 	}
 }
+*/
