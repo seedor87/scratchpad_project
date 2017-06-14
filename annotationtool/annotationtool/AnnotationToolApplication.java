@@ -411,6 +411,9 @@ public class AnnotationToolApplication extends Application {
         setupListeners();
 
         controllerBox = new FXControllerBox(this);
+
+        new IconControllerBox(this);
+
         boxWidth = controllerBox.getWidth();
 
         setUpMoveListeners(stage2);
