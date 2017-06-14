@@ -158,12 +158,12 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void run()
             {
-                commitShape(eraseShape);
+                commitChange(eraseShape);
             }
         });
         redoStack.clear();
     }
-    private void commitShape(ChangeItem changeItem)
+    private void commitChange(ChangeItem changeItem)
     {
         changeItem.addChangeToStage(this);
         undoStack.push(changeItem);
@@ -491,7 +491,7 @@ public class AnnotationToolApplication extends Application {
                 circle = new Circle(event.getSceneX(), event.getSceneY() ,10, Color.TRANSPARENT);
                 circle.setStroke(paint);
                 circle.setStrokeWidth(strokeWidth);
-                commitShape(new AddShape(circle));
+                commitChange(new AddShape(circle));
 
             }
             else if (circle != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED)
@@ -507,7 +507,7 @@ public class AnnotationToolApplication extends Application {
                 Shape newCircle = Shape.subtract(circle, new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius() - (strokeWidth/2)));
                 newCircle.setFill(paint);
                 AddShape addShape = new AddShape(newCircle);
-                commitShape(addShape);
+                commitChange(addShape);
 
                 redoStack.clear();
                 circle = null;
@@ -660,7 +660,7 @@ public class AnnotationToolApplication extends Application {
             {
                 root.getChildren().remove(eraserPath);
                 changeItem.EraseShape eraseShape = new changeItem.EraseShape(eraserPath);
-                commitShape(eraseShape);
+                commitChange(eraseShape);
                 eraseShape = null;
                 redoStack.clear();
             }
@@ -705,7 +705,7 @@ public class AnnotationToolApplication extends Application {
                     //path.setSmooth(true);
                     //MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                     //path.getElements().add(moveTo);
-                    commitShape(new AddShape(line));
+                    commitChange(new AddShape(line));
                     //root.getChildren().add(path);
                 }
                 else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -773,7 +773,7 @@ public class AnnotationToolApplication extends Application {
             Shape newShape = Shape.union(triangle, line);
             newShape.setFill(line.getStroke());
             undo();
-            commitShape(new AddShape(newShape));
+            commitChange(new AddShape(newShape));
         }
 
     }
