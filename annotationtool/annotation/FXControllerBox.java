@@ -1,4 +1,4 @@
-package annotationtool;
+package annotation;
 
 import java.awt.*;
 import java.awt.Color;

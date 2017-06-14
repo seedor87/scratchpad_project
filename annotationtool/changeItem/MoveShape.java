@@ -1,6 +1,6 @@
 package changeItem;
 
-import annotationtool.AnnotationToolApplication;
+import annotation.AnnotationToolApplication;
 import javafx.stage.Stage;
 
 /**

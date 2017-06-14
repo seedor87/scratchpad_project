@@ -1,4 +1,4 @@
-package annotationtool;
+package annotation;
 
 import com.sun.javafx.font.freetype.HBGlyphLayout;
 import javafx.event.ActionEvent;

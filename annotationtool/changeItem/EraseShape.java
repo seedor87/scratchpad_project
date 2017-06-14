@@ -1,6 +1,6 @@
 package changeItem;
 
-import annotationtool.AnnotationToolApplication;
+import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;

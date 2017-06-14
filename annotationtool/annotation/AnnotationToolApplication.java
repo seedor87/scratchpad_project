@@ -1,4 +1,4 @@
-package annotationtool;
+package annotation;
 /**
  * Created by remem on 5/30/2017.
  */
