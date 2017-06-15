@@ -969,29 +969,3 @@ public class AnnotationToolApplication extends Application {
         });
     }
 }
-//TODO list
-/*
- * Add in more shapes
- * Make controller box dynamically resize as needed             sort of done
- * Make save image work in linux.
- * Click text to select it and edit it
- * Click nodes to move them.
- * Click nodes to erase them.
- *
- * Resizable stage?
- * moveable stage?
- * Snipping tool?
- *
- */
-
-/**Priority stuff
- * Make sure it works on linux.
- *      Then do pull request.
- * Make sure save image works on linux.
- *
- * Less Priority
- *
- * moving/deleting shapes
- *
- * do similar paint fix that I did with circles to lines.
- */

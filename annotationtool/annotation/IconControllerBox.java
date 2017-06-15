@@ -11,6 +11,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -22,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
@@ -43,6 +45,17 @@ public class IconControllerBox extends Stage
     private Scene scene;
     private static final int IMAGE_WIDTH = 25;
     private static final int IMAGE_HEIGHT = 25;
+
+    private static final double SMALL_BUTTON_SIZE = 25;
+    private static final double MEDIUM_BUTTON_SIZE = 35;
+    private static final double LARGE_BUTTON_SIZE = 45;
+    private double buttonSize = MEDIUM_BUTTON_SIZE;
+    private static final int LEFT_LOCATION = 0;
+    private static final int TOP_LOCATION = 1;
+    private static final int RIGHT_LOCATION = 2;
+    private int location = RIGHT_LOCATION;
+
+
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
     public IconControllerBox(AnnotationToolApplication at)
@@ -175,9 +188,7 @@ public class IconControllerBox extends Stage
         nodes.add(eraseButton);
 
         Button sizePickerButton = new Button();
-        sizePickerButton.setMinWidth(41);
         Text numberText = new Text("5");
-        numberText.setFont(new Font(IMAGE_HEIGHT -6.5));
         sizePickerButton.setGraphic(numberText);
         sizePickerButton.setTooltip(new Tooltip("Pick a size"));
         sizePickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
@@ -311,6 +322,97 @@ public class IconControllerBox extends Stage
         });
         nodes.add(redoButton);
 
+        Button changeButtonSizeButton = new Button();
+        ImageView changeButtonSizeImage = new ImageView("changeButtonSizeImage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
+        changeButtonSizeImage.setFitHeight(IMAGE_HEIGHT);
+        changeButtonSizeImage.setFitWidth(IMAGE_WIDTH);
+        changeButtonSizeButton.setGraphic(changeButtonSizeImage);
+        changeButtonSizeButton.setTooltip(new Tooltip("Change Button Size"));
+        changeButtonSizeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            double changeSize;
+            @Override
+            public void handle(MouseEvent event)
+            {
+                changeSize = buttonSize;
+                Dialog<Double> dialog = new Dialog<>();
+                dialog.setTitle("Select Button Size");
+                dialog.initStyle(StageStyle.UTILITY);
+
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(20, 150, 10, 10));
+
+                Button
+                        button1 = new Button(),
+                        button2 = new Button(),
+                        button3 = new Button();
+                button1.setMaxSize(SMALL_BUTTON_SIZE,SMALL_BUTTON_SIZE);
+                button1.setMinSize(SMALL_BUTTON_SIZE,SMALL_BUTTON_SIZE);
+                button1.setText("Small");
+                button1.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        changeSize = SMALL_BUTTON_SIZE;
+                    }
+                });
+
+                button2.setMaxSize(MEDIUM_BUTTON_SIZE,MEDIUM_BUTTON_SIZE);
+                button2.setMinSize(MEDIUM_BUTTON_SIZE,MEDIUM_BUTTON_SIZE);
+                button2.setText("Medium");
+                button2.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        changeSize = MEDIUM_BUTTON_SIZE;
+                    }
+                });
+
+                button3.setMaxSize(LARGE_BUTTON_SIZE,LARGE_BUTTON_SIZE);
+                button3.setMinSize(LARGE_BUTTON_SIZE,LARGE_BUTTON_SIZE);
+                button3.setText("Large");
+                button3.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        changeSize = LARGE_BUTTON_SIZE;
+                    }
+                });
+
+                grid.add(button1,0,0);
+                grid.add(button2, 1,0);
+                grid.add(button3, 2,0);
+
+                dialog.getDialogPane().setContent(grid);
+
+                ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+                ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+
+                dialog.showAndWait();
+
+                dialog.setResultConverter( buttonType ->
+                {
+                    if(buttonType == okButton)
+                    {
+                        return changeSize;
+                    }
+                    else
+                    {
+                        return buttonSize;
+                    }
+                });
+
+                Optional<Double> result = dialog.showAndWait();
+
+                setIconSizes(result.get());
+                resetLocation();
+
+                //TODO Handle this
+            }
+        });
+        nodes.add(changeButtonSizeButton);
+
+
         Button snapToLeftButton = new Button();
         ImageView snapToLeftImage = new ImageView("snapLeftImage.png");
         snapToLeftImage.setFitHeight(IMAGE_HEIGHT);
@@ -367,6 +469,7 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.toggleClickable();
+                setAlwaysOnTop(true);
             }
         });
         nodes.add(toggleClickableButton);
@@ -441,11 +544,26 @@ public class IconControllerBox extends Stage
         });
         nodes.add(clearHistoryButton);
 
-        setIconSizes(42);
+        setIconSizes(MEDIUM_BUTTON_SIZE);
 
         this.show();
-        this.snapBoxToTop();
+        this.snapToRight();
         this.setAlwaysOnTop(true);
+    }
+    private void resetLocation()
+    {
+        if(location == LEFT_LOCATION)
+        {
+            snapToLeft();
+        }
+        else if(location == TOP_LOCATION)
+        {
+            snapBoxToTop();
+        }
+        else if(location == RIGHT_LOCATION)
+        {
+            snapToRight();
+        }
     }
 
     private void setIconSizes(double size)
@@ -454,6 +572,21 @@ public class IconControllerBox extends Stage
         {
             n.setMinSize(size, size);
             n.setMaxSize(size, size);
+
+            Node graphicsContext = n.getGraphic();
+            if(graphicsContext instanceof ImageView)
+            {
+                ((ImageView) graphicsContext).setFitWidth(size-5);
+                ((ImageView) graphicsContext).setFitHeight(size-5);
+            }
+            else if(graphicsContext instanceof Text)
+            {
+                ((Text)graphicsContext).setFont(new Font(size-15));
+            }
+            else if(graphicsContext instanceof Circle)
+            {
+                ((Circle)graphicsContext).setRadius((size-10)/2);
+            }
         }
     }
 
@@ -462,6 +595,7 @@ public class IconControllerBox extends Stage
      */
     private void snapBoxToTop()
     {
+        location = TOP_LOCATION;
 
         root.getChildren().remove(trunk);
 
@@ -492,6 +626,7 @@ public class IconControllerBox extends Stage
     }
     private void snapToLeft()
     {
+        location = LEFT_LOCATION;
         root.getChildren().remove(trunk);
 
         trunk = new VBox();
@@ -518,6 +653,7 @@ public class IconControllerBox extends Stage
     }
     private void snapToRight()
     {
+        location = RIGHT_LOCATION;
         root.getChildren().remove(trunk);
 
         trunk = new VBox();
