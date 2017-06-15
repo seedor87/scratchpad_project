@@ -947,6 +947,16 @@ public class AnnotationToolApplication extends Application {
         });
     }
 
+    public Stage getDrawingStage()
+    {
+        return this.stage2;
+    }
+
+    public Double getStrokeWidth()
+    {
+        return  strokeWidth;
+    }
+
     public void toBack()
     {
         Platform.runLater(new Runnable() {
