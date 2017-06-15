@@ -186,6 +186,7 @@ public class IconControllerBox extends Stage
             {
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Brush and Text Size");
+                dialog.initStyle(StageStyle.UTILITY);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
