@@ -281,6 +281,36 @@ public class IconControllerBox extends Stage
         });
         nodes.add(colorPickerButton);
 
+        Button undoButton = new Button();
+        ImageView undoImage = new ImageView("undoImage.png");
+        undoImage.setFitHeight(IMAGE_HEIGHT);
+        undoImage.setFitWidth(IMAGE_WIDTH);
+        undoButton.setGraphic(undoImage);
+        undoButton.setTooltip(new Tooltip("Undo"));
+        undoButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.undo();
+            }
+        });
+        nodes.add(undoButton);
+
+        Button redoButton = new Button();
+        ImageView redoImage = new ImageView("redoImage.png");
+        redoImage.setFitHeight(IMAGE_HEIGHT);
+        redoImage.setFitWidth(IMAGE_WIDTH);
+        redoButton.setGraphic(redoImage);
+        redoButton.setTooltip(new Tooltip("Redo"));
+        redoButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.redo();
+            }
+        });
+        nodes.add(redoButton);
+
         Button snapToLeftButton = new Button();
         ImageView snapToLeftImage = new ImageView("snapLeftImage.png");
         snapToLeftImage.setFitHeight(IMAGE_HEIGHT);
@@ -311,8 +341,105 @@ public class IconControllerBox extends Stage
         });
         nodes.add(snapToRightButton);
 
+        Button snapToTopButton = new Button();
+        ImageView snapToTopImage = new ImageView("snapTopImage.png");
+        snapToTopImage.setFitHeight(IMAGE_HEIGHT);
+        snapToTopImage.setFitWidth(IMAGE_WIDTH);
+        snapToTopButton.setGraphic(snapToTopImage);
+        snapToTopButton.setTooltip(new Tooltip("Snap to Top"));
+        snapToTopButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                snapBoxToTop();
+            }
+        });
+        nodes.add(snapToTopButton);
 
+        Button toggleClickableButton = new Button();
+        ImageView toggleClickableImage = new ImageView("hand.png");
+        toggleClickableImage.setFitHeight(IMAGE_HEIGHT);
+        toggleClickableImage.setFitWidth(IMAGE_WIDTH);
+        toggleClickableButton.setGraphic(toggleClickableImage);
+        toggleClickableButton.setTooltip(new Tooltip("Toggle Clickable"));
+        toggleClickableButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.toggleClickable();
+            }
+        });
+        nodes.add(toggleClickableButton);
 
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
+         * edited*
+         */
+        Button sendToBackButton = new Button();
+        ImageView sendToBackImage = new ImageView("sendToBack.png");
+        sendToBackImage.setFitHeight(IMAGE_HEIGHT);
+        sendToBackImage.setFitWidth(IMAGE_WIDTH);
+        sendToBackButton.setGraphic(sendToBackImage);
+        sendToBackButton.setTooltip(new Tooltip("Send To Back"));
+        sendToBackButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.toBack();
+            }
+        });
+        nodes.add(sendToBackButton);
+
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
+         */
+        Button bringToFrontButton = new Button();
+        ImageView bringToFrontImage = new ImageView("bringToFront.png");
+        bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
+        bringToFrontImage.setFitWidth(IMAGE_WIDTH);
+        bringToFrontButton.setGraphic(bringToFrontImage);
+        bringToFrontButton.setTooltip(new Tooltip("Bring to Front"));
+        bringToFrontButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.toFront();
+            }
+        });
+        nodes.add(bringToFrontButton);
+
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Edit-clear.svg/1024px-Edit-clear.svg.png
+         */
+        Button eraseTransparentButton = new Button();
+        ImageView eraseTransparentImage = new ImageView("EraseTransparent.png");
+        eraseTransparentImage.setFitHeight(IMAGE_HEIGHT);
+        eraseTransparentImage.setFitWidth(IMAGE_WIDTH);
+        eraseTransparentButton.setGraphic(eraseTransparentImage);
+        eraseTransparentButton.setTooltip(new Tooltip("Erase Transparent"));
+        eraseTransparentButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.doClear();
+            }
+        });
+        nodes.add(eraseTransparentButton);
+
+        Button clearHistoryButton = new Button();
+        ImageView clearHistoryImage = new ImageView("clearHistory.png");
+        clearHistoryImage.setFitHeight(IMAGE_HEIGHT);
+        clearHistoryImage.setFitWidth(IMAGE_WIDTH);
+        clearHistoryButton.setGraphic(clearHistoryImage);
+        clearHistoryButton.setTooltip(new Tooltip("Clear History"));
+        clearHistoryButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.clearHistory();
+            }
+        });
+        nodes.add(clearHistoryButton);
 
         this.show();
         this.snapBoxToTop();
@@ -342,6 +469,7 @@ public class IconControllerBox extends Stage
         Stage drawingStage = at.getDrawingStage();
         if(drawingStage.isFullScreen() || drawingStage.isMaximized())
         {
+            this.setX(at.getDrawingStage().getX());
             centerOnScreen();
             this.setY(0);
         }

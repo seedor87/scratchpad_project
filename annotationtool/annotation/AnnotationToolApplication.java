@@ -58,7 +58,7 @@ public class AnnotationToolApplication extends Application {
         //https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically
         //TODO that link might help with getting images in ubuntu.
     }
-    private FXControllerBox controllerBox;
+    private IconControllerBox controllerBox;
 
     private class HandlerGroup
     {
@@ -94,7 +94,7 @@ public class AnnotationToolApplication extends Application {
     private javafx.scene.paint.Paint paint = Color.BLACK;
     private Stroke stroke;
     private boolean mouseTransparent = false;
-    private double strokeWidth;
+    private double strokeWidth = 5d;
     private boolean clickable = true;
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
@@ -102,7 +102,7 @@ public class AnnotationToolApplication extends Application {
     private ArrowHandler arrowHandler = new ArrowHandler();
     private Text text;
     private Color textColor = Color.BLACK;
-    private double textSize = 100d;
+    private double textSize = 5d;
     private TextBoxHandler textBoxHandler = new TextBoxHandler();
     private StringBuffer textBoxText = new StringBuffer(64);
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
@@ -410,11 +410,9 @@ public class AnnotationToolApplication extends Application {
 
         setupListeners();
 
-        controllerBox = new FXControllerBox(this);
+        controllerBox = new IconControllerBox(this);
 
-        new IconControllerBox(this);
-
-        boxWidth = controllerBox.getWidth();
+        //boxWidth = ((int) controllerBox.getWidth());
 
         setUpMoveListeners(stage2);
 
@@ -431,7 +429,9 @@ public class AnnotationToolApplication extends Application {
     {
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
+/*
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
+*/
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
@@ -672,7 +672,7 @@ public class AnnotationToolApplication extends Application {
     /**
      * Hides the box when not being used.
      */
-    private class BoxHidingHandler implements EventHandler<MouseEvent>
+/*    private class BoxHidingHandler implements EventHandler<MouseEvent>
     {
 
         @Override
@@ -687,7 +687,7 @@ public class AnnotationToolApplication extends Application {
                 controllerBox.pack();
             }
         }
-    }
+    }*/
     /**
      * Creates arrows. should be implemented with MouseEvent.ANY.
      */

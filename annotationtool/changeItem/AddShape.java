@@ -36,6 +36,7 @@ public class AddShape implements ChangeItem
                 }
                 catch (java.lang.IllegalArgumentException iae)
                 {
+                    annotationToolApplication.paintFromUndoStack();
                     //Tried to add a duplicate node.
                     //TODO find the reason why I need this try catch.
                     //                commitShape(new AddShape(newCircle)); is one place where it would be thrown.
