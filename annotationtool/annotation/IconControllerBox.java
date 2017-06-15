@@ -44,7 +44,7 @@ public class IconControllerBox extends Stage
     private static final int IMAGE_WIDTH = 25;
     private static final int IMAGE_HEIGHT = 25;
     private AnnotationToolApplication at;
-    private LinkedList<Node> nodes = new LinkedList<>();
+    private LinkedList<Button> nodes = new LinkedList<>();
     public IconControllerBox(AnnotationToolApplication at)
     {
         this.setTitle("Tools");
@@ -441,9 +441,20 @@ public class IconControllerBox extends Stage
         });
         nodes.add(clearHistoryButton);
 
+        setIconSizes(42);
+
         this.show();
         this.snapBoxToTop();
         this.setAlwaysOnTop(true);
+    }
+
+    private void setIconSizes(double size)
+    {
+        for(Button n : this.nodes)
+        {
+            n.setMinSize(size, size);
+            n.setMaxSize(size, size);
+        }
     }
 
     /**
