@@ -54,6 +54,8 @@ public class IconControllerBox extends Stage
     private static final int TOP_LOCATION = 1;
     private static final int RIGHT_LOCATION = 2;
     private int location = RIGHT_LOCATION;
+    private static final int TOOLTIP_FONT_SIZE = 20;
+    private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
 
 
     private AnnotationToolApplication at;
@@ -73,7 +75,7 @@ public class IconControllerBox extends Stage
         exitImage.setFitHeight(IMAGE_HEIGHT);
         exitImage.setFitWidth(IMAGE_WIDTH);
         exitButton.setGraphic(exitImage);
-        exitButton.setTooltip(new Tooltip("Close Application"));
+        exitButton.setTooltip(getToolTip("Close Application"));
         exitButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -103,7 +105,7 @@ public class IconControllerBox extends Stage
         saveImage.setFitHeight(IMAGE_HEIGHT);
         saveImage.setFitWidth(IMAGE_WIDTH);
         saveImageButton.setGraphic(saveImage);
-        saveImageButton.setTooltip(new Tooltip("Save Image"));
+        saveImageButton.setTooltip(getToolTip("Save Image"));
         saveImageButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -118,7 +120,7 @@ public class IconControllerBox extends Stage
         arrowImage.setFitHeight(IMAGE_HEIGHT);
         arrowImage.setFitWidth(IMAGE_WIDTH);
         arrowButton.setGraphic(arrowImage);
-        arrowButton.setTooltip(new Tooltip("Draw Arrows"));
+        arrowButton.setTooltip(getToolTip("Draw Arrows"));
         arrowButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -133,7 +135,7 @@ public class IconControllerBox extends Stage
         circle.setStrokeWidth(2);
         circle.setStroke(Color.BLACK);
         circleButton.setGraphic(circle);
-        circleButton.setTooltip(new Tooltip("Make Circles"));
+        circleButton.setTooltip(getToolTip("Make Circles"));
         circleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -147,7 +149,7 @@ public class IconControllerBox extends Stage
         drawImage.setFitHeight(IMAGE_HEIGHT);
         drawImage.setFitWidth(IMAGE_WIDTH);
         drawButton.setGraphic(drawImage);
-        drawButton.setTooltip(new Tooltip("Draw"));
+        drawButton.setTooltip(getToolTip("Draw"));
         drawButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -162,7 +164,7 @@ public class IconControllerBox extends Stage
         textImage.setFitHeight(IMAGE_HEIGHT);
         textImage.setFitWidth(IMAGE_WIDTH);
         textButton.setGraphic(textImage);
-        textButton.setTooltip(new Tooltip("Add Text"));
+        textButton.setTooltip(getToolTip("Add Text"));
         textButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -177,7 +179,7 @@ public class IconControllerBox extends Stage
         eraseImage.setFitHeight(IMAGE_HEIGHT);
         eraseImage.setFitWidth(IMAGE_WIDTH);
         eraseButton.setGraphic(eraseImage);
-        eraseButton.setTooltip(new Tooltip("Erase"));
+        eraseButton.setTooltip(getToolTip("Erase"));
         eraseButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -190,7 +192,7 @@ public class IconControllerBox extends Stage
         Button sizePickerButton = new Button();
         Text numberText = new Text("5");
         sizePickerButton.setGraphic(numberText);
-        sizePickerButton.setTooltip(new Tooltip("Pick a size"));
+        sizePickerButton.setTooltip(getToolTip("Pick a size"));
         sizePickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -282,7 +284,7 @@ public class IconControllerBox extends Stage
         });
         colorPicker.setMaxWidth(25);
         colorPickerButton.setGraphic(colorPicker);
-        colorPickerButton.setTooltip(new Tooltip("Pick a color"));
+        colorPickerButton.setTooltip(getToolTip("Pick a color"));
         colorPickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -297,7 +299,7 @@ public class IconControllerBox extends Stage
         undoImage.setFitHeight(IMAGE_HEIGHT);
         undoImage.setFitWidth(IMAGE_WIDTH);
         undoButton.setGraphic(undoImage);
-        undoButton.setTooltip(new Tooltip("Undo"));
+        undoButton.setTooltip(getToolTip("Undo"));
         undoButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -312,7 +314,7 @@ public class IconControllerBox extends Stage
         redoImage.setFitHeight(IMAGE_HEIGHT);
         redoImage.setFitWidth(IMAGE_WIDTH);
         redoButton.setGraphic(redoImage);
-        redoButton.setTooltip(new Tooltip("Redo"));
+        redoButton.setTooltip(getToolTip("Redo"));
         redoButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -327,7 +329,7 @@ public class IconControllerBox extends Stage
         changeButtonSizeImage.setFitHeight(IMAGE_HEIGHT);
         changeButtonSizeImage.setFitWidth(IMAGE_WIDTH);
         changeButtonSizeButton.setGraphic(changeButtonSizeImage);
-        changeButtonSizeButton.setTooltip(new Tooltip("Change Button Size"));
+        changeButtonSizeButton.setTooltip(getToolTip("Change Button Size"));
         changeButtonSizeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             double changeSize;
             @Override
@@ -349,7 +351,7 @@ public class IconControllerBox extends Stage
                         button3 = new Button();
                 button1.setMaxSize(SMALL_BUTTON_SIZE,SMALL_BUTTON_SIZE);
                 button1.setMinSize(SMALL_BUTTON_SIZE,SMALL_BUTTON_SIZE);
-                button1.setText("Small");
+                button1.setTooltip(getToolTip("Small"));
                 button1.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
@@ -359,7 +361,7 @@ public class IconControllerBox extends Stage
 
                 button2.setMaxSize(MEDIUM_BUTTON_SIZE,MEDIUM_BUTTON_SIZE);
                 button2.setMinSize(MEDIUM_BUTTON_SIZE,MEDIUM_BUTTON_SIZE);
-                button2.setText("Medium");
+                button2.setTooltip(getToolTip("Medium"));
                 button2.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
@@ -369,7 +371,7 @@ public class IconControllerBox extends Stage
 
                 button3.setMaxSize(LARGE_BUTTON_SIZE,LARGE_BUTTON_SIZE);
                 button3.setMinSize(LARGE_BUTTON_SIZE,LARGE_BUTTON_SIZE);
-                button3.setText("Large");
+                button3.setTooltip(getToolTip("Large"));
                 button3.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
@@ -387,7 +389,7 @@ public class IconControllerBox extends Stage
                 ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
                 dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
-                
+
                 dialog.setResultConverter( buttonType ->
                 {
                     if(buttonType == okButton)
@@ -416,7 +418,7 @@ public class IconControllerBox extends Stage
         snapToLeftImage.setFitHeight(IMAGE_HEIGHT);
         snapToLeftImage.setFitWidth(IMAGE_WIDTH);
         snapToLeftButton.setGraphic(snapToLeftImage);
-        snapToLeftButton.setTooltip(new Tooltip("Snap to left"));
+        snapToLeftButton.setTooltip(getToolTip("Snap to left"));
         snapToLeftButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -431,7 +433,7 @@ public class IconControllerBox extends Stage
         snapToRightImage.setFitHeight(IMAGE_HEIGHT);
         snapToRightImage.setFitWidth(IMAGE_WIDTH);
         snapToRightButton.setGraphic(snapToRightImage);
-        snapToRightButton.setTooltip(new Tooltip("Snap to Right"));
+        snapToRightButton.setTooltip(getToolTip("Snap to Right"));
         snapToRightButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -446,7 +448,7 @@ public class IconControllerBox extends Stage
         snapToTopImage.setFitHeight(IMAGE_HEIGHT);
         snapToTopImage.setFitWidth(IMAGE_WIDTH);
         snapToTopButton.setGraphic(snapToTopImage);
-        snapToTopButton.setTooltip(new Tooltip("Snap to Top"));
+        snapToTopButton.setTooltip(getToolTip("Snap to Top"));
         snapToTopButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -461,7 +463,7 @@ public class IconControllerBox extends Stage
         toggleClickableImage.setFitHeight(IMAGE_HEIGHT);
         toggleClickableImage.setFitWidth(IMAGE_WIDTH);
         toggleClickableButton.setGraphic(toggleClickableImage);
-        toggleClickableButton.setTooltip(new Tooltip("Toggle Clickable"));
+        toggleClickableButton.setTooltip(getToolTip("Toggle Clickable"));
         toggleClickableButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -481,7 +483,7 @@ public class IconControllerBox extends Stage
         sendToBackImage.setFitHeight(IMAGE_HEIGHT);
         sendToBackImage.setFitWidth(IMAGE_WIDTH);
         sendToBackButton.setGraphic(sendToBackImage);
-        sendToBackButton.setTooltip(new Tooltip("Send To Back"));
+        sendToBackButton.setTooltip(getToolTip("Send To Back"));
         sendToBackButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -499,7 +501,7 @@ public class IconControllerBox extends Stage
         bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
         bringToFrontImage.setFitWidth(IMAGE_WIDTH);
         bringToFrontButton.setGraphic(bringToFrontImage);
-        bringToFrontButton.setTooltip(new Tooltip("Bring to Front"));
+        bringToFrontButton.setTooltip(getToolTip("Bring to Front"));
         bringToFrontButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -517,7 +519,7 @@ public class IconControllerBox extends Stage
         eraseTransparentImage.setFitHeight(IMAGE_HEIGHT);
         eraseTransparentImage.setFitWidth(IMAGE_WIDTH);
         eraseTransparentButton.setGraphic(eraseTransparentImage);
-        eraseTransparentButton.setTooltip(new Tooltip("Erase Transparent"));
+        eraseTransparentButton.setTooltip(getToolTip("Erase Transparent"));
         eraseTransparentButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -532,7 +534,7 @@ public class IconControllerBox extends Stage
         clearHistoryImage.setFitHeight(IMAGE_HEIGHT);
         clearHistoryImage.setFitWidth(IMAGE_WIDTH);
         clearHistoryButton.setGraphic(clearHistoryImage);
-        clearHistoryButton.setTooltip(new Tooltip("Clear History"));
+        clearHistoryButton.setTooltip(getToolTip("Clear History"));
         clearHistoryButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -677,7 +679,13 @@ public class IconControllerBox extends Stage
             this.setY(drawingStage.yProperty().get() + drawingStage.getHeight() / 2 - this.getHeight() /2);
             this.setX(drawingStage.xProperty().get() + drawingStage.getWidth() - this.getWidth());
         }
-
+    }
+    private Tooltip getToolTip(String toolTipString)
+    {
+        Tooltip tooltip = new Tooltip();
+        tooltip.setFont(TOOLTIP_FONT);
+        tooltip.setText(toolTipString);
+        return tooltip;
     }
 }
 
