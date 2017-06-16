@@ -387,9 +387,7 @@ public class IconControllerBox extends Stage
                 ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
                 dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
-
-                dialog.showAndWait();
-
+                
                 dialog.setResultConverter( buttonType ->
                 {
                     if(buttonType == okButton)
