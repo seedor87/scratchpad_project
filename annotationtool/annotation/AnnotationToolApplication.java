@@ -82,7 +82,7 @@ public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private Stage mouseCatchingStage;
-    private Stage stage2;
+    private Stage pictureStage;
     private Scene mouseCatchingScene;
     private Scene drawingScene;
     private VBox box;
@@ -284,7 +284,7 @@ public class AnnotationToolApplication extends Application {
                 @Override
                 public void run()
                 {
-                	stage2.setAlwaysOnTop(false);
+                    pictureStage.setAlwaysOnTop(false);
                 	mouseCatchingStage.setAlwaysOnTop(false);
                     mouseCatchingStage.setOpacity(0.004);
                 }
@@ -299,10 +299,11 @@ public class AnnotationToolApplication extends Application {
                       @Override
                     public void run()
                     {
-                    	  stage2.setAlwaysOnTop(true);
+                          pictureStage.setAlwaysOnTop(true);
                     	  mouseCatchingStage.setAlwaysOnTop(true);
                     	  mouseCatchingStage.setOpacity(0.0);
-                        
+                    	  controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
+                    	  controllerBox.setAlwaysOnTop(true);
                     }
                 });
             }
@@ -394,16 +395,16 @@ public class AnnotationToolApplication extends Application {
         root.getChildren().add(bg);
         notRoot.getChildren().add(bg);
 
-        stage2 = secondaryStage;
-        stage2.initStyle(StageStyle.TRANSPARENT);
-        stage2.setScene(drawingScene);
+        pictureStage = secondaryStage;
+        pictureStage.initStyle(StageStyle.TRANSPARENT);
+        pictureStage.setScene(drawingScene);
         if(!sizedWindow) {
-        	stage2.setMaximized(true);
-        	//stage2.setFullScreen(true);
+            pictureStage.setMaximized(true);
+        	//pictureStage.setFullScreen(true);
         }
         else {
-        	stage2.setX(x);
-        	stage2.setY(y);
+            pictureStage.setX(x);
+            pictureStage.setY(y);
         }
 
         mouseCatchingStage.setScene(mouseCatchingScene);
@@ -414,10 +415,10 @@ public class AnnotationToolApplication extends Application {
 
         //boxWidth = ((int) controllerBox.getWidth());
 
-        setUpMoveListeners(stage2);
+        setUpMoveListeners(pictureStage);
 
         mouseCatchingStage.show();
-        stage2.show();
+        pictureStage.show();
     }
 
     /**
@@ -863,7 +864,7 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void run() {
                 mouseCatchingStage.toFront();
-                stage2.toFront();
+                pictureStage.toFront();
             	mouseCatchingStage.setIconified(false);
             }
         });
@@ -949,7 +950,7 @@ public class AnnotationToolApplication extends Application {
 
     public Stage getDrawingStage()
     {
-        return this.stage2;
+        return this.pictureStage;
     }
 
     public Double getStrokeWidth()
@@ -963,7 +964,7 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void run() {
 //                mouseCatchingStage.toBack();
-//                stage2.toBack();
+//                pictureStage.toBack();
             	mouseCatchingStage.setIconified(true);
             }
         });
