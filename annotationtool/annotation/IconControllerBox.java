@@ -15,10 +15,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -507,6 +504,10 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.toFront();
+                IconControllerBox.this.setAlwaysOnTop(false);
+                IconControllerBox.this.setAlwaysOnTop(true);
+                IconControllerBox.this.toFront();
+
             }
         });
         nodes.add(bringToFrontButton);
@@ -570,6 +571,7 @@ public class IconControllerBox extends Stage
     {
         for(Button n : this.nodes)
         {
+            //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
             n.setMinSize(size, size);
             n.setMaxSize(size, size);
 
@@ -595,6 +597,7 @@ public class IconControllerBox extends Stage
      */
     private void snapBoxToTop()
     {
+
         location = TOP_LOCATION;
 
         root.getChildren().remove(trunk);

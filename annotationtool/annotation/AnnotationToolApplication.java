@@ -99,6 +99,7 @@ public class AnnotationToolApplication extends Application {
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
     private DrawingHandler drawingHandler = new DrawingHandler();
+    private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler();
     private Text text;
     private Color textColor = Color.BLACK;
@@ -304,12 +305,11 @@ public class AnnotationToolApplication extends Application {
                     	  mouseCatchingStage.setOpacity(0.0);
                     	  controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
                     	  controllerBox.setAlwaysOnTop(true);
+
                     }
                 });
             }
     }
-
-
     public void setMakingTextBox(boolean makingTextBox) {
         if (makingTextBox)
         {
@@ -428,6 +428,7 @@ public class AnnotationToolApplication extends Application {
      */
     private void setupListeners()
     {
+        drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
 /*
@@ -480,6 +481,16 @@ public class AnnotationToolApplication extends Application {
             }
         });
 
+    }
+
+    private class PutControllerBoxOnTopHandler implements EventHandler<MouseEvent>
+    {
+        @Override
+        public void handle(MouseEvent event)
+        {
+            controllerBox.setAlwaysOnTop(false);
+            controllerBox.setAlwaysOnTop(true);
+        }
     }
 
     /**
@@ -866,6 +877,8 @@ public class AnnotationToolApplication extends Application {
                 mouseCatchingStage.toFront();
                 pictureStage.toFront();
             	mouseCatchingStage.setIconified(false);
+            	controllerBox.setAlwaysOnTop(false);
+            	controllerBox.setAlwaysOnTop(true);
             }
         });
     }
