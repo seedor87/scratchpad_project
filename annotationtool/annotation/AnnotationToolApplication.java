@@ -14,6 +14,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.*;
 import javafx.scene.Cursor;
 import javafx.scene.image.*;
@@ -31,6 +32,7 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.w3c.dom.events.*;
@@ -425,6 +427,22 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingScene.setCursor(pencilCursor);
 
+
+/*        ImageView backgroundImage = new ImageView("eraser.png");
+        if(this.pictureStage.isFullScreen() || this.pictureStage.isMaximized())
+        {
+            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+            backgroundImage.setFitWidth(primScreenBounds.getWidth());
+            backgroundImage.setFitHeight(primScreenBounds.getHeight());
+        }
+        else
+        {
+            backgroundImage.setFitHeight(getDrawingStage().getHeight());
+            backgroundImage.setFitWidth(getDrawingStage().getWidth());
+        }
+
+        root.getChildren().add(backgroundImage);*/
+
         mouseCatchingStage.show();
         pictureStage.show();
     }
@@ -437,6 +455,7 @@ public class AnnotationToolApplication extends Application {
     private void setupListeners()
     {
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
+        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
 /*
@@ -590,6 +609,7 @@ public class AnnotationToolApplication extends Application {
                 path.setStrokeWidth(strokeWidth);
                 path.setSmooth(true);
                 MoveTo moveTo = new MoveTo(event.getX(), event.getY());
+                LineTo lineTo = new LineTo(event.getX(), event.getY());
                 path.getElements().add(moveTo);
                 root.getChildren().add(path);
                 path.setStroke(paint);
@@ -971,7 +991,7 @@ public class AnnotationToolApplication extends Application {
         });
     }
 
-    public Stage getDrawingStage()
+    public Stage getPictureStage()
     {
         return this.pictureStage;
     }
@@ -979,6 +999,13 @@ public class AnnotationToolApplication extends Application {
     public Double getStrokeWidth()
     {
         return  strokeWidth;
+    }
+
+    public void resetStages()
+    {
+        pictureStage.toFront();
+        mouseCatchingStage.toFront();
+        controllerBox.toFront();
     }
 
     public void toBack()
