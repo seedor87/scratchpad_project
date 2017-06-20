@@ -14,11 +14,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
+import javafx.scene.*;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.MouseEvent;
@@ -416,6 +414,8 @@ public class AnnotationToolApplication extends Application {
         //boxWidth = ((int) controllerBox.getWidth());
 
         setUpMoveListeners(pictureStage);
+
+        mouseCatchingScene.setCursor(new ImageCursor(new Image("pencil-cursor.png")));
 
         mouseCatchingStage.show();
         pictureStage.show();
