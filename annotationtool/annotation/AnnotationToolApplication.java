@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.Event;						  
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.*;
@@ -100,6 +101,7 @@ public class AnnotationToolApplication extends Application {
     private DrawingHandler drawingHandler = new DrawingHandler();
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler();
+    private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();																	
     private Text text;
     private Color textColor = Color.BLACK;
     private double textSize = 5d;
@@ -126,6 +128,9 @@ public class AnnotationToolApplication extends Application {
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
 
     //private final double TITLE_BAR_Y_DISTANCE = 25;
+    
+    private double lastTouchX = -1;
+    private double lastTouchY = -1;								   
 
     final ClipboardOwner clipboardOwner = new ClipboardOwner() {
         @Override
@@ -314,6 +319,7 @@ public class AnnotationToolApplication extends Application {
                 });
             }
     }
+	
     public void setMakingTextBox(boolean makingTextBox) {
         if (makingTextBox)
         {
@@ -439,6 +445,7 @@ public class AnnotationToolApplication extends Application {
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
+        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);																			
 /*
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
 */
@@ -449,6 +456,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
+        eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));																			 
     }
 
     /**
@@ -490,6 +498,13 @@ public class AnnotationToolApplication extends Application {
         });
 
     }
+    
+    private void moveAnnotationWindow(double changeX, double changeY) {
+    	double stageXPos = mouseCatchingStage.getX();
+    	double stageYPos = mouseCatchingStage.getY();
+    	mouseCatchingStage.setX(stageXPos + changeX);
+		mouseCatchingStage.setY(stageYPos + changeY);
+    }	 
 
     private class PutControllerBoxOnTopHandler implements EventHandler<MouseEvent>
     {
@@ -572,6 +587,35 @@ public class AnnotationToolApplication extends Application {
                 mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             }
         }
+    }
+   
+    private class TwoTouchHandler implements EventHandler<TouchEvent> {
+
+		@Override
+		public void handle(TouchEvent event) {
+			if(event.getTouchCount() == 2) {
+				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
+					lastTouchX = event.getTouchPoint().getScreenX();
+					lastTouchY = event.getTouchPoint().getScreenY();
+				}
+				
+				if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
+					double currentTouchX = event.getTouchPoint().getScreenX();
+					double currentTouchY = event.getTouchPoint().getScreenY();
+					if(lastTouchX != -1 && lastTouchY != -1) {
+						moveAnnotationWindow(currentTouchX - lastTouchX, currentTouchY - lastTouchY);
+					}
+					lastTouchX = currentTouchX;
+					lastTouchY = currentTouchY;
+				}
+			}
+			
+			if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
+				lastTouchX = -1;
+				lastTouchY = -1;
+			}
+		}
+    	
     }
 
     /**
