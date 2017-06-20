@@ -595,6 +595,7 @@ public class AnnotationToolApplication extends Application {
 		public void handle(TouchEvent event) {
 			if(event.getTouchCount() == 2) {
 				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
+					clickable = false;
 					lastTouchX = event.getTouchPoint().getScreenX();
 					lastTouchY = event.getTouchPoint().getScreenY();
 				}
@@ -611,6 +612,7 @@ public class AnnotationToolApplication extends Application {
 			}
 			
 			if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
+				clickable = true;
 				lastTouchX = -1;
 				lastTouchY = -1;
 			}
