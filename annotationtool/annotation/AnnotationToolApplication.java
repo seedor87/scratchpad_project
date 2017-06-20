@@ -15,6 +15,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.*;
+import javafx.scene.Cursor;
 import javafx.scene.image.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
@@ -118,6 +119,11 @@ public class AnnotationToolApplication extends Application {
 
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
+
+    private Cursor pencilCursor = new ImageCursor(new Image("pencil-cursor.png"));
+    private Cursor eraserCursor = new ImageCursor(new Image("eraser-cursor.PNG"));
+    private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
+    private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
 
     //private final double TITLE_BAR_Y_DISTANCE = 25;
 
@@ -314,6 +320,7 @@ public class AnnotationToolApplication extends Application {
             this.resetHandlers();
             this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
             this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
+            mouseCatchingScene.setCursor(textCursor);
         }
         else
         {
@@ -333,6 +340,7 @@ public class AnnotationToolApplication extends Application {
         {
             this.mouseCatchingScene.removeEventHandler(h.eventType,h.handler);
         }
+        mouseCatchingScene.setCursor(pencilCursor);
     }
 
     /**
@@ -415,7 +423,7 @@ public class AnnotationToolApplication extends Application {
 
         setUpMoveListeners(pictureStage);
 
-        mouseCatchingScene.setCursor(new ImageCursor(new Image("pencil-cursor.png")));
+        mouseCatchingScene.setCursor(pencilCursor);
 
         mouseCatchingStage.show();
         pictureStage.show();
@@ -795,6 +803,7 @@ public class AnnotationToolApplication extends Application {
     public void makeLines()
     {
         this.resetHandlers();
+        this.mouseCatchingScene.setCursor(arrowCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, arrowHandler);
     }
 
@@ -852,6 +861,7 @@ public class AnnotationToolApplication extends Application {
     public void turnOnErasing()
     {
         this.resetHandlers();
+        this.mouseCatchingScene.setCursor(eraserCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, eraseHandler);
     }
 
