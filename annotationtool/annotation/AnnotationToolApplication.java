@@ -444,7 +444,7 @@ public class AnnotationToolApplication extends Application {
     {
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-        mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
+        //mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);																			
 /*
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
