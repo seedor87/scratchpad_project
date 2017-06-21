@@ -50,6 +50,7 @@ import java.lang.reflect.Field;
 import java.time.chrono.Era;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.logging.Handler;
 
 public class AnnotationToolApplication extends Application {
@@ -123,17 +124,17 @@ public class AnnotationToolApplication extends Application {
 
     private boolean makingTextBox = false;
     private int saveImageIndex = 0;
+    
 
     private Cursor pencilCursor = new ImageCursor(new Image("pencil-cursor.png"));
     private Cursor eraserCursor = new ImageCursor(new Image("eraser-cursor.PNG"));
     private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
 
+    private final double[] minStageSize = {100, 100};
+    
     //private final double TITLE_BAR_Y_DISTANCE = 25;
     
-    private double lastTouchX = -1;
-    private double lastTouchY = -1;								   
-
     final ClipboardOwner clipboardOwner = new ClipboardOwner() {
         @Override
         public void lostOwnership(java.awt.datatransfer.Clipboard clipboard, Transferable contents) {
@@ -523,7 +524,18 @@ public class AnnotationToolApplication extends Application {
     	double stageYPos = mouseCatchingStage.getY();
     	mouseCatchingStage.setX(stageXPos + changeX);
 		mouseCatchingStage.setY(stageYPos + changeY);
-    }	 
+    }
+    
+    private void resizeAnnotationWindow(double changeX, double changeY) {
+    	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    	double screenWidth = screenSize.getWidth();
+    	double screenHeight = screenSize.getHeight();
+    	double stageWidth = mouseCatchingStage.getWidth();
+    	double stageHeight = mouseCatchingStage.getHeight();
+    	
+    	mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
+    	mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
+    }
 
     private class PutControllerBoxOnTopHandler implements EventHandler<MouseEvent>
     {
@@ -609,32 +621,56 @@ public class AnnotationToolApplication extends Application {
     }
    
     private class TwoTouchHandler implements EventHandler<TouchEvent> {
+    	private double[] primaryTouchCoords = {-1d, -1d};
+    	private double[] secondaryTouchCoords = {-1d, -1d};
+    	private double[] touchDist = {0, 0};
+    	private double resizeTolerance = 6;
 
 		@Override
 		public void handle(TouchEvent event) {
 			if(event.getTouchCount() == 2) {
+				TouchPoint primaryTouch = event.getTouchPoint();
+				TouchPoint secondaryTouch = event.getTouchPoints().get(1);
+				
 				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
-					clickable = false;
-					lastTouchX = event.getTouchPoint().getScreenX();
-					lastTouchY = event.getTouchPoint().getScreenY();
+					setPoints(primaryTouch, secondaryTouch);
 				}
 				
 				if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
-					double currentTouchX = event.getTouchPoint().getScreenX();
-					double currentTouchY = event.getTouchPoint().getScreenY();
-					if(lastTouchX != -1 && lastTouchY != -1) {
-						moveAnnotationWindow(currentTouchX - lastTouchX, currentTouchY - lastTouchY);
+					if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
+						setPoints(primaryTouch, secondaryTouch);
+					} else {
+						double[] newPrimaryCoords = {primaryTouch.getScreenX(), primaryTouch.getScreenY()};
+						double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
+						double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
+						if(pythagorize(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
+							resizeAnnotationWindow(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
+						} else {
+							moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
+						}
 					}
-					lastTouchX = currentTouchX;
-					lastTouchY = currentTouchY;
 				}
 			}
 			
 			if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
 				clickable = true;
-				lastTouchX = -1;
-				lastTouchY = -1;
+				primaryTouchCoords[0] = -1;
+				primaryTouchCoords[1] = -1;
+				secondaryTouchCoords[0] = -1;
+				secondaryTouchCoords[1] = -1;
+				touchDist[0] = 0;
+				touchDist[1] = 0;
 			}
+		}
+		
+		private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
+			clickable = false;
+			primaryTouchCoords[0] = primaryTouch.getScreenX();
+			primaryTouchCoords[1] = primaryTouch.getScreenY();
+			secondaryTouchCoords[0] = secondaryTouch.getScreenX();
+			secondaryTouchCoords[1] = secondaryTouch.getScreenY();
+			touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
+			touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
 		}
     	
     }
