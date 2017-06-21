@@ -116,6 +116,10 @@ public class AnnotationToolApplication extends Application {
     private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
 
     private Circle circle;
+    private Rectangle borderShape;
+    private int borderWidth = 5;
+    private Color borderColor = Color.BLUE;
+
     private CircleHandler circleHandler = new CircleHandler();
 
     private EraseHandler eraseHandler = new EraseHandler();
@@ -402,13 +406,7 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingScene.setFill(clickablyClearPaint);
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Rectangle bg = new Rectangle(screenSize.getWidth(), screenSize.getHeight());
-        bg.setFill(clearPaint);
-        bg.setMouseTransparent(false);
-
-        root.getChildren().add(bg);
-        notRoot.getChildren().add(bg);
+        //notRoot.getChildren().add(bg);
 
         pictureStage = secondaryStage;
         pictureStage.initStyle(StageStyle.TRANSPARENT);
@@ -450,6 +448,21 @@ public class AnnotationToolApplication extends Application {
 
         root.getChildren().add(backgroundImage);*/
 
+        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+        {
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            borderShape = new Rectangle(screenSize.getWidth(), screenSize.getHeight());
+        }
+        else
+        {
+            borderShape = new Rectangle( pictureStage.getWidth(), pictureStage.getHeight());
+        }
+        borderShape.setStroke(borderColor);
+        borderShape.setStrokeWidth(borderWidth);
+        borderShape.setFill(clearPaint);
+
+        root.getChildren().add(borderShape);
+
         mouseCatchingStage.show();
         pictureStage.show();
     }
@@ -482,14 +495,15 @@ public class AnnotationToolApplication extends Application {
     /**
      * Sets up the two stages so that they move and resize with each other.
      */
-    private void setUpMoveListeners(Stage drawingStage)
+    private void setUpMoveListeners(Stage pictureStage)
     {
         mouseCatchingStage.widthProperty().addListener(new ChangeListener<Number>()
         {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
             {
-                drawingStage.setWidth(mouseCatchingStage.getWidth());
+                pictureStage.setWidth(mouseCatchingStage.getWidth());
+                borderShape.setWidth(mouseCatchingStage.getWidth());
             }
         });
 
@@ -497,7 +511,8 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
             {
-                drawingStage.setHeight(mouseCatchingStage.getHeight());
+                pictureStage.setHeight(mouseCatchingStage.getHeight());
+                borderShape.setHeight(mouseCatchingStage.getHeight());
             }
         });
 
@@ -505,7 +520,7 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
             {
-                drawingStage.setX(mouseCatchingStage.getX());
+                pictureStage.setX(mouseCatchingStage.getX());
             }
         });
 
@@ -513,7 +528,7 @@ public class AnnotationToolApplication extends Application {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
             {
-                drawingStage.setY(mouseCatchingStage.getY());
+                pictureStage.setY(mouseCatchingStage.getY());
             }
         });
 
@@ -629,7 +644,7 @@ public class AnnotationToolApplication extends Application {
 		@Override
 		public void handle(TouchEvent event) {
 			if(event.getTouchCount() == 2) {
-				TouchPoint primaryTouch = event.getTouchPoint();
+				TouchPoint primaryTouch = event.getTouchPoints().get(0);
 				TouchPoint secondaryTouch = event.getTouchPoints().get(1);
 				
 				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
@@ -648,6 +663,9 @@ public class AnnotationToolApplication extends Application {
 						} else {
 							moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
 						}
+						primaryTouchCoords = newPrimaryCoords;
+						secondaryTouchCoords = newSecondaryCoords;
+						touchDist = newTouchDist;
 					}
 				}
 			}
