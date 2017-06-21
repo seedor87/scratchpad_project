@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -23,12 +24,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import javax.swing.*;
 import java.awt.peer.ButtonPeer;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -262,11 +265,11 @@ public class IconControllerBox extends Stage
                 });
 
                 Optional<Double> result = dialog.showAndWait();
+                at.resetStages();
 
                 at.setStroke(result.get());
                 at.setTextSize(result.get().intValue());
                 numberText.setText(new Integer(result.get().intValue()).toString());
-
             }
         });
         nodes.add(sizePickerButton);
@@ -530,6 +533,31 @@ public class IconControllerBox extends Stage
         });
         nodes.add(eraseTransparentButton);
 
+/*        Button preferencesButton = new Button();
+        ImageView preferencesImage = new ImageView("preferences.png");
+        preferencesImage.setFitHeight(IMAGE_HEIGHT);
+        preferencesImage.setFitWidth(IMAGE_WIDTH);
+        preferencesButton.setGraphic(preferencesImage);
+        preferencesButton.setTooltip(getToolTip("Change Background."));
+        preferencesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Choose background picture.");
+                fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
+                File selectedFile = fileChooser.showOpenDialog(at.getPictureStage());
+                if(selectedFile != null)
+                {
+                    Image image = new Image(selectedFile.toURI().toString());
+                    ImageView iv = new ImageView(image);
+                    at.getRoot().getChildren().add(iv);
+                    at.resetStages();
+                }
+            }
+        });
+        nodes.add(preferencesButton);*/
+
         Button clearHistoryButton = new Button();
         ImageView clearHistoryImage = new ImageView("clearHistory.png");
         clearHistoryImage.setFitHeight(IMAGE_HEIGHT);
@@ -614,17 +642,17 @@ public class IconControllerBox extends Stage
         }
         this.sizeToScene();
 
-        Stage drawingStage = at.getDrawingStage();
-        if(drawingStage.isFullScreen() || drawingStage.isMaximized())
+        Stage pictureStage = at.getPictureStage();
+        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
         {
-            this.setX(at.getDrawingStage().getX());
+            this.setX(at.getPictureStage().getX());
             centerOnScreen();
             this.setY(0);
         }
         else
         {
-            this.setY(drawingStage.yProperty().get());
-            this.setX(drawingStage.xProperty().get() + drawingStage.getWidth()/2- this.getWidth()/2);
+            this.setY(pictureStage.yProperty().get());
+            this.setX(pictureStage.xProperty().get() + pictureStage.getWidth()/2- this.getWidth()/2);
         }
     }
     private void snapToLeft()
@@ -641,16 +669,16 @@ public class IconControllerBox extends Stage
         }
         this.sizeToScene();
 
-        Stage drawingStage = at.getDrawingStage();
-        if(drawingStage.isFullScreen() || drawingStage.isMaximized())
+        Stage pictureStage = at.getPictureStage();
+        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
         {
             centerOnScreen();
             this.setX(0);
         }
         else
         {
-            this.setY(drawingStage.yProperty().get() + drawingStage.getHeight() / 2 - this.getHeight() /2);
-            this.setX(drawingStage.xProperty().get());
+            this.setY(pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2);
+            this.setX(pictureStage.xProperty().get());
         }
 
     }
@@ -669,9 +697,9 @@ public class IconControllerBox extends Stage
 
         this.sizeToScene();
 
-        Stage drawingStage = at.getDrawingStage();
+        Stage pictureStage = at.getPictureStage();
 
-        if(drawingStage.isFullScreen() || drawingStage.isMaximized())
+        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
         {
             centerOnScreen();
             Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -679,8 +707,8 @@ public class IconControllerBox extends Stage
         }
         else
         {
-            this.setY(drawingStage.yProperty().get() + drawingStage.getHeight() / 2 - this.getHeight() /2);
-            this.setX(drawingStage.xProperty().get() + drawingStage.getWidth() - this.getWidth());
+            this.setY(pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2);
+            this.setX(pictureStage.xProperty().get() + pictureStage.getWidth() - this.getWidth());
         }
     }
     private Tooltip getToolTip(String toolTipString)
