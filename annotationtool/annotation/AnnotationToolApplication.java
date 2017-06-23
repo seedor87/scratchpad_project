@@ -29,6 +29,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.ProcessRunner;
 
 import javax.imageio.ImageIO;
 
@@ -45,6 +46,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AnnotationToolApplication extends Application {
 
@@ -112,15 +116,16 @@ public class AnnotationToolApplication extends Application {
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
     
     // Settings
-    private boolean mouseTransparent = false;
+    private String windowID = "";
+    private final double[] minStageSize = {100, 100};
     private double strokeWidth = 5d;
-    private boolean clickable = true;
     private double textSize = 5d;
     private int borderWidth = 5;
     private int boxWidth = 0;
-    private boolean makingTextBox = false;
     private int saveImageIndex = 0;
-    private final double[] minStageSize = {100, 100};
+    private boolean mouseTransparent = false;
+    private boolean clickable = true;
+    private boolean makingTextBox = false;
 
     //================================================================================
     // Constructors/Starts
@@ -128,6 +133,11 @@ public class AnnotationToolApplication extends Application {
 
 	public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
     	start(primaryStage, secondaryStage, x, y, sizedWindow);
+    }
+	
+	public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) {
+		this.windowID = windowID;
+		start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
     
     public void start(Stage primaryStage) {
@@ -216,8 +226,17 @@ public class AnnotationToolApplication extends Application {
         borderShape.setStroke(borderColor);
         borderShape.setStrokeWidth(borderWidth);
         borderShape.setFill(clearPaint);
-
         root.getChildren().add(borderShape);
+        
+        if(windowID != "") {
+        	ScheduledExecutorService windowChecker = Executors.newScheduledThreadPool(1);
+        	Runnable task = () -> resnapToWindow(windowID, windowChecker);
+        	
+        	int initialDelay = 0;
+        	int period = 10;
+        	
+        	windowChecker.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
+        }
 
         mouseCatchingStage.show();
         pictureStage.show();
@@ -500,6 +519,9 @@ public class AnnotationToolApplication extends Application {
 		mouseCatchingStage.setY(stageYPos + changeY);
     }
 
+    /**
+     * This can't just be named this. This is not descriptive at all. 
+     */
     private void resizeAnnotationWindow2(double width, double height)
     {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -521,6 +543,26 @@ public class AnnotationToolApplication extends Application {
     	
     	mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
     	mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
+    }
+    
+    /**
+     * Gets the coordinates of the window associated with the given windowID and ensures the annotationtool window remains snapped to it.
+     * If the given window closes, stops the scheduled executor service calling the method.
+     * 
+     * @param windowID The window to snap to.
+     * @param executor The Scheduled Executor Service calling this method.
+     */
+    private void resnapToWindow(String windowID, ScheduledExecutorService executor) {
+    	Process proc = null;
+    	Double[] windowInfo = ProcessRunner.getWindowInfoByID(windowID, proc);
+    	if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
+    		resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
+    		mouseCatchingStage.setX(windowInfo[2]);
+    		mouseCatchingStage.setY(windowInfo[3]);
+    	}
+    	else {
+    		executor.shutdownNow();
+    	}
     }
 
 

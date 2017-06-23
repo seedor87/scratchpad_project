@@ -69,6 +69,48 @@ public class ProcessRunner {
 		return new Object[] {windowID, width, height, x, y};
 	}
 	
+	public static Double[] getWindowInfoByID(String windowID, Process proc) {
+		
+		Double width = -1d;
+		Double height = -1d;
+		Double x = -1d;
+		Double y = -1d;
+
+		try {
+			String[] xWinInfoArgs = {"xwininfo", "-id", windowID};
+			BufferedReader br = runProcess(xWinInfoArgs, proc);
+			
+			String line = null;
+            while ( (line = br.readLine()) != null) {
+            	String[] splitLine = line.split(":");
+            	
+            	if(splitLine.length > 1 && splitLine[1].trim().equals("Window id")) {
+            		windowID = splitLine[2].trim().split(" ")[0];
+            	}
+            	
+            	switch(splitLine[0].trim()) {
+            		case "Width":
+            			width = Double.valueOf(splitLine[1].trim());
+            			break;
+            		case "Height": 
+            			height = Double.valueOf(splitLine[1].trim());
+            			break;
+            		case "Absolute upper-left X":
+            			x = Double.valueOf(splitLine[1].trim());
+            			break;
+            		case "Absolute upper-left Y":
+            			y = Double.valueOf(splitLine[1].trim());
+            			break;
+            		default:
+            			break;
+            	}
+            }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new Double[] {width, height, x, y};
+	}
+	
 	/**
 	 * Gets the ID number of the program.
 	 * 

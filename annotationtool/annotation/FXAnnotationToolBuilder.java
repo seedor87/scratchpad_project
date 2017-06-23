@@ -155,7 +155,14 @@ public class FXAnnotationToolBuilder extends Application {
 						
 						System.out.println(windowInfo[0]);
 						
-						AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
+						AnnotationToolApplication app = new AnnotationToolApplication(
+														newStage, 
+														newSecondaryStage, 
+														x, 
+														y, 
+														true, 
+														(String)windowInfo[0]
+														);
 			    	}
 			    }
 			});
