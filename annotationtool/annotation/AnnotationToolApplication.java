@@ -124,6 +124,7 @@ public class AnnotationToolApplication extends Application {
     private CircleHandler circleHandler = new CircleHandler();
 
     private EraseHandler eraseHandler = new EraseHandler();
+    private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
 
     private int boxWidth = 0;
 
@@ -481,10 +482,10 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         //mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
         //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
-        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
+        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
 
 
-        mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
+        //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
 /*
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
 */
@@ -495,7 +496,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
-        eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
+        //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
     }
 
@@ -546,6 +547,18 @@ public class AnnotationToolApplication extends Application {
     	double stageYPos = mouseCatchingStage.getY();
     	mouseCatchingStage.setX(stageXPos + changeX);
 		mouseCatchingStage.setY(stageYPos + changeY);
+    }
+
+    private void resizeAnnotationWindow2(double width, double height)
+    {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double screenWidth = screenSize.getWidth();
+        double screenHeight = screenSize.getHeight();
+        double stageWidth = mouseCatchingStage.getWidth();
+        double stageHeight = mouseCatchingStage.getHeight();
+
+        mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, width), minStageSize[0] ) );
+        mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, height), minStageSize[1] ) );
     }
     
     private void resizeAnnotationWindow(double changeX, double changeY) {
@@ -642,7 +655,7 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-    private class TwoTouchChangeSize implements EventHandler<TouchEvent>
+    private class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent>
     {
         int topPointIndex;
         int bottomPointIndex;
@@ -657,6 +670,11 @@ public class AnnotationToolApplication extends Application {
         double originalScreenWidth;
         double originalScreenHeight;
 
+        double rightXChange = 0;
+        double topYChange = 0;
+        double leftXChange = 0;
+        double bottomYChange = 0;
+
         @Override
         public void handle(TouchEvent event)
         {
@@ -667,10 +685,15 @@ public class AnnotationToolApplication extends Application {
                  */
                 if(event.getEventType() == TouchEvent.TOUCH_PRESSED)
                 {
+                    resetHandlers();
                     originalScreenX = mouseCatchingStage.getX();
                     originalScreenY = mouseCatchingStage.getY();
                     originalScreenWidth = mouseCatchingStage.getWidth();
                     originalScreenHeight = mouseCatchingStage.getHeight();
+                    double rightXChange = 0;
+                    double topYChange = 0;
+                    double leftXChange = 0;
+                    double bottomYChange = 0;
 
                     TouchPoint point1 = event.getTouchPoints().get(0);
                     TouchPoint point2 = event.getTouchPoints().get(1);
@@ -688,7 +711,7 @@ public class AnnotationToolApplication extends Application {
                         bottomPoint = point1;
                         topPoint = point2;
                     }
-                    if(point1.getX() > point2.getX())
+                    if(point1.getScreenX() > point2.getScreenX())
                     {
                         rightPointIndex = 0;
                         leftPointIndex = 1;
@@ -710,35 +733,35 @@ public class AnnotationToolApplication extends Application {
                         if(touchPoint.getState() != TouchPoint.State.STATIONARY)
                         {
                             int index = event.getTouchPoints().indexOf(touchPoint);
-                            double xChange = 0;
-                            double yChange = 0;
-                            double xMove = 0;
-                            double yMove = 0;
                             if(index == rightPointIndex)
                             {
-                                xChange = touchPoint.getX() - rightPoint.getX();
+                                rightXChange = touchPoint.getScreenX() - rightPoint.getScreenX();
                             }
                             else if(index == leftPointIndex)
                             {
-                                xChange = leftPoint.getX() - touchPoint.getX();
-                                xMove = xChange;
+                                leftXChange = leftPoint.getScreenX() - touchPoint.getScreenX();
                             }
                             if(index == topPointIndex)
                             {
-                                yChange = topPoint.getY() - touchPoint.getY();
-                                yMove = yChange;
+                                topYChange = topPoint.getScreenY() - touchPoint.getScreenY();
                             }
                             else if(index == bottomPointIndex)
                             {
-                                yChange = touchPoint.getY() - bottomPoint.getY();
+                                bottomYChange = touchPoint.getScreenY() - bottomPoint.getScreenY();
                             }
-                            resizeAnnotationWindow(xChange + originalScreenWidth - mouseCatchingStage.getWidth()
-                                    ,yChange + originalScreenHeight - mouseCatchingStage.getHeight());
-                            mouseCatchingStage.setX(xChange + originalScreenX);
-                            mouseCatchingStage.setY(yChange + originalScreenY);
+                            //mouseCatchingStage.setHeight(topYChange + originalScreenHeight + bottomYChange);
+                            //mouseCatchingStage.setWidth(rightXChange + leftXChange);
+                            resizeAnnotationWindow2(rightXChange  +  originalScreenWidth + leftXChange
+                                    ,topYChange + originalScreenHeight + bottomYChange);
+                            mouseCatchingStage.setX(originalScreenX - leftXChange);
+                            mouseCatchingStage.setY(originalScreenY - topYChange);
                         }
                     }
                 }
+            }
+            else if(event.getEventType() == TouchEvent.TOUCH_RELEASED)
+            {
+                mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             }
 
         }
