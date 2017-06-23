@@ -1,15 +1,5 @@
 package annotation;
 
-import java.awt.AWTException;
-import java.awt.Robot;
-import java.awt.event.InputEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.MessageFormat;
-import java.util.concurrent.TimeUnit;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Screen;
@@ -23,6 +13,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+
+import util.ProcessRunner;
 
 public class FXAnnotationToolBuilder extends Application {
 	
@@ -86,7 +78,6 @@ public class FXAnnotationToolBuilder extends Application {
 			gc.strokePolygon(xPoints, yPoints, 4);
     	}
     	
-    	
     }
 
 	private class BuilderMouseHandler implements javafx.event.EventHandler<MouseEvent>
@@ -147,10 +138,10 @@ public class FXAnnotationToolBuilder extends Application {
 			Platform.runLater(new Runnable() {
 			    @Override
 			    public void run() {
-			    	getWindowInfo();
+			    	windowInfo = ProcessRunner.getWindowInfo(proc);
 			    	if(windowInfo != null) {
-			    		String programID = getProgramID((String)windowInfo[0]);
-			    		String programName = getProgramName(programID);
+			    		String programID = ProcessRunner.getProgramID((String)windowInfo[0], proc);
+			    		String programName = ProcessRunner.getProgramName(programID, proc);
 			    		System.out.println(programName);
 			    		
 						Stage newStage = new Stage(); 		
@@ -207,110 +198,5 @@ public class FXAnnotationToolBuilder extends Application {
 		    	System.exit(0);
 		    }
 		});
-	}
-	
-	/**
-	 * Builds a terminal process from the array of arguments given, then returns a BufferedReader for its output.
-	 * 
-	 * @param args An array of Strings that form the terminal command. 
-	 * @return The BufferedReader of the process's output.
-	 * @throws IOException
-	 */
-	private BufferedReader runProcess(String[] args) throws IOException {
-		proc = new ProcessBuilder(args).start();
-		InputStream stdin = proc.getInputStream();
-		InputStreamReader isr = new InputStreamReader(stdin);
-		return new BufferedReader(isr);
-	}
-	
-	/**
-	 * Gets the position, size, and ID of the clicked window.
-	 * 
-	 * @return An array of Objects containing the window's ID in a string, followed by its width, height, x position, and y position in Doubles.
-	 */
-	private void getWindowInfo() {
-		
-		String windowID = null;
-		Double width = -1d;
-		Double height = -1d;
-		Double x = -1d;
-		Double y = -1d;
-
-		try {
-			String[] xWinInfoArgs = {"xwininfo"};
-			BufferedReader br = runProcess(xWinInfoArgs);
-			
-			String line = null;
-            while ( (line = br.readLine()) != null) {
-            	String[] splitLine = line.split(":");
-            	
-            	if(splitLine.length > 1 && splitLine[1].trim().equals("Window id")) {
-            		windowID = splitLine[2].trim().split(" ")[0];
-            	}
-            	
-            	switch(splitLine[0].trim()) {
-            		case "Width":
-            			width = Double.valueOf(splitLine[1].trim());
-            			break;
-            		case "Height": 
-            			height = Double.valueOf(splitLine[1].trim());
-            			break;
-            		case "Absolute upper-left X":
-            			x = Double.valueOf(splitLine[1].trim());
-            			break;
-            		case "Absolute upper-left Y":
-            			y = Double.valueOf(splitLine[1].trim());
-            			break;
-            		default:
-            			break;
-            	}
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		windowInfo = new Object[] {windowID, width, height, x, y};
-	}
-	
-	/**
-	 * Gets the ID number of the program.
-	 * 
-	 * @param windowID The ID number of the window as a string.
-	 * @return The ID number of the program as a string.
-	 */
-	private String getProgramID(String windowID) {
-		try {
-			String[] xPropArgs = {"xprop", "-id", windowID, "_NET_WM_PID"};
-			BufferedReader br = runProcess(xPropArgs);
-			String line = null;
-			while ( (line = br.readLine()) != null) {
-				String[] splitLine = line.split(" ");
-				return splitLine[splitLine.length - 1].trim();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the file name of the program from a given ID number.
-	 * 
-	 * @param programID The ID number of the program as a string.
-	 * @return The file name of a program as a string.
-	 */
-	private String getProgramName(String programID) {
-		try {
-			String[] llArgs = {"ls", "-l", MessageFormat.format("/proc/{0}/exe", programID)};
-			BufferedReader br = runProcess(llArgs);
-			String line = null;
-			while ( (line = br.readLine()) != null) {
-				String[] splitLine = line.split("/");
-				return splitLine[splitLine.length - 1].trim();
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
 	}
 }
