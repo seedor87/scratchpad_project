@@ -105,7 +105,8 @@ public class AnnotationToolApplication extends Application {
     private DrawingHandler drawingHandler = new DrawingHandler();
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler();
-    private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();																	
+    private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();					
+    private ShortcutHandler shortcutHandler = new ShortcutHandler();
     private Text text;
     private Color textColor = Color.BLACK;
     private double textSize = 5d;
@@ -333,6 +334,7 @@ public class AnnotationToolApplication extends Application {
     public void setMakingTextBox(boolean makingTextBox) {
         if (makingTextBox)
         {
+        	this.makingTextBox = true;
             this.resetHandlers();
             this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
             this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
@@ -340,6 +342,7 @@ public class AnnotationToolApplication extends Application {
         }
         else
         {
+        	this.makingTextBox = false;
             this.resetHandlers();
             this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             textBoxText.delete(0,textBoxText.length());
@@ -483,6 +486,7 @@ public class AnnotationToolApplication extends Application {
         //mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
         //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
+        mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -1008,6 +1012,26 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+    
+    private class ShortcutHandler implements EventHandler<KeyEvent>
+    {
+    	public void handle(KeyEvent event)
+    	{
+    		if(event.getCode() == KeyCode.ESCAPE) {
+    			if(makingTextBox) {
+    				setMakingTextBox(false);
+    			} else {
+    				Platform.runLater(new Runnable() {
+    				    @Override
+    				    public void run() {
+    				    	System.exit(0);
+    				    }
+    				});
+    			}
+    		}
+    	}
+    }
+    
     /**
      * Hides the box when not being used.
      */
@@ -1319,4 +1343,19 @@ public class AnnotationToolApplication extends Application {
             }
         });
     }
+    
+    /*private CirclePopupMenu initializeShapeMenu() {
+    	StackPane popupPane = new StackPane();
+    	popupPane.setMinSize(mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
+    	notRoot.getChildren().add(popupPane);
+    	CirclePopupMenu shapeMenu = new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
+    	MenuItem testItem = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
+    	shapeMenu.getItems().add(testItem);
+    	MenuItem testItem2 = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
+    	shapeMenu.getItems().add(testItem2);
+    	MenuItem testItem3 = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
+    	shapeMenu.getItems().add(testItem3);
+    	
+    	return new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
+    }*/
 }
