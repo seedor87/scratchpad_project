@@ -325,7 +325,7 @@ public class IconControllerBox extends Stage
         nodes.add(redoButton);
 
         Button changeButtonSizeButton = new Button();
-        ImageView changeButtonSizeImage = new ImageView("changeButtonSizeImage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
+        ImageView changeButtonSizeImage = new ImageView("changebuttonsizeimage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
         changeButtonSizeImage.setFitHeight(IMAGE_HEIGHT);
         changeButtonSizeImage.setFitWidth(IMAGE_WIDTH);
         changeButtonSizeButton.setGraphic(changeButtonSizeImage);
@@ -534,7 +534,7 @@ public class IconControllerBox extends Stage
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Edit-clear.svg/1024px-Edit-clear.svg.png
          */
         Button eraseTransparentButton = new Button();
-        ImageView eraseTransparentImage = new ImageView("EraseTransparent.png");
+        ImageView eraseTransparentImage = new ImageView("eraseTransparent.png");
         eraseTransparentImage.setFitHeight(IMAGE_HEIGHT);
         eraseTransparentImage.setFitWidth(IMAGE_WIDTH);
         eraseTransparentButton.setGraphic(eraseTransparentImage);

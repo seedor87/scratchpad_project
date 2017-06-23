@@ -107,7 +107,7 @@ public class AnnotationToolApplication extends Application {
     
     // Cursors
     private Cursor pencilCursor = new ImageCursor(new Image("pencil-cursor.png"));
-    private Cursor eraserCursor = new ImageCursor(new Image("eraser-cursor.PNG"));
+    private Cursor eraserCursor = new ImageCursor(new Image("eraser-cursor.png"));
     private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
     
