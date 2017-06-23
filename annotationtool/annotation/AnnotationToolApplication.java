@@ -101,6 +101,7 @@ public class AnnotationToolApplication extends Application {
     private boolean clickable = true;
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
+    private MovingHandler movingHandler = new MovingHandler();
     private DrawingHandler drawingHandler = new DrawingHandler();
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler();
@@ -278,6 +279,7 @@ public class AnnotationToolApplication extends Application {
             public void run()
             {
                 root.getChildren().clear();
+                root.getChildren().add(borderShape);
             }
         });
         undoStack.clear();
@@ -478,7 +480,11 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         //mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
-        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);																			
+        //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
+        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
+
+
+        mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
 /*
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
 */
@@ -489,7 +495,8 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
-        eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));																			 
+        eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
     }
 
     /**
@@ -634,15 +641,146 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+
+    private class TwoTouchChangeSize implements EventHandler<TouchEvent>
+    {
+        int topPointIndex;
+        int bottomPointIndex;
+        int rightPointIndex;
+        int leftPointIndex;
+        TouchPoint topPoint;
+        TouchPoint bottomPoint;
+        TouchPoint leftPoint;
+        TouchPoint rightPoint;
+        double originalScreenX;
+        double originalScreenY;
+        double originalScreenWidth;
+        double originalScreenHeight;
+
+        @Override
+        public void handle(TouchEvent event)
+        {
+            if(event.getTouchCount() == 2)
+            {
+                /*
+                Sets up some variables to keep track of which first point was which.
+                 */
+                if(event.getEventType() == TouchEvent.TOUCH_PRESSED)
+                {
+                    originalScreenX = mouseCatchingStage.getX();
+                    originalScreenY = mouseCatchingStage.getY();
+                    originalScreenWidth = mouseCatchingStage.getWidth();
+                    originalScreenHeight = mouseCatchingStage.getHeight();
+
+                    TouchPoint point1 = event.getTouchPoints().get(0);
+                    TouchPoint point2 = event.getTouchPoints().get(1);
+                    if(point1.getY() < point2.getY())
+                    {
+                        topPointIndex = 0;
+                        bottomPointIndex = 1;
+                        topPoint = point1;
+                        bottomPoint = point2;
+                    }
+                    else
+                    {
+                        bottomPointIndex = 0;
+                        topPointIndex = 1;
+                        bottomPoint = point1;
+                        topPoint = point2;
+                    }
+                    if(point1.getX() > point2.getX())
+                    {
+                        rightPointIndex = 0;
+                        leftPointIndex = 1;
+                        rightPoint = point1;
+                        leftPoint = point2;
+                    }
+                    else
+                    {
+                        rightPointIndex = 1;
+                        leftPointIndex = 0;
+                        rightPoint = point2;
+                        leftPoint = point1;
+                    }
+                }
+                else if(event.getEventType() == TouchEvent.TOUCH_MOVED && event.getTouchCount() == 2)
+                {
+                    for(TouchPoint touchPoint : event.getTouchPoints())
+                    {
+                        if(touchPoint.getState() != TouchPoint.State.STATIONARY)
+                        {
+                            int index = event.getTouchPoints().indexOf(touchPoint);
+                            double xChange = 0;
+                            double yChange = 0;
+                            double xMove = 0;
+                            double yMove = 0;
+                            if(index == rightPointIndex)
+                            {
+                                xChange = touchPoint.getX() - rightPoint.getX();
+                            }
+                            else if(index == leftPointIndex)
+                            {
+                                xChange = leftPoint.getX() - touchPoint.getX();
+                                xMove = xChange;
+                            }
+                            if(index == topPointIndex)
+                            {
+                                yChange = topPoint.getY() - touchPoint.getY();
+                                yMove = yChange;
+                            }
+                            else if(index == bottomPointIndex)
+                            {
+                                yChange = touchPoint.getY() - bottomPoint.getY();
+                            }
+                            resizeAnnotationWindow(xChange + originalScreenWidth - mouseCatchingStage.getWidth()
+                                    ,yChange + originalScreenHeight - mouseCatchingStage.getHeight());
+                            mouseCatchingStage.setX(xChange + originalScreenX);
+                            mouseCatchingStage.setY(yChange + originalScreenY);
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    private class TwoTouchTesting implements EventHandler<TouchEvent>
+    {
+
+        @Override
+        public void handle(TouchEvent event)
+        {
+            if(event.getTouchCount() == 2 && event.getEventType() != TouchEvent.TOUCH_STATIONARY)
+            {
+                System.out.println(event.getTouchPoints().get(0));
+                System.out.println(event.getTouchPoints().get(1));
+                System.out.println(event.getTouchPoints().get(0).getX() + ", " + event.getTouchPoints().get(0).getY());
+                System.out.println(event.getTouchPoints().get(1).getX() + ", " + event.getTouchPoints().get(1).getY());
+                System.out.println();
+            }
+
+        }
+    }
    
-    private class TwoTouchHandler implements EventHandler<TouchEvent> {
+    private class TwoTouchHandler implements EventHandler<TouchEvent>
+    {
     	private double[] primaryTouchCoords = {-1d, -1d};
     	private double[] secondaryTouchCoords = {-1d, -1d};
     	private double[] touchDist = {0, 0};
     	private double resizeTolerance = 6;
 
+    	TouchPoint firstPoint;
+    	TouchPoint secondPoint;
+
 		@Override
-		public void handle(TouchEvent event) {
+		public void handle(TouchEvent event)
+        {
+            if(event.getEventType() == TouchEvent.TOUCH_PRESSED && event.getTouchCount() == 2)
+            {
+                firstPoint = event.getTouchPoints().get(0);
+                secondPoint = event.getTouchPoints().get(1);
+                //TODO setup first two points to be followed based on the later movement.
+            }
 			if(event.getTouchCount() == 2) {
 				TouchPoint primaryTouch = event.getTouchPoints().get(0);
 				TouchPoint secondaryTouch = event.getTouchPoints().get(1);
@@ -691,6 +829,44 @@ public class AnnotationToolApplication extends Application {
 			touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
 		}
     	
+    }
+
+    public void setMovingHandler()
+    {
+        this.resetHandlers();
+        mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
+    }
+
+    private class MovingHandler implements EventHandler<MouseEvent>
+    {
+        double originalX = -1;
+        double originalY;
+        double originalStageX;
+        double originalStageY;
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                originalX = event.getScreenX();
+                originalY = event.getScreenY();
+                originalStageX = mouseCatchingStage.getX();
+                originalStageY = mouseCatchingStage.getY();
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                double changeX = event.getScreenX() - originalX;
+                double changeY = event.getScreenY() - originalY;
+                mouseCatchingStage.setX(originalStageX + changeX);
+                mouseCatchingStage.setY(originalStageY + changeY);
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                originalX = -1;
+            }
+        }
     }
 
     /**
@@ -970,6 +1146,7 @@ public class AnnotationToolApplication extends Application {
     public void paintFromUndoStack()
     {
         root.getChildren().clear();
+        root.getChildren().add(borderShape);
         for(ChangeItem changeItem : undoStack)
         {
             if(!(changeItem instanceof changeItem.EraseShape))          // infinite callse to paintFromUndoStack() if it is an EraseShape

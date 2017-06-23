@@ -458,8 +458,23 @@ public class IconControllerBox extends Stage
         });
         nodes.add(snapToTopButton);
 
+        Button moveButton = new Button();
+        ImageView moveImage = new ImageView("hand.png");
+        moveImage.setFitHeight(IMAGE_HEIGHT);
+        moveImage.setFitWidth(IMAGE_WIDTH);
+        moveButton.setGraphic(moveImage);
+        moveButton.setTooltip(getToolTip("Move window"));
+        moveButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.setMovingHandler();
+            }
+        });
+        nodes.add(moveButton);
+
         Button toggleClickableButton = new Button();
-        ImageView toggleClickableImage = new ImageView("hand.png");
+        ImageView toggleClickableImage = new ImageView("pointer.png");
         toggleClickableImage.setFitHeight(IMAGE_HEIGHT);
         toggleClickableImage.setFitWidth(IMAGE_WIDTH);
         toggleClickableButton.setGraphic(toggleClickableImage);
