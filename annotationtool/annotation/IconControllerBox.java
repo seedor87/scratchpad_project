@@ -40,16 +40,21 @@ import java.util.Optional;
  */
 public class IconControllerBox extends Stage
 {
-    private Pane root;
+	
+	enum ControllerBoxPos {LEFT, TOP, RIGHT}
+	
+
+	private Pane root;
     private Pane trunk;
     private Scene scene;
     private static final int IMAGE_WIDTH = 25;
     private static final int IMAGE_HEIGHT = 25;
 
-    private static final double SMALL_BUTTON_SIZE = 25;
-    private static final double MEDIUM_BUTTON_SIZE = 35;
-    private static final double LARGE_BUTTON_SIZE = 45;
-    private double buttonSize = MEDIUM_BUTTON_SIZE;
+    private double smallButtonSize;
+    private double medButtonSize;
+    private double largeButtonSize;
+    private double buttonSize;
+    ControllerBoxPos pos = ControllerBoxPos.TOP;
     private static final int LEFT_LOCATION = 0;
     private static final int TOP_LOCATION = 1;
     private static final int RIGHT_LOCATION = 2;
@@ -57,9 +62,9 @@ public class IconControllerBox extends Stage
     private static final int TOOLTIP_FONT_SIZE = 20;
     private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
 
-
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
+    
     public IconControllerBox(AnnotationToolApplication at)
     {
         this.setTitle("Tools");
@@ -69,6 +74,13 @@ public class IconControllerBox extends Stage
         this.initStyle(StageStyle.TRANSPARENT);
         scene.setFill(Color.TRANSPARENT);
         this.setScene(scene);
+        
+        double dotsPerInch = Screen.getPrimary().getDpi();
+        smallButtonSize = .25 * dotsPerInch;
+        medButtonSize = .35 * dotsPerInch;
+        largeButtonSize = .6 * dotsPerInch;
+        buttonSize = smallButtonSize;
+        
 
         Button exitButton = new Button();
         ImageView exitImage = new ImageView("exit.png");
@@ -349,33 +361,33 @@ public class IconControllerBox extends Stage
                         button1 = new Button(),
                         button2 = new Button(),
                         button3 = new Button();
-                button1.setMaxSize(SMALL_BUTTON_SIZE,SMALL_BUTTON_SIZE);
-                button1.setMinSize(SMALL_BUTTON_SIZE,SMALL_BUTTON_SIZE);
+                button1.setMaxSize(smallButtonSize,smallButtonSize);
+                button1.setMinSize(smallButtonSize,smallButtonSize);
                 button1.setTooltip(getToolTip("Small"));
                 button1.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
-                        changeSize = SMALL_BUTTON_SIZE;
+                        changeSize = smallButtonSize;
                     }
                 });
 
-                button2.setMaxSize(MEDIUM_BUTTON_SIZE,MEDIUM_BUTTON_SIZE);
-                button2.setMinSize(MEDIUM_BUTTON_SIZE,MEDIUM_BUTTON_SIZE);
+                button2.setMaxSize(medButtonSize,medButtonSize);
+                button2.setMinSize(medButtonSize,medButtonSize);
                 button2.setTooltip(getToolTip("Medium"));
                 button2.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
-                        changeSize = MEDIUM_BUTTON_SIZE;
+                        changeSize = medButtonSize;
                     }
                 });
 
-                button3.setMaxSize(LARGE_BUTTON_SIZE,LARGE_BUTTON_SIZE);
-                button3.setMinSize(LARGE_BUTTON_SIZE,LARGE_BUTTON_SIZE);
+                button3.setMaxSize(largeButtonSize,largeButtonSize);
+                button3.setMinSize(largeButtonSize,largeButtonSize);
                 button3.setTooltip(getToolTip("Large"));
                 button3.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
-                        changeSize = LARGE_BUTTON_SIZE;
+                        changeSize = largeButtonSize;
                     }
                 });
 
@@ -588,10 +600,10 @@ public class IconControllerBox extends Stage
         });
         nodes.add(clearHistoryButton);
 
-        setIconSizes(MEDIUM_BUTTON_SIZE);
+        setIconSizes(smallButtonSize);
 
         this.show();
-        this.snapToRight();
+        this.snapBoxToTop();
         this.setAlwaysOnTop(true);
     }
     private void resetLocation()
