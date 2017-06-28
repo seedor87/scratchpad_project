@@ -30,6 +30,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import javax.swing.*;
+
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.peer.ButtonPeer;
 import java.io.File;
 import java.util.LinkedList;
@@ -41,9 +44,6 @@ import java.util.Optional;
 public class IconControllerBox extends Stage
 {
 	
-	enum ControllerBoxPos {LEFT, TOP, RIGHT}
-	
-
 	private Pane root;
     private Pane trunk;
     private Scene scene;
@@ -54,7 +54,6 @@ public class IconControllerBox extends Stage
     private double medButtonSize;
     private double largeButtonSize;
     private double buttonSize;
-    ControllerBoxPos pos = ControllerBoxPos.TOP;
     private static final int LEFT_LOCATION = 0;
     private static final int TOP_LOCATION = 1;
     private static final int RIGHT_LOCATION = 2;
@@ -79,8 +78,6 @@ public class IconControllerBox extends Stage
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
-        buttonSize = smallButtonSize;
-        
 
         Button exitButton = new Button();
         ImageView exitImage = new ImageView("exit.png");
@@ -417,7 +414,7 @@ public class IconControllerBox extends Stage
                 Optional<Double> result = dialog.showAndWait();
 
                 setIconSizes(result.get());
-                resetLocation();
+                fitScreen();
 
                 //TODO Handle this
             }
@@ -435,7 +432,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                snapToLeft();
+                location = LEFT_LOCATION;
+                fitScreen();
             }
         });
         nodes.add(snapToLeftButton);
@@ -450,7 +448,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                snapToRight();
+                location = RIGHT_LOCATION;
+                fitScreen();
             }
         });
         nodes.add(snapToRightButton);
@@ -465,7 +464,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                snapBoxToTop();
+                location = TOP_LOCATION;
+                fitScreen();
             }
         });
         nodes.add(snapToTopButton);
@@ -599,27 +599,30 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(clearHistoryButton);
-
-        setIconSizes(smallButtonSize);
+        
+        Button lockControllerBoxButton = new Button();
+        //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
+        ImageView lockControllerBoxImage = new ImageView("padlock.png");
+        lockControllerBoxImage.setFitHeight(IMAGE_HEIGHT);
+        lockControllerBoxImage.setFitWidth(IMAGE_WIDTH);
+        lockControllerBoxButton.setGraphic(lockControllerBoxImage);
+        lockControllerBoxButton.setTooltip(getToolTip("Lock the toolbar to the annotation window"));
+        lockControllerBoxButton.setGraphic(lockControllerBoxImage);
+        lockControllerBoxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.toggleLockedControllerBox();
+            }
+        });
+        nodes.add(lockControllerBoxButton);
+        
+        setIconSizes(medButtonSize);
 
         this.show();
-        this.snapBoxToTop();
+        location = TOP_LOCATION;
+        this.fitScreen();
         this.setAlwaysOnTop(true);
-    }
-    private void resetLocation()
-    {
-        if(location == LEFT_LOCATION)
-        {
-            snapToLeft();
-        }
-        else if(location == TOP_LOCATION)
-        {
-            snapBoxToTop();
-        }
-        else if(location == RIGHT_LOCATION)
-        {
-            snapToRight();
-        }
     }
 
     private void setIconSizes(double size)
@@ -645,99 +648,10 @@ public class IconControllerBox extends Stage
                 ((Circle)graphicsContext).setRadius((size-10)/2);
             }
         }
+        this.buttonSize = size;
+        this.fitScreen();
     }
-
-    /**
-     * Must be called after show was called on this stage.
-     */
-    private void snapBoxToTop()
-    {
-
-        location = TOP_LOCATION;
-
-        root.getChildren().remove(trunk);
-
-        trunk = new HBox();
-        root.getChildren().add(trunk);
-
-        //this.setScene(scene);
-
-
-        for(Node node : nodes)
-        {
-            trunk.getChildren().add(node);
-        }
-        this.sizeToScene();
-
-        Stage pictureStage = at.getPictureStage();
-        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-        {
-            this.setX(at.getPictureStage().getX());
-            centerOnScreen();
-            this.setY(0);
-        }
-        else
-        {
-            this.setY(pictureStage.yProperty().get());
-            this.setX(pictureStage.xProperty().get() + pictureStage.getWidth()/2- this.getWidth()/2);
-        }
-    }
-    private void snapToLeft()
-    {
-        location = LEFT_LOCATION;
-        root.getChildren().remove(trunk);
-
-        trunk = new VBox();
-        root.getChildren().add(trunk);
-
-        for(Node b : nodes)
-        {
-            trunk.getChildren().add(b);
-        }
-        this.sizeToScene();
-
-        Stage pictureStage = at.getPictureStage();
-        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-        {
-            centerOnScreen();
-            this.setX(0);
-        }
-        else
-        {
-            this.setY(pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2);
-            this.setX(pictureStage.xProperty().get());
-        }
-
-    }
-    private void snapToRight()
-    {
-        location = RIGHT_LOCATION;
-        root.getChildren().remove(trunk);
-
-        trunk = new VBox();
-        root.getChildren().add(trunk);
-
-        for(Node node : nodes)
-        {
-            trunk.getChildren().add(node);
-        }
-
-        this.sizeToScene();
-
-        Stage pictureStage = at.getPictureStage();
-
-        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-        {
-            centerOnScreen();
-            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-            this.setX(primScreenBounds.getWidth() - this.getWidth());
-        }
-        else
-        {
-            this.setY(pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2);
-            this.setX(pictureStage.xProperty().get() + pictureStage.getWidth() - this.getWidth());
-        }
-    }
+    
     private Tooltip getToolTip(String toolTipString)
     {
         Tooltip tooltip = new Tooltip();
@@ -745,5 +659,100 @@ public class IconControllerBox extends Stage
         tooltip.setText(toolTipString);
         return tooltip;
     }
+    
+    public void fitScreen() {
+    	int numButtons = nodes.size();
+    	double menuLength = numButtons * buttonSize;
+    	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int numSplits = 1;
+		if(location == TOP_LOCATION) {
+			numSplits += (int)(menuLength / screenSize.getWidth());
+		} else {
+			numSplits += (int)(menuLength / screenSize.getHeight());
+		}
+		snapBox(numSplits);
+    }
+    
+    private void snapBox(int numSplits) {
+    	root.getChildren().remove(trunk);
+    	Pane[] splits;
+    	splits = new Pane[numSplits];
+    	
+    	if(location == TOP_LOCATION) {
+    		trunk = new VBox();
+    		for(int i = 0; i < numSplits; i++) {
+    			splits[i] = new HBox();
+    		}
+    	} else {
+    		trunk = new HBox();
+    		for(int i = 0; i < numSplits; i++) {
+    			splits[i] = new VBox();
+    		}
+    	}
+    	
+    	for(Pane pane : splits) {
+    		trunk.getChildren().add(pane);
+    	}
+    	
+    	int i = 0;
+    	for(Node node : nodes)
+        {
+            splits[i].getChildren().add(node);
+            i = ++i % numSplits;
+        }
+    	
+    	root.getChildren().add(trunk);
+    	this.sizeToScene();
+        Stage pictureStage = at.getPictureStage();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        
+    	switch(location) {
+    		case TOP_LOCATION:
+    			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+    	        {
+    	            this.setX(at.getPictureStage().getX());
+    	            centerOnScreen();
+    	            this.setY(0);
+    	        }
+    	        else
+    	        {
+    	            this.setY( Math.max(0, pictureStage.yProperty().get() - buttonSize) );
+    	            this.setX( Math.min( Math.max(0, pictureStage.xProperty().get() + pictureStage.getWidth()/2- this.getWidth()/2), 
+    	            		   screenSize.getWidth() - (nodes.size() * buttonSize) / numSplits) );
+    	        }
+    			break;
+    		case LEFT_LOCATION:
+    			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+    	        {
+    	            centerOnScreen();
+    	            this.setX(0);
+    	        }
+    	        else
+    	        {
+    	            this.setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2), 
+    	            		   screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+    	            this.setX( Math.max(0, pictureStage.xProperty().get() - (buttonSize * numSplits)) );
+    	        }
+    			break;
+    		case RIGHT_LOCATION:
+    			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+    	        {
+    	            centerOnScreen();
+    	            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+    	            this.setX(primScreenBounds.getWidth() - this.getWidth());
+    	        }
+    	        else
+    	        {
+    	        	this.setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2), 
+ 	            		   	   screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+    	            this.setX( Math.min(pictureStage.xProperty().get() + pictureStage.getWidth() - this.getWidth() + (numSplits * buttonSize), 
+    	            		   Toolkit.getDefaultToolkit().getScreenSize().getWidth() - (numSplits * buttonSize)) );
+    	        }
+    			break;
+    		default:
+    			break;
+    	}
+    }
+    
 }
 

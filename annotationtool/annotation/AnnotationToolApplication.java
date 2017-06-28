@@ -126,6 +126,7 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private boolean clickable = true;
     private boolean makingTextBox = false;
+    private boolean lockedControllerBox = true;
 
     //================================================================================
     // Constructors/Starts
@@ -499,6 +500,9 @@ public class AnnotationToolApplication extends Application {
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
             {
                 pictureStage.setX(mouseCatchingStage.getX());
+                if(lockedControllerBox) {
+                	controllerBox.fitScreen();
+                }
             }
         });
 
@@ -507,6 +511,9 @@ public class AnnotationToolApplication extends Application {
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
             {
                 pictureStage.setY(mouseCatchingStage.getY());
+                if(lockedControllerBox) {
+                	controllerBox.fitScreen();
+                }
             }
         });
 
@@ -919,6 +926,11 @@ public class AnnotationToolApplication extends Application {
     public void setStroke(double strokeWidth)
     {
         this.strokeWidth = strokeWidth;
+    }
+    
+    public boolean toggleLockedControllerBox() {
+    	lockedControllerBox = !lockedControllerBox;
+    	return lockedControllerBox;
     }
 
     //================================================================================
