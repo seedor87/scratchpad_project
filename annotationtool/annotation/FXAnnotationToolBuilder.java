@@ -4,18 +4,26 @@ import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-
+import javafx.scene.layout.VBox;
 import util.ProcessRunner;
 import util.Window;
 
@@ -62,7 +70,7 @@ public class FXAnnotationToolBuilder extends Application {
 		gc.setStroke(Color.RED);
     	gc.setLineWidth(4);
     	
-    	if(System.getProperty("os.name") == "Linux") {
+    	if(System.getProperty("os.name").equals("Linux")) {
     		ArrayList<String> windowIDs = ProcessRunner.getAllWindows(proc);
 
     		for(String id : windowIDs) {
@@ -71,7 +79,42 @@ public class FXAnnotationToolBuilder extends Application {
     			String programTitle = ProcessRunner.getProgramName(programID, proc);
     			windows.add(new Window(id, windowTitle, programID, programTitle));
     		}
+    		
+    		createWindowList(new Stage());
     	}
+    }
+    
+    private void createWindowList(Stage stage) {
+    	final ObservableList<Window> windows = FXCollections.observableArrayList(this.windows);
+    	
+    	Scene scene = new Scene(new Group());
+        stage.setTitle("Windows");
+        stage.setWidth(500);
+        stage.setHeight(500);
+ 
+        final Label label = new Label("Windows");
+        label.setFont(new Font("Arial", 20));
+ 
+        TableView table = new TableView<>(); 
+        table.setEditable(false);
+ 
+        TableColumn<Window, String> windowTitles = new TableColumn<>("Window Titles");
+        windowTitles.setCellValueFactory(new PropertyValueFactory<Window, String>("title"));
+        TableColumn<Window, String> programTitles = new TableColumn<>("Program Names");
+        programTitles.setCellValueFactory(new PropertyValueFactory<Window, String>("programName"));
+        
+        table.setItems(windows);
+        table.getColumns().addAll(windowTitles, programTitles);
+ 
+        final VBox vbox = new VBox();
+        vbox.setSpacing(5);
+        vbox.setPadding(new Insets(10, 0, 0, 20));
+        vbox.getChildren().addAll(label, table);
+ 
+        ((Group) scene.getRoot()).getChildren().addAll(vbox);
+ 
+        stage.setScene(scene);
+        stage.show();
     }
     
     private void highlight(GraphicsContext gc) {
