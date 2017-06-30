@@ -128,7 +128,7 @@ public class AnnotationToolApplication extends Application {
     private String textFont = "Times New Roman";
     private final double[] minStageSize = {100, 100};
     private double strokeWidth = 5d;
-    private double textSize = 5d;
+    private double textSize = 24d;
     private int borderWidth = 5;
     private int boxWidth = 0;
     private int saveImageIndex = 0;
@@ -788,6 +788,7 @@ public class AnnotationToolApplication extends Application {
 
     public void doSave()
     {
+    	
         try
         {
             Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
@@ -836,6 +837,8 @@ public class AnnotationToolApplication extends Application {
 
                 try
                 {
+                	textOptionStage.hide();
+                	controllerBox.hide();
                     java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)mouseCatchingStage.getX() /*+ borderThickness*/, (int)mouseCatchingStage.getY() /* + borderThickness*/,
                             (int)mouseCatchingStage.getWidth()/* - (2 * borderThickness)*/, (int)mouseCatchingStage.getHeight()/* - (2 * borderThickness)*/);
                     BufferedImage outImg = robot.createScreenCapture(screenGrabArea);
@@ -848,6 +851,11 @@ public class AnnotationToolApplication extends Application {
                 catch (IOException e)
                 {
                     e.printStackTrace();
+                }
+                finally {
+                	controllerBox.show();
+                	if(makingTextBox)
+                		textOptionStage.show();
                 }
             }
         });
@@ -931,11 +939,17 @@ public class AnnotationToolApplication extends Application {
     public void setTextSize(Integer textSize)
     {
         this.textSize = (double) textSize;
+        if(text != null)
+        	text.setFont(new Font(this.textFont, this.textSize));
+        mouseCatchingStage.requestFocus();
     }
     
     public void setTextSize(Double textSize) 
     {
     	this.textSize = textSize;
+    	if(text != null)
+    		text.setFont(new Font(this.textFont, this.textSize));
+    	mouseCatchingStage.requestFocus();
     }
 
     public void setTextColor(java.awt.Color textColor)
@@ -945,17 +959,26 @@ public class AnnotationToolApplication extends Application {
                 textColor.getGreen()/255d,
                 textColor.getBlue()/255d,
                 textColor.getAlpha()/255d);
+        if(text != null)
+        	text.setFill(this.textColor);
+        mouseCatchingStage.requestFocus();
     }
     
     public void setTextColor(Color textColor)
     {
     	this.textColor = textColor;
+    	if(text != null)
+    		text.setFill(this.textColor);
+    	mouseCatchingStage.requestFocus();
     }
     
     public void setTextFont(String textFont) {
     	this.textFont = textFont;
+    	if(text != null)
+    		text.setFont(new Font(this.textFont, this.textSize));
+    	mouseCatchingStage.requestFocus();
     }
-
+    
     public Stack<ChangeItem> getUndoStack()
     {
         return undoStack;
