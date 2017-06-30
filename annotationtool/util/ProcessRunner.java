@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 
 public class ProcessRunner {
 	/**
@@ -67,6 +68,47 @@ public class ProcessRunner {
 			e.printStackTrace();
 		}
 		return new Object[] {windowID, width, height, x, y};
+	}
+	
+	public static ArrayList<String> getAllWindows(Process proc) {
+		String searchString = "_NET_CLIENT_LIST(WINDOW): window id # ";
+		ArrayList<String> windowIDs = new ArrayList<String>();
+		
+		String[] xPropArgs = new String[] {"xprop", "-root"};
+		BufferedReader br;
+		try {
+			br = runProcess(xPropArgs, proc);
+			String line = null;
+			while( (line = br.readLine()) != null) {
+				if(line.contains(searchString)) {
+					String windowIDLine = line.substring(line.indexOf(searchString) + searchString.length());
+					String[] windowIDArray = windowIDLine.split(", ");
+					for(String id : windowIDArray) {
+						windowIDs.add(id);
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return windowIDs;
+	}
+	
+	public static String getWindowTitleByID(String windowID, Process proc) {
+		try {
+			String[] xWinInfoArgs = {"xwininfo", "-id", windowID};
+			BufferedReader br = runProcess(xWinInfoArgs, proc);
+			
+			String line = null;
+			if((line = br.readLine()) != null && (line = br.readLine()) != null && line.contains("\"")) {
+				String title = line.substring(line.indexOf("\"") + 1, line.length() - 1);
+				return title;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 	
 	public static Double[] getWindowInfoByID(String windowID, Process proc) {

@@ -1,5 +1,7 @@
 package annotation;
 
+import java.util.ArrayList;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Screen;
@@ -15,6 +17,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 import util.ProcessRunner;
+import util.Window;
 
 public class FXAnnotationToolBuilder extends Application {
 	
@@ -22,6 +25,7 @@ public class FXAnnotationToolBuilder extends Application {
 	private GraphicsContext gc;
 	private Process proc;
 	
+	private ArrayList<Window> windows = new ArrayList<Window>();
 	private Object[] windowInfo;
     
     private double xPos1;
@@ -57,6 +61,17 @@ public class FXAnnotationToolBuilder extends Application {
 		
 		gc.setStroke(Color.RED);
     	gc.setLineWidth(4);
+    	
+    	if(System.getProperty("os.name") == "Linux") {
+    		ArrayList<String> windowIDs = ProcessRunner.getAllWindows(proc);
+
+    		for(String id : windowIDs) {
+    			String windowTitle = ProcessRunner.getWindowTitleByID(id, proc);
+    			String programID = ProcessRunner.getProgramID(id, proc);
+    			String programTitle = ProcessRunner.getProgramName(programID, proc);
+    			windows.add(new Window(id, windowTitle, programID, programTitle));
+    		}
+    	}
     }
     
     private void highlight(GraphicsContext gc) {
