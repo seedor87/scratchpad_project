@@ -11,14 +11,20 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.*;
 import javafx.scene.Cursor;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
@@ -27,6 +33,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import util.ProcessRunner;
@@ -68,6 +75,7 @@ public class AnnotationToolApplication extends Application {
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
     private Stage pictureStage;
+    private Stage textOptionStage;
     private Scene mouseCatchingScene;
     private Scene drawingScene;
     private Group root;
@@ -117,6 +125,7 @@ public class AnnotationToolApplication extends Application {
     
     // Settings
     private String windowID = "";
+    private String textFont = "Times New Roman";
     private final double[] minStageSize = {100, 100};
     private double strokeWidth = 5d;
     private double textSize = 5d;
@@ -253,6 +262,65 @@ public class AnnotationToolApplication extends Application {
         }
     };
 
+    public void showTextOptionStage() 
+    {
+    	if(makingTextBox) {
+    		if(textOptionStage == null) {
+    			textOptionStage = new Stage();
+    			HBox textOptions = new HBox();
+    			Label fontSizeLabel = new Label("Font Size:");
+    			textOptions.getChildren().add(fontSizeLabel);
+    			ObservableList<Double> fontSizeList = 
+    					FXCollections.observableArrayList(5d, 6d, 8d, 10d, 12d, 14d, 16d, 18d, 20d, 24d, 28d, 32d, 36d, 40d, 44d, 48d, 52d, 56d, 60d, 64d, 80d, 100d);
+    			ComboBox<Double> fontSizes = new ComboBox<>(fontSizeList);
+    			fontSizes.valueProperty().addListener(new ChangeListener<Double>() {
+    				@Override
+    				public void changed(ObservableValue<? extends Double> observableValue, Double oldSize, Double newSize) {
+    					setTextSize(newSize);
+    				}
+    			});
+    			fontSizes.setValue(textSize);
+    			textOptions.getChildren().add(fontSizes);
+    			
+    			Label fontStyleLabel = new Label("Font: ");
+    			textOptions.getChildren().add(fontStyleLabel);
+    			ObservableList<String> fontStyleList =
+    					FXCollections.observableArrayList(Font.getFamilies());
+    			ComboBox<String> fontStyles = new ComboBox<>(fontStyleList);
+    			fontStyles.valueProperty().addListener(new ChangeListener<String>() {
+    				@Override
+    				public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont) {
+    					setTextFont(newFont);
+    				}
+    			});
+    			fontStyles.setValue(textFont);
+    			textOptions.getChildren().add(fontStyles);
+    			
+    			Label fontColorLabel = new Label("Color: ");
+    			textOptions.getChildren().add(fontColorLabel);
+    			ColorPicker fontColorPicker = new ColorPicker(textColor);
+    			fontColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
+    				@Override
+    				public void changed(ObservableValue<? extends Color> observableValue, Color oldColor, Color newColor) {
+    					setTextColor(newColor);
+    				}
+    			});
+    			textOptions.getChildren().add(fontColorPicker);
+    			
+    			
+    			Scene textOptionScene = new Scene(textOptions);
+    			textOptionStage.setScene(textOptionScene);
+    			textOptionStage.setTitle("Text and Font Options");
+    			textOptionStage.setX( Math.max(0, mouseCatchingStage.getX() + .1 * mouseCatchingStage.getWidth()));
+    			textOptionStage.setY( Math.max(0, mouseCatchingStage.getY() + .1 * mouseCatchingStage.getHeight()));
+    			textOptionStage.setAlwaysOnTop(true);
+    		}
+    		textOptionStage.show();
+    	} else {
+    		textOptionStage.hide();
+    	}
+    }
+    
     public void doClear()
     {
         doClear(clickablyClearPaint);
@@ -864,6 +932,11 @@ public class AnnotationToolApplication extends Application {
     {
         this.textSize = (double) textSize;
     }
+    
+    public void setTextSize(Double textSize) 
+    {
+    	this.textSize = textSize;
+    }
 
     public void setTextColor(java.awt.Color textColor)
     {
@@ -872,6 +945,15 @@ public class AnnotationToolApplication extends Application {
                 textColor.getGreen()/255d,
                 textColor.getBlue()/255d,
                 textColor.getAlpha()/255d);
+    }
+    
+    public void setTextColor(Color textColor)
+    {
+    	this.textColor = textColor;
+    }
+    
+    public void setTextFont(String textFont) {
+    	this.textFont = textFont;
     }
 
     public Stack<ChangeItem> getUndoStack()
@@ -916,6 +998,7 @@ public class AnnotationToolApplication extends Application {
             this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             textBoxText.delete(0,textBoxText.length());
         }
+        showTextOptionStage();
     }
 
     public Group getRoot()
@@ -930,6 +1013,9 @@ public class AnnotationToolApplication extends Application {
     
     public boolean toggleLockedControllerBox() {
     	lockedControllerBox = !lockedControllerBox;
+    	if(lockedControllerBox) {
+    		controllerBox.fitScreen();
+    	}
     	return lockedControllerBox;
     }
 
@@ -1078,8 +1164,8 @@ public class AnnotationToolApplication extends Application {
         public void handle(MouseEvent event) {
             String defaultText = "Text";
             text = new Text(event.getX(), event.getY() , defaultText);
-            text.setFont(new Font(textSize));
-            text.setFill(paint);
+            text.setFont(new Font(textFont, textSize));
+            text.setFill(textColor);
             undoStack.push(new AddShape(text));
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
