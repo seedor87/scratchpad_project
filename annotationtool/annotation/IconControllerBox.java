@@ -415,6 +415,7 @@ public class IconControllerBox extends Stage
 
                 setIconSizes(result.get());
                 fitScreen();
+                at.resetStages();
             }
         });
         nodes.add(changeButtonSizeButton);

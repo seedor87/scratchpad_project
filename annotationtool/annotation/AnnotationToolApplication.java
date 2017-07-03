@@ -7,6 +7,7 @@ import changeItem.AddShape;
 import changeItem.ChangeItem;
 import changeItem.EraseShape;
 
+import changeItem.MoveShape;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -534,6 +535,7 @@ public class AnnotationToolApplication extends Application {
         //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -1091,6 +1093,38 @@ public class AnnotationToolApplication extends Application {
         {
             this.eventType = eventType;
             this.handler = handler;
+        }
+    }
+    Shape clickedShape;
+    public void setClickedShape(Shape shape)
+    {
+        clickedShape = shape;
+    }
+
+    /**
+     * should be implemented with mouseEvent.ANY
+     */
+    private class moveShapeHandler implements EventHandler<MouseEvent>
+    {
+        double oldX;
+        double oldY;
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED && clickedShape !=null)
+            {
+                oldX = clickedShape.getLayoutX();
+                oldY = clickedShape.getLayoutY();
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED && clickedShape != null)
+            {
+                clickedShape.setLayoutY(event.getY());
+                clickedShape.setLayoutX(event.getX());
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED && clickedShape != null)
+            {
+                commitChange(new MoveShape(clickedShape, oldX, oldY));
+            }
         }
     }
     

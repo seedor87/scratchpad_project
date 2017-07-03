@@ -2,6 +2,8 @@ package changeItem;
 
 import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
@@ -41,6 +43,14 @@ public class AddShape implements ChangeItem
                     //TODO find the reason why I need this try catch.
                     //                commitShape(new AddShape(newCircle)); is one place where it would be thrown.
                 }
+            }
+        });
+        shape.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                System.out.println("Shape clicked");
+                annotationToolApplication.setClickedShape(shape);
             }
         });
     }
