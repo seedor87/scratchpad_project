@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class MoveShape implements ChangeItem
 {
 
-    //TODO this class. 
+    //TODO this class.
 
     @Override
     public void addChangeToStage(AnnotationToolApplication annotationToolApplication)

@@ -316,7 +316,9 @@ public class AnnotationToolApplication extends Application {
     			textOptionStage.setAlwaysOnTop(true);
     		}
     		textOptionStage.show();
-    	} else {
+    	}
+    	else if(textOptionStage != null)
+    	{
     		textOptionStage.hide();
     	}
     }
