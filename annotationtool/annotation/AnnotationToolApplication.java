@@ -572,6 +572,9 @@ public class AnnotationToolApplication extends Application {
             {
                 pictureStage.setWidth(mouseCatchingStage.getWidth());
                 borderShape.setWidth(mouseCatchingStage.getWidth());
+                if(lockedControllerBox) {
+                    controllerBox.fitScreen();
+                }
             }
         });
 
@@ -581,6 +584,9 @@ public class AnnotationToolApplication extends Application {
             {
                 pictureStage.setHeight(mouseCatchingStage.getHeight());
                 borderShape.setHeight(mouseCatchingStage.getHeight());
+                if(lockedControllerBox) {
+                    controllerBox.fitScreen();
+                }
             }
         });
 
