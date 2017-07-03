@@ -1307,6 +1307,7 @@ public class AnnotationToolApplication extends Application {
 
     private class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent>
     {
+        boolean using = false;
         int topPointIndex;
         int bottomPointIndex;
         int rightPointIndex;
@@ -1330,6 +1331,7 @@ public class AnnotationToolApplication extends Application {
         {
             if(event.getTouchCount() == 2)
             {
+                using = true;
                 /*
                 Sets up some variables to keep track of which first point was which.
                  */
@@ -1409,8 +1411,9 @@ public class AnnotationToolApplication extends Application {
                     }
                 }
             }
-            else if(event.getEventType() == TouchEvent.TOUCH_RELEASED)
+            else if(event.getEventType() == TouchEvent.TOUCH_RELEASED && using)
             {
+                using = false;
                 mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             }
 
