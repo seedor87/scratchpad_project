@@ -21,75 +21,7 @@ import util.GridBagConstraintBuilder;
 
 public class FXControllerBox extends JFrame {
 
-    private AnnotationToolApplication annotationTool;
     private static final int SWATCH_SIZE = 24;
-
-    private Point initialClick;
-    private FXControllerBox thisBox = this;
-
-
-
-    private ComponentListener thisListener = new ComponentListener() {
-        @Override
-        public void componentResized(ComponentEvent e) {
-
-        }
-
-        @Override
-        public void componentMoved(ComponentEvent e)
-        {
-            //annotationTool.setLocation(new Point(thisBox.getX() -1300, thisBox.getY()));
-
-        }
-
-        @Override
-        public void componentShown(ComponentEvent e)
-        {
-
-        }
-
-        @Override
-        public void componentHidden(ComponentEvent e)
-        {
-
-        }
-    };
-
-
-
-
-    private static class SwatchIcon implements Icon {
-
-        private Paint paint;
-
-        public SwatchIcon(Paint p) {
-            this.paint = p;
-        }
-
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            Dimension size = c.getSize();
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setPaint(paint);
-            g2d.fillRect(x, y, size.width, size.height);
-            if (((AbstractButton) c).isSelected()) {
-                g2d.setColor(Color.BLACK);
-                g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
-                g2d.drawRect(x, y, size.width, size.height);
-            }
-        }
-
-        @Override
-        public int getIconWidth() {
-            return SWATCH_SIZE;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return SWATCH_SIZE;
-        }
-    }
-
     private static final Color[] penColors = {
             new Color(255, 0, 0, 255),
             new Color(255, 128, 0, 255),
@@ -99,7 +31,6 @@ public class FXControllerBox extends JFrame {
             new Color(255, 0, 255, 255),
             new Color(0, 0, 0, 255),
             new Color(255, 255, 255, 255),};
-
     private static final Color[] highlighterColors = {
             new Color(255, 0, 0, 128),
             new Color(255, 128, 0, 128),
@@ -109,33 +40,35 @@ public class FXControllerBox extends JFrame {
             // new Color(255, 255, 255, 10)
             new Color(0f,0f,0f,0.1f)
     };
+    private AnnotationToolApplication annotationTool;
+    private Point initialClick;
+    private FXControllerBox thisBox = this;
+    private ComponentListener thisListener = new ComponentListener() {
+        @Override
+        public void componentResized(ComponentEvent e) {
 
-
-
-    private static class PaintPalletteActionListener implements ActionListener {
-
-        private AnnotationToolApplication annotationTool;
-        private Color paint;
-
-        public PaintPalletteActionListener(AnnotationToolApplication at, Color ppi)
-        {
-            annotationTool = at;
-            paint = ppi;
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            /*annotationTool.setPaint(paint);*/
-        }
-    }
+        public void componentMoved(ComponentEvent e) {
+            //annotationTool.setLocation(new Point(thisBox.getX() -1300, thisBox.getY()));
 
+        }
+
+        @Override
+        public void componentShown(ComponentEvent e) {
+
+        }
+
+        @Override
+        public void componentHidden(ComponentEvent e) {
+
+        }
+    };
     private JRadioButton thinLine;
     private JRadioButton mediumLine;
     private JRadioButton thickLine;
     private JRadioButton hugeLine;
-
-
     public FXControllerBox(AnnotationToolApplication at) {
         super("Tools");
 
@@ -151,7 +84,7 @@ public class FXControllerBox extends JFrame {
         ActionListener setMakingTextBoxFalse = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setMakingTextBox(false);
+                annotationTool.setMakingText();
             }
         };
 
@@ -360,7 +293,7 @@ public class FXControllerBox extends JFrame {
         setDrawButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setMakingTextBox(false);
+                annotationTool.setDrawingText();
             }
         });
         add(setDrawButton, gbcb.build());
@@ -375,7 +308,7 @@ public class FXControllerBox extends JFrame {
                                            @Override
                                            public void actionPerformed(ActionEvent e)
                                            {
-                                               annotationTool.setMakingTextBox(true);
+                                               annotationTool.setMakingText();
                                            }
                                        }
 
@@ -498,15 +431,64 @@ public class FXControllerBox extends JFrame {
         this.setVisible(true);
     }
 
+    private static class SwatchIcon implements Icon {
+
+        private Paint paint;
+
+        public SwatchIcon(Paint p) {
+            this.paint = p;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Dimension size = c.getSize();
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setPaint(paint);
+            g2d.fillRect(x, y, size.width, size.height);
+            if (((AbstractButton) c).isSelected()) {
+                g2d.setColor(Color.BLACK);
+                g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+                g2d.drawRect(x, y, size.width, size.height);
+            }
+        }
+
+        @Override
+        public int getIconWidth() {
+            return SWATCH_SIZE;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return SWATCH_SIZE;
+        }
+    }
+
+    private static class PaintPalletteActionListener implements ActionListener {
+
+        private AnnotationToolApplication annotationTool;
+        private Color paint;
+
+        public PaintPalletteActionListener(AnnotationToolApplication at, Color ppi) {
+            annotationTool = at;
+            paint = ppi;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            /*annotationTool.setPaint(paint);*/
+        }
+    }
+
     /**
      * https://stackoverflow.com/questions/18830098/pick-color-with-jcombobox-java-swing
      */
     private class MyCellRenderer extends JButton implements ListCellRenderer {
+        boolean b = false;
         public MyCellRenderer() {
             setOpaque(true);
 
         }
-        boolean b=false;
+
         @Override
         public void setBackground(Color bg) {
             // TODO Auto-generated method stub
