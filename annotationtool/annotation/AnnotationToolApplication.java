@@ -167,7 +167,7 @@ public class AnnotationToolApplication extends Application {
         if(!sizedWindow) {
         	//this.mouseCatchingStage.setFullScreen(true);
         	//this.mouseCatchingStage.setMaximized(true);
-            this.mouseCatchingStage.setY(0);//TODO here make stage as big as screen
+            this.mouseCatchingStage.setY(0);
             this.mouseCatchingStage.setX(0);
             this.mouseCatchingStage.setHeight(primScreenBounds.getHeight());
             this.mouseCatchingStage.setWidth(primScreenBounds.getWidth());
@@ -197,7 +197,7 @@ public class AnnotationToolApplication extends Application {
             //pictureStage.setMaximized(true);
         	//pictureStage.setFullScreen(true);
             pictureStage.setX(0);
-            pictureStage.setY(0);//TODO here make stage as big as screen
+            pictureStage.setY(0);
             this.pictureStage.setHeight(primScreenBounds.getHeight());
             this.pictureStage.setWidth(primScreenBounds.getWidth());
         }
