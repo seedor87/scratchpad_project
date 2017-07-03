@@ -61,7 +61,7 @@ public class AnnotationToolApplication extends Application {
 
     static
     {
-        System.setProperty("java.awt.headless", "false");           //TODO test in linux.
+        System.setProperty("java.awt.headless", "false");
         //https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically
         //TODO that link might help with getting images in ubuntu.
     }
@@ -1437,7 +1437,6 @@ public class AnnotationToolApplication extends Application {
             {
                 firstPoint = event.getTouchPoints().get(0);
                 secondPoint = event.getTouchPoints().get(1);
-                //TODO setup first two points to be followed based on the later movement.
             }
 			if(event.getTouchCount() == 2) {
 				TouchPoint primaryTouch = event.getTouchPoints().get(0);
