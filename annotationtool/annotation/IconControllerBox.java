@@ -708,6 +708,7 @@ public class IconControllerBox extends Stage
     		case TOP_LOCATION:
     			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
     	        {
+    	            //TODO handle all if statements
     	            this.setX(at.getPictureStage().getX());
     	            centerOnScreen();
     	            this.setY(0);

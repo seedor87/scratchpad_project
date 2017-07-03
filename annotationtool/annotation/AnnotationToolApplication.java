@@ -15,6 +15,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.*;
 import javafx.scene.Cursor;
 import javafx.scene.control.ColorPicker;
@@ -160,11 +161,16 @@ public class AnnotationToolApplication extends Application {
      */
     public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow)
     {
+        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
         if(!sizedWindow) {
         	//this.mouseCatchingStage.setFullScreen(true);
-        	this.mouseCatchingStage.setMaximized(true);
+        	//this.mouseCatchingStage.setMaximized(true);
+            this.mouseCatchingStage.setY(0);//TODO here make stage as big as screen
+            this.mouseCatchingStage.setX(0);
+            this.mouseCatchingStage.setHeight(primScreenBounds.getHeight());
+            this.mouseCatchingStage.setWidth(primScreenBounds.getWidth());
         }
         else {
         	this.mouseCatchingStage.setX(x);
@@ -188,8 +194,12 @@ public class AnnotationToolApplication extends Application {
         pictureStage.initStyle(StageStyle.TRANSPARENT);
         pictureStage.setScene(drawingScene);
         if(!sizedWindow) {
-            pictureStage.setMaximized(true);
+            //pictureStage.setMaximized(true);
         	//pictureStage.setFullScreen(true);
+            pictureStage.setX(0);
+            pictureStage.setY(0);//TODO here make stage as big as screen
+            this.pictureStage.setHeight(primScreenBounds.getHeight());
+            this.pictureStage.setWidth(primScreenBounds.getWidth());
         }
         else {
             pictureStage.setX(x);
@@ -539,6 +549,15 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
         //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
+    }
+
+    private void unMaximize()
+    {
+        pictureStage.setMaximized(false);
+        pictureStage.setFullScreen(false);
+        mouseCatchingStage.setMaximized(false);
+        mouseCatchingStage.setFullScreen(false);
+
     }
 
     /**
