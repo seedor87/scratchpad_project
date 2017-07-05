@@ -17,6 +17,7 @@ public class EraseShape implements ChangeItem
 {
     private Path eraseArea;
     private Stack<ChangeItem> shapesPartiallyErased = new Stack<>();
+    private Stack<ChangeItem> undidStack;
     public EraseShape(Path eraseArea)
     {
         this.eraseArea = eraseArea;
@@ -74,6 +75,7 @@ public class EraseShape implements ChangeItem
     public void undoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
         Stack<ChangeItem> undoStack = annotationToolApplication.getUndoStack();
+        undidStack = (Stack<ChangeItem>) undoStack.clone();
         undoStack.clear();
 
         while(!(shapesPartiallyErased.isEmpty()))

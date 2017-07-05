@@ -12,7 +12,10 @@ import javafx.stage.Stage;
  */
 public class AddShape implements ChangeItem
 {
+    public static boolean movingShapes = true;
+    private final MoveShapeHandler moveShapeHandler = new MoveShapeHandler();
     private Shape shape;
+    private AnnotationToolApplication annotationToolApplication;
 
     public AddShape(Shape shape)
     {
@@ -28,6 +31,7 @@ public class AddShape implements ChangeItem
     @Override
     public void addChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
+        this.annotationToolApplication = annotationToolApplication;
         Platform.runLater(new Runnable() {
             @Override
             public void run()
@@ -45,14 +49,15 @@ public class AddShape implements ChangeItem
                 }
             }
         });
-        shape.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+        shape.addEventHandler(MouseEvent.ANY, moveShapeHandler);
+        /*new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
             {
                 System.out.println("Shape clicked");
                 annotationToolApplication.setClickedShape(shape);
             }
-        });
+        });*/
     }
 
     @Override
@@ -73,5 +78,40 @@ public class AddShape implements ChangeItem
     public void redoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
         addChangeToStage(annotationToolApplication);
+    }
+    private class MoveShapeHandler implements EventHandler<MouseEvent>
+    {
+        double oldX;
+        double oldY;
+        double oldClickX;
+        double oldClickY;
+        double newX;
+        double newY;
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED && movingShapes)
+            {
+                //oldX = shape.getTranslateX();
+                oldX = shape.layoutXProperty().get();
+                oldY = shape.layoutYProperty().get();
+                //oldY = shape.getTranslateY();
+                oldClickX = event.getScreenX();
+                oldClickY = event.getScreenY();
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED && movingShapes)
+            {
+                newX = oldX + event.getScreenX() - oldClickX;
+                newY = oldY + event.getScreenY() - oldClickY;
+                shape.layoutXProperty().set(newX);
+                shape.layoutYProperty().set(newY);
+                //shape.setTranslateX(newX);
+                //shape.setTranslateY(newY);
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED && movingShapes)
+            {
+                annotationToolApplication.commitChange(new MoveShape(shape, oldX, oldY));
+            }
+        }
     }
 }

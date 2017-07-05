@@ -598,6 +598,22 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(clearHistoryButton);
+
+        Button moveShapesButton = new Button();
+        ImageView moveShapesImage = new ImageView("selectimage.png");
+        moveShapesImage.setFitHeight(IMAGE_HEIGHT);
+        moveShapesImage.setFitWidth(IMAGE_WIDTH);
+        moveShapesButton.setGraphic(moveShapesImage);
+        moveShapesButton.setTooltip(getToolTip("Select and move shapes."));
+        moveShapesButton.setGraphic(moveShapesImage);
+        moveShapesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.setSelectAndMoveHandler();
+            }
+        });
+        nodes.add(moveShapesButton);
         
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".

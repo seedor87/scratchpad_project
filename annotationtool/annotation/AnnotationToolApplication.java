@@ -364,7 +364,7 @@ public class AnnotationToolApplication extends Application {
         });
         redoStack.clear();
     }
-    private void commitChange(ChangeItem changeItem)
+    public void commitChange(ChangeItem changeItem)
     {
         changeItem.addChangeToStage(this);
         undoStack.push(changeItem);
@@ -517,6 +517,8 @@ public class AnnotationToolApplication extends Application {
         {
             this.mouseCatchingScene.removeEventHandler(h.eventType,h.handler);
         }
+        AddShape.movingShapes = false;
+        resetStages();
         mouseCatchingScene.setCursor(pencilCursor);
     }
 
@@ -535,7 +537,7 @@ public class AnnotationToolApplication extends Application {
         //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
-        mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
+        //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -1095,37 +1097,12 @@ public class AnnotationToolApplication extends Application {
             this.handler = handler;
         }
     }
-    Shape clickedShape;
-    public void setClickedShape(Shape shape)
+    public void setSelectAndMoveHandler()
     {
-        clickedShape = shape;
-    }
-
-    /**
-     * should be implemented with mouseEvent.ANY
-     */
-    private class moveShapeHandler implements EventHandler<MouseEvent>
-    {
-        double oldX;
-        double oldY;
-        @Override
-        public void handle(MouseEvent event)
-        {
-            if(event.getEventType() == MouseEvent.MOUSE_PRESSED && clickedShape !=null)
-            {
-                oldX = clickedShape.getLayoutX();
-                oldY = clickedShape.getLayoutY();
-            }
-            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED && clickedShape != null)
-            {
-                clickedShape.setLayoutY(event.getY());
-                clickedShape.setLayoutX(event.getX());
-            }
-            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED && clickedShape != null)
-            {
-                commitChange(new MoveShape(clickedShape, oldX, oldY));
-            }
-        }
+        mouseCatchingStage.toFront();
+        pictureStage.toFront();
+        controllerBox.toFront();
+        AddShape.movingShapes = true;
     }
     
     /**
@@ -1211,14 +1188,16 @@ public class AnnotationToolApplication extends Application {
         {
             if(clickable)
             {
-                if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                path = new Path();
-                path.setStrokeWidth(strokeWidth);
-                path.setSmooth(true);
-                MoveTo moveTo = new MoveTo(event.getX(), event.getY());
-                LineTo lineTo = new LineTo(event.getX(), event.getY());
-                path.getElements().add(moveTo);
-                root.getChildren().add(path);
+                if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
+                {
+                    path = new Path();
+                    path.setStrokeWidth(strokeWidth);
+                    path.setSmooth(true);
+                    MoveTo moveTo = new MoveTo(event.getX(), event.getY());
+                    LineTo lineTo = new LineTo(event.getX(), event.getY());
+                    path.getElements().add(moveTo);
+                    //root.getChildren().add(path);
+                    commitChange(new AddShape(path));
                 path.setStroke(paint);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -1230,7 +1209,7 @@ public class AnnotationToolApplication extends Application {
                 //path.setFillRule(FillRule.EVEN_ODD);
                 //path.setFill(paint);
                 //root.getChildren().add(path);
-                undoStack.push(new AddShape(path));
+                //undoStack.push(new AddShape(path));
                 path = null;
                 redoStack.clear();
                 }
@@ -1250,7 +1229,8 @@ public class AnnotationToolApplication extends Application {
             text = new Text(event.getX(), event.getY() , defaultText);
             text.setFont(new Font(textFont, textSize));
             text.setFill(textColor);
-            undoStack.push(new AddShape(text));
+            //undoStack.push(new AddShape(text));
+            commitChange(new AddShape(text));
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
             redoStack.clear();
