@@ -1,40 +1,30 @@
 package annotation;
 
-import com.sun.javafx.font.freetype.HBGlyphLayout;
+
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import javax.swing.*;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.peer.ButtonPeer;
-import java.io.File;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -514,6 +504,9 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.getMouseCatchingStage().setAlwaysOnTop(false);
+            	at.getPictureStage().setAlwaysOnTop(false);
+            	at.getPictureStage().toBack();
                 at.toBack();
             }
         });
@@ -689,85 +682,91 @@ public class IconControllerBox extends Stage
     }
     
     private void snapBox(int numSplits) {
-    	root.getChildren().remove(trunk);
-    	Pane[] splits;
-    	splits = new Pane[numSplits];
-    	
-    	if(location == TOP_LOCATION) {
-    		trunk = new VBox();
-    		for(int i = 0; i < numSplits; i++) {
-    			splits[i] = new HBox();
-    		}
-    	} else {
-    		trunk = new HBox();
-    		for(int i = 0; i < numSplits; i++) {
-    			splits[i] = new VBox();
-    		}
-    	}
-    	
-    	for(Pane pane : splits) {
-    		trunk.getChildren().add(pane);
-    	}
-    	
-    	int i = 0;
-    	for(Node node : nodes)
-        {
-            splits[i].getChildren().add(node);
-            i = ++i % numSplits;
-        }
-    	
-    	root.getChildren().add(trunk);
-    	this.sizeToScene();
-        Stage pictureStage = at.getPictureStage();
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        
-    	switch(location) {
-    		case TOP_LOCATION:
-    			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-    	        {
-    	            //TODO handle all if statements
-    	            this.setX(at.getPictureStage().getX());
-    	            centerOnScreen();
-    	            this.setY(0);
-    	        }
-    	        else
-    	        {
-    	            this.setY( Math.max(0, pictureStage.yProperty().get() - buttonSize) );
-    	            this.setX( Math.min( Math.max(0, pictureStage.xProperty().get() + pictureStage.getWidth()/2- this.getWidth()/2), 
-    	            		   screenSize.getWidth() - (nodes.size() * buttonSize) / numSplits) );
-    	        }
-    			break;
-    		case LEFT_LOCATION:
-    			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-    	        {
-    	            centerOnScreen();
-    	            this.setX(0);
-    	        }
-    	        else
-    	        {
-    	            this.setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2), 
-    	            		   screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
-    	            this.setX( Math.max(0, pictureStage.xProperty().get() - (buttonSize * numSplits)) );
-    	        }
-    			break;
-    		case RIGHT_LOCATION:
-    			if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-    	        {
-    	            centerOnScreen();
-    	            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-    	            this.setX(primScreenBounds.getWidth() - this.getWidth());
-    	        }
-    	        else
-    	        {
-    	        	this.setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - this.getHeight() /2), 
- 	            		   	   screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
-    	            this.setX( Math.min(pictureStage.xProperty().get() + pictureStage.getWidth() - this.getWidth() + (numSplits * buttonSize), 
-    	            		   Toolkit.getDefaultToolkit().getScreenSize().getWidth() - (numSplits * buttonSize)) );
-    	        }
-    			break;
-    		default:
-    			break;
-    	}
+    	Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				root.getChildren().remove(trunk);
+				Pane[] splits;
+				splits = new Pane[numSplits];
+				
+				if(location == TOP_LOCATION) {
+					trunk = new VBox();
+					for(int i = 0; i < numSplits; i++) {
+						splits[i] = new HBox();
+					}
+				} else {
+					trunk = new HBox();
+					for(int i = 0; i < numSplits; i++) {
+						splits[i] = new VBox();
+					}
+				}
+				
+				for(Pane pane : splits) {
+					trunk.getChildren().add(pane);
+				}
+				
+				int i = 0;
+				for(Node node : nodes)
+				{
+					splits[i].getChildren().add(node);
+					i = ++i % numSplits;
+				}
+				
+				root.getChildren().add(trunk);
+				sizeToScene();
+				Stage pictureStage = at.getPictureStage();
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				
+				switch(location) {
+				case TOP_LOCATION:
+					if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+					{
+						//TODO handle all if statements
+						setX(at.getPictureStage().getX());
+						centerOnScreen();
+						setY(0);
+					}
+					else
+					{
+						setY( Math.max(0, pictureStage.yProperty().get() - buttonSize) );
+						setX( Math.min( Math.max(0, pictureStage.xProperty().get() + pictureStage.getWidth()/2- getWidth()/2), 
+								screenSize.getWidth() - (nodes.size() * buttonSize) / numSplits) );
+					}
+					break;
+				case LEFT_LOCATION:
+					if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+					{
+						centerOnScreen();
+						setX(0);
+					}
+					else
+					{
+						setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - getHeight() /2), 
+								screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+						setX( Math.max(0, pictureStage.xProperty().get() - (buttonSize * numSplits)) );
+					}
+					break;
+				case RIGHT_LOCATION:
+					if(pictureStage.isFullScreen() || pictureStage.isMaximized())
+					{
+						centerOnScreen();
+						Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+						setX(primScreenBounds.getWidth() - getWidth());
+					}
+					else
+					{
+						setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - getHeight() /2), 
+								screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+						setX( Math.min(pictureStage.xProperty().get() + pictureStage.getWidth() - getWidth() + (numSplits * buttonSize), 
+								Toolkit.getDefaultToolkit().getScreenSize().getWidth() - (numSplits * buttonSize)) );
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		});
     }
     
 }

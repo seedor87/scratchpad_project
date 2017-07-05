@@ -425,6 +425,8 @@ public class FXControllerBox extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 annotationTool.toFront();
+                annotationTool.getPictureStage().setAlwaysOnTop(true);
+                annotationTool.getMouseCatchingStage().setAlwaysOnTop(true);
                 //annotationTool.setAlwaysOnTop(true);
                 toFront();
                 //setAlwaysOnTop(true);
@@ -437,7 +439,8 @@ public class FXControllerBox extends JFrame {
         sendBack.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setAlwaysOnTop(false);
+                annotationTool.getPictureStage().setAlwaysOnTop(false);
+                annotationTool.getMouseCatchingStage().setAlwaysOnTop(false);
                 annotationTool.toBack();
             }
         });
