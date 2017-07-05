@@ -404,8 +404,8 @@ public class FXControllerBox extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (JOptionPane.showConfirmDialog(
-                        FXControllerBox.this, "Confirm quit?", "Confirm quit",
-                        JOptionPane.YES_NO_OPTION)
+                        null, "Confirm quit?", "Confirm quit",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
                         == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
@@ -416,7 +416,7 @@ public class FXControllerBox extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (JOptionPane.showConfirmDialog(
-                        FXControllerBox.this, "Confirm quit?", "Confirm quit",
+                        null, "Confirm quit?", "Confirm quit",
                         JOptionPane.YES_NO_OPTION)
                         == JOptionPane.YES_OPTION) {
                     System.exit(0);
