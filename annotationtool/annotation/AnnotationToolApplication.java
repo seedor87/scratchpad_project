@@ -261,6 +261,9 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingStage.show();
         pictureStage.show();
+        
+        pictureStage.setAlwaysOnTop(true);
+        mouseCatchingStage.setAlwaysOnTop(true);
     }
     
     //================================================================================
@@ -949,6 +952,11 @@ public class AnnotationToolApplication extends Application {
     public Stage getPictureStage()
     {
         return this.pictureStage;
+    }
+    
+    public Stage getMouseCatchingStage() 
+    {
+    	return this.mouseCatchingStage;
     }
 
     public Double getStrokeWidth()

@@ -101,7 +101,7 @@ public class FXAnnotationToolBuilder extends Application {
         final Label label = new Label("Windows");
         label.setFont(new Font("Arial", 20));
  
-        table = new TableView<Window>(); 
+        table = new TableView(); 
         table.setEditable(false);
  
         TableColumn<Window, String> windowTitles = new TableColumn<>("Window Titles");
@@ -123,8 +123,11 @@ public class FXAnnotationToolBuilder extends Application {
         selectWindowButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				windowInfo = ProcessRunner.getWindowInfoByID(((Window)table.getSelectionModel().getSelectedItem()).getId(), proc);
-				build(true);
+				Window selectedWindow = (Window)table.getSelectionModel().getSelectedItem();
+				windowInfo = ProcessRunner.getWindowInfoByID(selectedWindow.getId(), proc);
+				ProcessRunner.focusWindow(selectedWindow.getTitle(), proc);
+				buildFromInfo();
+				stage.close();
 			}
 		});
         Button annotateDesktopButton = new Button();
@@ -140,7 +143,7 @@ public class FXAnnotationToolBuilder extends Application {
         hbox.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         hbox.getChildren().addAll(selectWindowButton, annotateDesktopButton);
         
-        vbox.getChildren().add(hbox);
+        vbox.getChildren().addAll(table, hbox);
  
         ((Group) scene.getRoot()).getChildren().addAll(vbox);
         
@@ -217,6 +220,29 @@ public class FXAnnotationToolBuilder extends Application {
 		
 	}
 	
+	private void buildFromInfo() {
+		building = true;
+		this.stage.setOpacity(0f);
+		this.stage.setIconified(true);
+		
+		Stage newStage = new Stage();
+		Stage newSecondaryStage = new Stage();
+		newStage.setWidth((Double)windowInfo[0]);
+		newSecondaryStage.setWidth((Double)windowInfo[0]);
+		newStage.setHeight((Double)windowInfo[1]);
+		newSecondaryStage.setHeight((Double)windowInfo[1]);
+		double x = (Double)windowInfo[2];
+		double y = (Double)windowInfo[3];
+		AnnotationToolApplication app = new AnnotationToolApplication(
+				newStage, 
+				newSecondaryStage, 
+				x, 
+				y, 
+				true, 
+				String.valueOf(windowInfo[0])
+				);
+	}
+	
 	private void build(boolean snapToWindow) {
 		if(building) {
 			return;
@@ -244,8 +270,6 @@ public class FXAnnotationToolBuilder extends Application {
 						newSecondaryStage.setHeight((Double)windowInfo[2]);
 						double x = (Double)windowInfo[3];
 						double y = (Double)windowInfo[4];
-						
-						System.out.println(windowInfo[0]);
 						
 						AnnotationToolApplication app = new AnnotationToolApplication(
 														newStage, 

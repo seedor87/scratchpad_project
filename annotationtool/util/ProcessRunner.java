@@ -153,6 +153,15 @@ public class ProcessRunner {
 		return new Double[] {width, height, x, y};
 	}
 	
+	public static void focusWindow(String windowTitle, Process proc) {
+		String[] wmCtrlArgs = {"wmctrl", "-a", windowTitle};
+		try {
+			BufferedReader br = runProcess(wmCtrlArgs, proc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Gets the ID number of the program.
 	 * 
