@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 /**
@@ -111,6 +112,10 @@ public class AddShape implements ChangeItem
             else if(event.getEventType() == MouseEvent.MOUSE_RELEASED && movingShapes)
             {
                 annotationToolApplication.commitChange(new MoveShape(shape, oldX, oldY));
+                if(shape instanceof Text)
+                {
+                    annotationToolApplication.setEditingText((Text) shape);
+                }
             }
         }
     }

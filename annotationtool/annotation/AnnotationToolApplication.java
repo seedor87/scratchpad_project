@@ -3,11 +3,8 @@ package annotation;
  * Created by remem on 5/30/2017.
  */
 
-import changeItem.AddShape;
-import changeItem.ChangeItem;
-import changeItem.EraseShape;
+import changeItem.*;
 
-import changeItem.MoveShape;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -1217,7 +1214,13 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
-
+    public void setEditingText(Text text)
+    {
+        System.out.println("Here");
+        System.out.println(textBoxText);
+        this.resetHandlers();
+        commitChange(new EditText(text, this));
+    }
     /**
      * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
      * TextBoxKeyHandler changes the text in the box if needed.
@@ -1246,6 +1249,7 @@ public class AnnotationToolApplication extends Application {
         public void handle(KeyEvent event)
         {
             char c = event.getCharacter().charAt(0);
+            System.out.println(c);
             if((( c > 31)&&(c < 127)))
             {
                 textBoxText.append(c);

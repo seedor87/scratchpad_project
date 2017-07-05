@@ -4,6 +4,7 @@ import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import sun.security.provider.SHA;
 
@@ -48,14 +49,20 @@ public class EraseShape implements ChangeItem
             {
                 oldShape =((AddShape) oldItem).getShape();
 
-                newShape = Shape.subtract(oldShape, eraseArea);
-                newShape.setFill(oldShape.getFill());
-                if(oldShape.getFill() == null)
+                if(oldShape instanceof Text)
                 {
-                    newShape.setFill(oldShape.getStroke());
+                    shapesPartiallyErased.add(oldItem);
                 }
-                shapesPartiallyErased.add(oldItem);
-                iterator.set(new AddShape(newShape));
+                else
+                {
+                    newShape = Shape.subtract(oldShape, eraseArea);
+                    newShape.setFill(oldShape.getFill());
+                    if (oldShape.getFill() == null) {
+                        newShape.setFill(oldShape.getStroke());
+                    }
+                    shapesPartiallyErased.add(oldItem);
+                    iterator.set(new AddShape(newShape));
+                }
             }
             else
             {
