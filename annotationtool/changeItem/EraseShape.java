@@ -95,6 +95,16 @@ public class EraseShape implements ChangeItem
     @Override
     public void redoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
-        addChangeToStage(annotationToolApplication);
+        Stack<ChangeItem> undoStack = annotationToolApplication.getUndoStack();
+        shapesPartiallyErased = (Stack<ChangeItem>)undoStack.clone();
+        undoStack.clear();
+        undoStack.addAll(undidStack);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run()
+            {
+                annotationToolApplication.paintFromUndoStack();
+            }
+        });
     }
 }
