@@ -1,31 +1,19 @@
-package annotationtool;
+package annotation;
+/*package annotationtool;
 
 import java.awt.*;
-import java.awt.Color;
-import java.awt.Paint;
 import java.awt.event.*;
-import java.awt.event.ActionEvent;
-import java.util.*;
-import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
 import javax.swing.*;
-import javax.swing.Timer;
-import javax.swing.event.MouseInputAdapter;
 
-import javafx.embed.swing.JFXPanel;
-import javafx.event.*;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.paint.*;
 import util.GridBagConstraintBuilder;
 
-public class FXControllerBox extends JFrame {
+public class ControllerBox extends JFrame {
 
-    private AnnotationToolApplication annotationTool;
+    private AnnotationTool annotationTool;
     private static final int SWATCH_SIZE = 24;
 
     private Point initialClick;
-    private FXControllerBox thisBox = this;
+    private ControllerBox thisBox = this;
 
 
 
@@ -91,42 +79,40 @@ public class FXControllerBox extends JFrame {
     }
 
     private static final Color[] penColors = {
-            new Color(255, 0, 0, 255),
-            new Color(255, 128, 0, 255),
-            new Color(255, 255, 0, 255),
-            new Color(0, 255, 0, 255),
-            new Color(0, 0, 255, 255),
-            new Color(255, 0, 255, 255),
-            new Color(0, 0, 0, 255),
-            new Color(255, 255, 255, 255),};
+        new Color(255, 0, 0, 255),
+        new Color(255, 128, 0, 255),
+        new Color(255, 255, 0, 255),
+        new Color(0, 255, 0, 255),
+        new Color(0, 0, 255, 255),
+        new Color(255, 0, 255, 255),
+        new Color(0, 0, 0, 255),
+        new Color(255, 255, 255, 255),};
 
     private static final Color[] highlighterColors = {
-            new Color(255, 0, 0, 128),
-            new Color(255, 128, 0, 128),
-            new Color(255, 255, 0, 128),
-            new Color(0, 255, 0, 128),
-            new Color(0, 0, 255, 128),
-            // new Color(255, 255, 255, 10)
-            new Color(0f,0f,0f,0.1f)
+        new Color(255, 0, 0, 128),
+        new Color(255, 128, 0, 128),
+        new Color(255, 255, 0, 128),
+        new Color(0, 255, 0, 128),
+        new Color(0, 0, 255, 128),
+       // new Color(255, 255, 255, 10)
+        new Color(0f,0f,0f,0.1f)
     };
 
 
 
     private static class PaintPalletteActionListener implements ActionListener {
 
-        private AnnotationToolApplication annotationTool;
+        private AnnotationTool annotationTool;
         private Color paint;
 
-        public PaintPalletteActionListener(AnnotationToolApplication at, Color ppi)
-        {
+        public PaintPalletteActionListener(AnnotationTool at, Color ppi) {
             annotationTool = at;
             paint = ppi;
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            /*annotationTool.setPaint(paint);*/
+        public void actionPerformed(ActionEvent e) {
+            annotationTool.setPaint(paint);
         }
     }
 
@@ -136,7 +122,7 @@ public class FXControllerBox extends JFrame {
     private JRadioButton hugeLine;
 
 
-    public FXControllerBox(AnnotationToolApplication at) {
+    public ControllerBox(AnnotationTool at) {
         super("Tools");
 
         this.addComponentListener(thisListener);
@@ -155,36 +141,13 @@ public class FXControllerBox extends JFrame {
             }
         };
 
-        JFXPanel jfxPanel = new JFXPanel();
-        Group root  =  new  Group();
-        Scene  scene  =  new  Scene(root);
-        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        ColorPicker colorPicker = new ColorPicker(javafx.scene.paint.Color.BLACK);
-        colorPicker.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
-            @Override
-            public void handle(javafx.event.ActionEvent event)
-            {
-                javafx.scene.paint.Color c = colorPicker.getValue();
-                annotationTool.setPaint(c);
-            }
-        });
-        root.getChildren().add(colorPicker);
-        jfxPanel.setScene(scene);
-        JPanel fxPanelHolder = new JPanel(new GridBagLayout());
-        fxPanelHolder.add(jfxPanel);
-        add(fxPanelHolder, gbcb.fullWidth().nextY().build());
-
-
-        //gbcb.nextY();
-
-
-/*        add(new JLabel("Pens"), gbcb.fullWidth().build());
+        add(new JLabel("Pens"), gbcb.fullWidth().build());
         gbcb.nextY().singleWidth();
         boolean first = true;
         for (Color ppi : penColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
-            //jrb.addActionListener(setMakingTextBoxFalse);
+            jrb.addActionListener(setMakingTextBoxFalse);
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
@@ -199,21 +162,22 @@ public class FXControllerBox extends JFrame {
         for (Color ppi : highlighterColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
-            //jrb.addActionListener(setMakingTextBoxFalse);
+            jrb.addActionListener(setMakingTextBoxFalse);
             add(jrb, gbcb.build());
             gbcb.nextX();
             toolGroup.add(jrb);
         }
-        add(new JLabel("Pen Sizes"), gbcb.fullWidth().nextY().build());*/
+        add(new JLabel("Pen Sizes"), gbcb.fullWidth().nextY().build());
 
         thinLine = new JRadioButton("Thin");
         thinLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(5);
+                annotationTool.setStroke(
+                        new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        //thinLine.addActionListener(setMakingTextBoxFalse);
+        thinLine.addActionListener(setMakingTextBoxFalse);
         add(thinLine, gbcb.nextY().build());
         gbcb.nextY();
 
@@ -223,10 +187,11 @@ public class FXControllerBox extends JFrame {
         mediumLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(15);
+                annotationTool.setStroke(
+                        new BasicStroke(15, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        //mediumLine.addActionListener(setMakingTextBoxFalse);
+        mediumLine.addActionListener(setMakingTextBoxFalse);
         add(mediumLine, gbcb.build());
         gbcb.nextY();
 
@@ -234,10 +199,11 @@ public class FXControllerBox extends JFrame {
         thickLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(30);
+                annotationTool.setStroke(
+                        new BasicStroke(30, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        //thickLine.addActionListener(setMakingTextBoxFalse);
+        thickLine.addActionListener(setMakingTextBoxFalse);
         add(thickLine, gbcb.build());
         gbcb.nextY();
 
@@ -245,10 +211,11 @@ public class FXControllerBox extends JFrame {
         hugeLine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.setStroke(70);
+                annotationTool.setStroke(
+                        new BasicStroke(70, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        //hugeLine.addActionListener(setMakingTextBoxFalse);
+        hugeLine.addActionListener(setMakingTextBoxFalse);
         add(hugeLine, gbcb.build());
         gbcb.nextY();
 
@@ -271,25 +238,14 @@ public class FXControllerBox extends JFrame {
         add(eraseButton, gbcb.build());
         gbcb.nextY();
 
-/*        JButton eraseWhiteButton = new JButton("Erase White");
+        JButton eraseWhiteButton = new JButton("Erase White");
         eraseWhiteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                annotationTool.doClear(new javafx.scene.paint.Color(1d, 1d, 1d, 1d));
+                annotationTool.doClear(new Color(255, 255, 255, 255));
             }
         });
         add(eraseWhiteButton, gbcb.build());
-        gbcb.nextY();*/
-
-        JButton eraserButton = new JButton("Eraser");
-        eraserButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                annotationTool.turnOnErasing();
-            }
-        });
-        add(eraserButton, gbcb.build());
         gbcb.nextY();
 
         JButton undoButton = new JButton("Undo");
@@ -332,42 +288,9 @@ public class FXControllerBox extends JFrame {
         add(toggleClickableButton, gbcb.build());
         gbcb.nextY();
 
+
         add(new JLabel("----------"), gbcb.build());
         gbcb.nextY();
-
-        JButton circleAdder = new JButton("Add circle");
-        circleAdder.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                annotationTool.makeCircles();
-            }
-        });
-        add(circleAdder, gbcb.build());
-        gbcb.nextY();
-
-        JButton lineAdder = new JButton("Add Arrow");
-        lineAdder.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                annotationTool.makeLines();
-            }
-        });
-        add(lineAdder, gbcb.build());
-        gbcb.nextY();
-
-        JButton setDrawButton = new JButton("Draw");
-        setDrawButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                annotationTool.setMakingTextBox(false);
-            }
-        });
-        add(setDrawButton, gbcb.build());
-        gbcb.nextY();
-
-/*        add(new JLabel("----------"), gbcb.build());
-        gbcb.nextY();*/
 
         JButton textBoxAdder = new JButton("Add Text");
         textBoxAdder.addActionListener(new ActionListener()
@@ -401,7 +324,7 @@ public class FXControllerBox extends JFrame {
         add(textSizes, gbcb.build());
         gbcb.nextY();
 
-        /*add(new JLabel("Text Color:"), gbcb.build());
+        add(new JLabel("Text Color:"), gbcb.build());
         gbcb.nextY();
 
         JComboBox textColors = new JComboBox(penColors);                                // could replace with a separate array if desired.
@@ -414,7 +337,7 @@ public class FXControllerBox extends JFrame {
             }
         });
         add(textColors, gbcb.build());
-        gbcb.nextY();*/
+        gbcb.nextY();
 
 
         add(new JLabel("----------"), gbcb.build());
@@ -425,9 +348,7 @@ public class FXControllerBox extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 annotationTool.toFront();
-                //annotationTool.setAlwaysOnTop(true);
-                toFront();
-                //setAlwaysOnTop(true);
+                annotationTool.setAlwaysOnTop(true);
             }
         });
         add(bringToTop, gbcb.build());
@@ -442,17 +363,6 @@ public class FXControllerBox extends JFrame {
             }
         });
         add(sendBack, gbcb.build());
-        gbcb.nextY();
-
-        JButton hideButton = new JButton("Hide");
-        hideButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                thisBox.setBounds(thisBox.getX(), thisBox.getY(), thisBox.getWidth(), 50);
-            }
-        });
-        add(hideButton, gbcb.build());
         gbcb.nextY();
 
         JButton save = new JButton("Save image");
@@ -471,7 +381,7 @@ public class FXControllerBox extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (JOptionPane.showConfirmDialog(
-                        FXControllerBox.this, "Confirm quit?", "Confirm quit",
+                        ControllerBox.this, "Confirm quit?", "Confirm quit",
                         JOptionPane.YES_NO_OPTION)
                         == JOptionPane.YES_OPTION) {
                     System.exit(0);
@@ -483,7 +393,7 @@ public class FXControllerBox extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (JOptionPane.showConfirmDialog(
-                        FXControllerBox.this, "Confirm quit?", "Confirm quit",
+                        ControllerBox.this, "Confirm quit?", "Confirm quit",
                         JOptionPane.YES_NO_OPTION)
                         == JOptionPane.YES_OPTION) {
                     System.exit(0);
@@ -491,16 +401,11 @@ public class FXControllerBox extends JFrame {
             }
         });
         gbcb.nextY();
-
-        this.setBounds(300, 0, 0, 0);
-        this.setMinimumSize(new Dimension(275, this.getHeight()));
-        this.pack();
-        this.setVisible(true);
     }
 
-    /**
+    *//**
      * https://stackoverflow.com/questions/18830098/pick-color-with-jcombobox-java-swing
-     */
+     *//*
     private class MyCellRenderer extends JButton implements ListCellRenderer {
         public MyCellRenderer() {
             setOpaque(true);
@@ -536,3 +441,4 @@ public class FXControllerBox extends JFrame {
 
 
 }
+*/
