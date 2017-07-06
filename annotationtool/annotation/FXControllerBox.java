@@ -19,7 +19,9 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.*;
 import util.GridBagConstraintBuilder;
 
+
 public class FXControllerBox extends JFrame {
+
 
     private static final int SWATCH_SIZE = 24;
     private static final Color[] penColors = {
@@ -69,6 +71,8 @@ public class FXControllerBox extends JFrame {
     private JRadioButton mediumLine;
     private JRadioButton thickLine;
     private JRadioButton hugeLine;
+
+
     public FXControllerBox(AnnotationToolApplication at) {
         super("Tools");
 
@@ -226,6 +230,7 @@ public class FXControllerBox extends JFrame {
         gbcb.nextY();
 
         JButton undoButton = new JButton("Undo");
+
         undoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -404,8 +409,10 @@ public class FXControllerBox extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (JOptionPane.showConfirmDialog(
-                        null, "Confirm quit?", "Confirm quit",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
+                        null,
+                        "Confirm quit?",
+                        "Confirm quit",
+                        JOptionPane.YES_NO_OPTION)
                         == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
@@ -416,8 +423,11 @@ public class FXControllerBox extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (JOptionPane.showConfirmDialog(
-                        null, "Confirm quit?", "Confirm quit",
-                        JOptionPane.YES_NO_OPTION)
+                        null,
+                        "Confirm quit?",
+                        "Confirm quit",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE)
                         == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }

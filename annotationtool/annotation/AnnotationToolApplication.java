@@ -982,6 +982,7 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
+
     }
 
     /**
@@ -1116,6 +1117,7 @@ public class AnnotationToolApplication extends Application {
                 originalY = event.getScreenY();
                 originalStageX = mouseCatchingStage.getX();
                 originalStageY = mouseCatchingStage.getY();
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("grab.png")));
             }
             else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
             {
@@ -1127,6 +1129,7 @@ public class AnnotationToolApplication extends Application {
             else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
                 originalX = -1;
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
             }
         }
     }
