@@ -48,7 +48,9 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
@@ -606,6 +608,7 @@ public class AnnotationToolApplication extends Application {
                 if(lockedControllerBox) {
                     controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
@@ -618,6 +621,7 @@ public class AnnotationToolApplication extends Application {
                 if(lockedControllerBox) {
                     controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
@@ -629,6 +633,7 @@ public class AnnotationToolApplication extends Application {
                 if(lockedControllerBox) {
                 	controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
@@ -640,6 +645,7 @@ public class AnnotationToolApplication extends Application {
                 if(lockedControllerBox) {
                 	controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
@@ -998,6 +1004,20 @@ public class AnnotationToolApplication extends Application {
             	mouseCatchingStage.setIconified(true);
             }
         });
+    }
+    
+    
+    private void saveState()
+    {
+    	try(  PrintWriter out = new PrintWriter( "state.txt" )  ){
+    	    out.println( 
+    	    		String.valueOf(mouseCatchingStage.getWidth()) + " " +
+    	    		String.valueOf(mouseCatchingStage.getHeight()) + " " +
+    	    		String.valueOf(mouseCatchingStage.getX()) + " " +
+    	    		String.valueOf(mouseCatchingStage.getY()) );
+    	} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
     }
     
     /*private CirclePopupMenu initializeShapeMenu() {

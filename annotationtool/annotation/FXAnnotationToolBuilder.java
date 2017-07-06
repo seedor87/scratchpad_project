@@ -1,5 +1,8 @@
 package annotation;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -35,16 +38,19 @@ import util.Window;
 /**
  * Both the main class as well as the builder for the application. Using this you can create a maximized window, a window of a specific size
  * or a window that snaps to a running window (in Linux).
- */ 
+ */
 public class FXAnnotationToolBuilder extends Application {
 	
 	private Stage stage;
+	private Stage tableStage;
 	private GraphicsContext gc;
 	private Process proc;
 	private TableView table;
 	
 	private ArrayList<Window> windows = new ArrayList<Window>();
 	private Object[] windowInfo;
+	
+	private static String programRestore;
     
     private double xPos1;
     private double yPos1;
@@ -52,16 +58,76 @@ public class FXAnnotationToolBuilder extends Application {
     private double yPos2;
     private double xPosCurr;
     private double yPosCurr;
+    private static double widthRestore = -1;
+    private static double heightRestore = -1;
+    private static double xRestore = -1;
+    private static double yRestore = -1;
     
     private boolean dragging;
     private boolean building;
 
     public static void main(String[] args) {
-        launch(args);
+    	if(args.length > 0) {
+    		BufferedReader br = null;
+    		FileReader fr = null;
+
+    		try {
+
+    			fr = new FileReader("state.txt");
+    			br = new BufferedReader(fr);
+
+    			String sCurrentLine;
+
+    			br = new BufferedReader(new FileReader("state.txt"));
+
+    			while ((sCurrentLine = br.readLine()) != null) {
+    				String[] coords = sCurrentLine.split(" ");
+    				widthRestore = Double.valueOf(coords[0]);
+    				heightRestore = Double.valueOf(coords[1]);
+    				xRestore = Double.valueOf(coords[2]);
+    				yRestore = Double.valueOf(coords[3]);
+    			}
+
+    		} catch (IOException e) {
+
+    			e.printStackTrace();
+
+    		} finally {
+
+    			try {
+
+    				if (br != null)
+    					br.close();
+
+    				if (fr != null)
+    					fr.close();
+
+    			} catch (IOException ex) {
+
+    				ex.printStackTrace();
+
+    			}
+
+    		}
+    	} 
+    	
+		launch(args);
     }
 
     @Override
     public void start(Stage stage) throws Exception {
+    	if(widthRestore > 0) {
+    		xPos1 = xRestore;
+    		xPos2 = xPos1 + widthRestore;
+    		yPos1 = yRestore;
+    		yPos2 = yPos1 + heightRestore;
+    		if(programRestore != null) {
+    			//TODO: Snap into that slim jim
+    		} else {
+    			build(false);
+    		}
+    		return;
+    	}
     	this.stage = stage;
     	this.stage.initStyle(StageStyle.UNDECORATED);
     	this.stage.setOpacity(0.2d);
@@ -89,8 +155,8 @@ public class FXAnnotationToolBuilder extends Application {
     			String programTitle = ProcessRunner.getProgramName(programID, proc);
     			windows.add(new Window(id, windowTitle, programID, programTitle));
     		}
-    		
-    		createWindowList(new Stage());
+    		tableStage = new Stage();
+    		createWindowList(tableStage);
     	}
     }
     
@@ -130,7 +196,7 @@ public class FXAnnotationToolBuilder extends Application {
 				Window selectedWindow = (Window)table.getSelectionModel().getSelectedItem();
 				windowInfo = ProcessRunner.getWindowInfoByID(selectedWindow.getId(), proc);
 				ProcessRunner.focusWindow(selectedWindow.getTitle(), proc);
-				buildFromInfo();
+				buildFromInfo(selectedWindow.getId());
 				stage.close();
 			}
 		});
@@ -224,7 +290,7 @@ public class FXAnnotationToolBuilder extends Application {
 		
 	}
 	
-	private void buildFromInfo() {
+	private void buildFromInfo(String windowID) {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
@@ -243,7 +309,7 @@ public class FXAnnotationToolBuilder extends Application {
 				x, 
 				y, 
 				true, 
-				String.valueOf(windowInfo[0])
+				windowID
 				);
 	}
 	
@@ -313,7 +379,9 @@ public class FXAnnotationToolBuilder extends Application {
 		Platform.runLater(new Runnable() {
 		    @Override
 		    public void run() {
-		        stage.close();
+		    	if(stage != null) {
+		    		stage.close();
+		    	}
 		    }
 		});
 	}
@@ -325,5 +393,36 @@ public class FXAnnotationToolBuilder extends Application {
 		    	System.exit(0);
 		    }
 		});
+	}
+	
+	private static void restoreSession(String[] args) {
+		if(args.length > 2) {
+			double width = Double.valueOf(args[0]);
+			double height = Double.valueOf(args[1]);
+			double x = Double.valueOf(args[2]);
+			double y = Double.valueOf(args[3]);
+			Stage newStage = new Stage(); 		
+			Stage newSecondaryStage = new Stage();
+			newStage.setWidth(width);			
+			newSecondaryStage.setWidth(width);
+			newStage.setHeight(height);			
+			newSecondaryStage.setHeight(height);
+			
+			if(args.length > 3) {
+				//TODO: Launch program whose name is listed here.
+			} else {
+				AnnotationToolApplication app = new AnnotationToolApplication(
+						newStage, 
+						newSecondaryStage, 
+						x, 
+						y, 
+						true
+						);
+			}
+			
+		} else {
+			launch(args);
+		}
+		
 	}
 }
