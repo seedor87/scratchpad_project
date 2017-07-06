@@ -56,6 +56,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ *
+ */
 public class AnnotationToolApplication extends Application {
 
     static
@@ -331,7 +335,10 @@ public class AnnotationToolApplication extends Application {
     		textOptionStage.hide();
     	}
     }
-    
+
+    /**
+     * Clears the current stage. Can be undone (unlike clear history)
+     */
     public void doClear()
     {
         doClear(clickablyClearPaint);
@@ -362,6 +369,11 @@ public class AnnotationToolApplication extends Application {
         });
         redoStack.clear();
     }
+
+    /**
+     * commits a change item to the undostack and adds the changes it makes to the main window.
+     * @param changeItem
+     */
     public void commitChange(ChangeItem changeItem)
     {
         changeItem.addChangeToStage(this);
@@ -378,6 +390,9 @@ public class AnnotationToolApplication extends Application {
         undoStack.push(shape);*/
     }
 
+    /**
+     * Redoes the top item on the redo stack, if there is one to be redone.
+     */
     public void redo()
     {
         if(redoStack.size() > 0)
@@ -400,6 +415,9 @@ public class AnnotationToolApplication extends Application {
         }*/
     }
 
+    /**
+     * Undoes the top item on the undo stack, pushes it onto the redo stack.
+     */
     public void undo()
     {
         if(undoStack.size() > 0)
@@ -448,6 +466,9 @@ public class AnnotationToolApplication extends Application {
 
     }*/
 
+    /**
+     * clears the undo and redo stack and all changes from them.
+     */
     public void clearHistory()
     {
         Platform.runLater(new Runnable() {
@@ -461,12 +482,20 @@ public class AnnotationToolApplication extends Application {
         undoStack.clear();
         redoStack.clear();
     }
+
+    /**
+     * Sets the state of the program so that it is making circles.
+     */
     public void makeCircles()
     {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, circleHandler);
     }
 
+    /**
+     * Makes it so that the mousecatching stage stops catching mouse events when toggled to unclickable.
+     * Calling the method again restores it so that the stage starts catching the events again.
+     */
     public void toggleClickable()
     {
         clickable = !clickable;
@@ -615,7 +644,13 @@ public class AnnotationToolApplication extends Application {
         });
 
     }
-    
+
+    /**
+     * moves the mousecatchingstage to a new position that is based on the current position and
+     * the values of X and Y passed in.
+     * @param changeX
+     * @param changeY
+     */
     private void moveAnnotationWindow(double changeX, double changeY) {
     	double stageXPos = mouseCatchingStage.getX();
     	double stageYPos = mouseCatchingStage.getY();
@@ -624,7 +659,8 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     * This can't just be named this. This is not descriptive at all. 
+     * Does the same thing as resizeAnnotationWindow, but instead of taking in the change in x and the change in y
+     * it takes in the new values of x and y.
      */
     private void resizeAnnotationWindow2(double width, double height)
     {
@@ -637,7 +673,13 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, width), minStageSize[0] ) );
         mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, height), minStageSize[1] ) );
     }
-    
+
+    /**
+     * Resizes the mouseCatching stage so long as the resize would not make it smaller than
+     * 100x100 and not larger than the screen size.
+     * @param changeX
+     * @param changeY
+     */
     private void resizeAnnotationWindow(double changeX, double changeY) {
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     	double screenWidth = screenSize.getWidth();
@@ -670,6 +712,12 @@ public class AnnotationToolApplication extends Application {
     }
 
 
+    /**
+     * x^2 + y^2 = z^2
+     * @param x
+     * @param y
+     * @return z
+     */
     private double pythagorize(double x, double y)
     {
         double result;
@@ -702,7 +750,7 @@ public class AnnotationToolApplication extends Application {
 
 
     /**
-     *
+     *  adds a triangle to the most recent straight line drawn to make it an arrow.
      * @param mouseEvent
      */
     private void addArrowToEndOfLine(MouseEvent mouseEvent)
@@ -752,6 +800,10 @@ public class AnnotationToolApplication extends Application {
         }
 
     }
+
+    /**
+     * Sets the state of the program so that the user can draw arrows.
+     */
     public void makeLines()
     {
         this.resetHandlers();
@@ -796,6 +848,9 @@ public class AnnotationToolApplication extends Application {
         });
     }*/
 
+    /**
+     * clears the main window and then repaints it from scratch.
+     */
     public void paintFromUndoStack()
     {
         root.getChildren().clear();
@@ -808,6 +863,10 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+
+    /**
+     * changes the state of the program so that the user is erasing.
+     */
     public void turnOnErasing()
     {
         this.resetHandlers();
@@ -815,6 +874,10 @@ public class AnnotationToolApplication extends Application {
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, eraseHandler);
     }
 
+    /**
+     * Saves a screenshot of the current window as well as anything behind the window
+     * and anything that may be drawn on the window.
+     */
     public void doSave()
     {
     	
@@ -891,6 +954,13 @@ public class AnnotationToolApplication extends Application {
     }
 
 
+    /**
+     * Resets the stages so that they are in the right order so they do not interfere with
+     * each other. The order should be
+     * On bottom: picturestage
+     * Above that: mousecatchingstage
+     * On top: controllerbox
+     */
     public void resetStages()
     {
         pictureStage.toFront();
@@ -898,6 +968,9 @@ public class AnnotationToolApplication extends Application {
         controllerBox.toFront();
     }
 
+    /**
+     * Brings stages that were sent to the back by toBack back to the front
+     */
     public void toFront()
     {
         Platform.runLater(new Runnable() {
@@ -912,6 +985,9 @@ public class AnnotationToolApplication extends Application {
         });
     }
 
+    /**
+     * Sends the main stages (not the controllerbox to the back)
+     */
     public void toBack()
     {
         Platform.runLater(new Runnable() {
@@ -1018,6 +1094,9 @@ public class AnnotationToolApplication extends Application {
         return undoStack;
     }
 
+    /**
+     * Sets the state of the program so that the user is able to move the window around.
+     */
     public void setMovingHandler()
     {
         this.resetHandlers();
@@ -1049,6 +1128,9 @@ public class AnnotationToolApplication extends Application {
         }
 
 
+    /**
+     * Sets the state of the program so that you are drawing.
+     */
     public void setDrawingText()
         {
         	this.makingTextBox = false;
@@ -1067,7 +1149,11 @@ public class AnnotationToolApplication extends Application {
     {
         this.strokeWidth = strokeWidth;
     }
-    
+
+    /**
+     * Toggles whether the controllerbox follows the window or not.
+     * @return
+     */
     public boolean toggleLockedControllerBox() {
     	lockedControllerBox = !lockedControllerBox;
     	if(lockedControllerBox) {
@@ -1089,7 +1175,12 @@ public class AnnotationToolApplication extends Application {
             this.eraseArea = eraseArea;
         }
     }*/
-    
+
+    /**
+     * Small class to provide struct functionality.
+     * The event type what type should be used when adding the handler to the
+     * mouseCatchingScene.
+     */
     private class HandlerGroup
     {
         EventType eventType;
@@ -1100,6 +1191,10 @@ public class AnnotationToolApplication extends Application {
             this.handler = handler;
         }
     }
+
+    /**
+     * Sets the state of the program so that the user can move shapes that are on the screen.
+     */
     public void setSelectAndMoveHandler()
     {
         mouseCatchingStage.toFront();
@@ -1109,7 +1204,8 @@ public class AnnotationToolApplication extends Application {
     }
     
     /**
-     * Creates arrows. should be implemented with MouseEvent.ANY.
+     * Creates arrows. should be implemented with MouseEvent.ANY when you add the
+     * handler to the mousecatchingscene.
      */
     private class ArrowHandler implements EventHandler<MouseEvent>
     {
@@ -1148,7 +1244,11 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
-    
+
+    /**
+     * Handler for moving the stage. should be implemented with MouseEvent.ANY when you add the
+     * handler to the mousecatchingscene.
+     */
     private class MovingHandler implements EventHandler<MouseEvent>
     {
         double originalX = -1;
@@ -1186,6 +1286,8 @@ public class AnnotationToolApplication extends Application {
      * Draws lines based on the location of various mouse events.
      * Pressing the mouse starts the line, dragging it extends.
      * Releasing ends the line.
+     * should be implemented with MouseEvent.ANY when you add the
+     * handler to the mousecatchingscene.
      */
     private class DrawingHandler implements EventHandler<MouseEvent> {
         @Override
@@ -1222,6 +1324,11 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+
+    /**
+     * Sets the state of the program so that the user is editing text
+     * @param text The text that is to be edited.
+     */
     public void setEditingText(Text text)
     {
         System.out.println("Here");
@@ -1278,6 +1385,12 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
+
+    /**
+     * Handles erasing a shaded area from the existing shapes on the screen.
+     * should be implemented with MouseEvent.ANY when you add the
+     * handler to the mousecatchingscene.
+     */
     private class EraseHandler implements EventHandler<MouseEvent>
     {
         Color eraserColor = new Color(0,0,0,.1);
@@ -1308,7 +1421,14 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
-    
+
+    /**
+     * Handles if the user presses the escape button.
+     * If the user is in a text box, it closes the text box. It returns you to
+     * drawing mode if you are in a text box.
+     *
+     * If you are not in a text box, the program is closed.
+     */
     private class ShortcutHandler implements EventHandler<KeyEvent>
     {
     	public void handle(KeyEvent event)
@@ -1331,6 +1451,7 @@ public class AnnotationToolApplication extends Application {
 
     /**
      * Triggers toggleClickable when triggered. Should be implemented with ZoomEvent.ANY
+     * Not being used in the most current version.
      */
     private class TouchSendToBackHandler implements EventHandler<ZoomEvent>
     {
@@ -1358,6 +1479,13 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Handles touch events that involve two touch points.
+     * can be used to move the window with two fingers, and/or to
+     * resize it with two fingers
+     * should be implemented with TouchEvent.ANY when you add the
+     * handler to the mousecatchingscene.
+     */
     private class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent>
     {
         boolean using = false;
@@ -1472,7 +1600,10 @@ public class AnnotationToolApplication extends Application {
 
         }
     }
-   
+
+    /**
+     * not being used in current version. Original purpose was similar to TwoTouchChangeSizeAndMoveHandler
+     */
     private class TwoTouchHandler implements EventHandler<TouchEvent>
     {
         TouchPoint firstPoint;
@@ -1539,7 +1670,11 @@ public class AnnotationToolApplication extends Application {
 		}
     	
     }
-    
+
+    /**
+     * Handler to reset the controllerbox to make sure it is on top
+     * in case it is not for whatever reason.
+     */
     private class PutControllerBoxOnTopHandler implements EventHandler<MouseEvent>
     {
         @Override
@@ -1551,7 +1686,9 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     * Adds a circle at the given location of the MouseEvent.
+     * Adds a circle at the given location of the MouseEvent. should be
+     * implemented with MouseEvent.ANY when you add the
+     * handler to the mousecatchingscene.
      */
     private class CircleHandler implements EventHandler<MouseEvent> {
         @Override

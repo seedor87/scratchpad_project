@@ -260,7 +260,6 @@ public class IconControllerBox extends Stage
                         return at.getStrokeWidth();
                     }
                 });
-
                 Optional<Double> result = dialog.showAndWait();
                 at.resetStages();
 

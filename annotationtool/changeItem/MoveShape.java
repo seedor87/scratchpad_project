@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 /**
  * Created by Brennan on 6/13/2017.
+ * A subclass of ChangeItem that represents a shape being moved from one location on the screen to another.
  */
 public class MoveShape implements ChangeItem
 {

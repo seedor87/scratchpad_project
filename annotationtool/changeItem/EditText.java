@@ -9,7 +9,9 @@ import java.security.Key;
 
 
 /**
- * Created by remem on 7/5/2017.
+ * Created by Brennan Ringel on 7/5/2017.
+ * A subclass of ChangeItem that represents text being changed.  This is created every time a MoveShape is
+ * committed with the shape that is moved being text.
  */
 public class EditText implements ChangeItem
 {

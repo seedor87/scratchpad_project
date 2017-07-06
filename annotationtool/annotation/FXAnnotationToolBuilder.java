@@ -32,6 +32,10 @@ import javafx.scene.layout.VBox;
 import util.ProcessRunner;
 import util.Window;
 
+/**
+ * Both the main class as well as the builder for the application. Using this you can create a maximized window, a window of a specific size
+ * or a window that snaps to a running window (in Linux).
+ */
 public class FXAnnotationToolBuilder extends Application {
 	
 	private Stage stage;
@@ -72,7 +76,7 @@ public class FXAnnotationToolBuilder extends Application {
         
 		stage.getScene().addEventHandler(KeyEvent.KEY_PRESSED, new BuilderKeyHandler());
 		stage.getScene().addEventHandler(MouseEvent.ANY, new BuilderMouseHandler());
-		
+
 		gc.setStroke(Color.RED);
     	gc.setLineWidth(4);
     	

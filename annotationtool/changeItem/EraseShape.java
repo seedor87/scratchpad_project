@@ -13,12 +13,17 @@ import java.util.Stack;
 
 /**
  * Created by Brennan on 6/13/2017.
+ * An subclass of ChangeItem that is used to represent a path (a shape) that is erased from a stage
  */
 public class EraseShape implements ChangeItem
 {
     private Path eraseArea;
     private Stack<ChangeItem> shapesPartiallyErased = new Stack<>();
     private Stack<ChangeItem> undidStack;
+
+    /**
+     * @param eraseArea the area that should be subtracted from each existing shape in a window
+     */
     public EraseShape(Path eraseArea)
     {
         this.eraseArea = eraseArea;
