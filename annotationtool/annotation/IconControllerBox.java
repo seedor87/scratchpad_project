@@ -33,24 +33,22 @@ import java.util.Optional;
  */
 public class IconControllerBox extends Stage
 {
-	
-	private Pane root;
-    private Pane trunk;
-    private Scene scene;
+
     private static final int IMAGE_WIDTH = 25;
     private static final int IMAGE_HEIGHT = 25;
-
+    private static final int LEFT_LOCATION = 0;
+    private static final int TOP_LOCATION = 1;
+    private static final int RIGHT_LOCATION = 2;
+    private static final int TOOLTIP_FONT_SIZE = 20;
+    private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
+    private Pane root;
+    private Pane trunk;
+    private Scene scene;
     private double smallButtonSize;
     private double medButtonSize;
     private double largeButtonSize;
     private double buttonSize;
-    private static final int LEFT_LOCATION = 0;
-    private static final int TOP_LOCATION = 1;
-    private static final int RIGHT_LOCATION = 2;
     private int location = RIGHT_LOCATION;
-    private static final int TOOLTIP_FONT_SIZE = 20;
-    private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
-
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
     
@@ -153,7 +151,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                at.setMakingTextBox(false);     //TODO change to make lines
+                at.setDrawingText();     //TODO change to make lines
             }
         });
         nodes.add(drawButton);
@@ -168,7 +166,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                at.setMakingTextBox(true);
+                at.setMakingText();
             }
         });
         nodes.add(textButton);
