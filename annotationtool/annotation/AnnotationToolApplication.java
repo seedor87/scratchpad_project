@@ -69,7 +69,16 @@ public class AnnotationToolApplication extends Application {
     //================================================================================
     // Instance Variables
     //================================================================================
-    
+
+    final ClipboardOwner clipboardOwner = new ClipboardOwner() {
+        @Override
+        public void lostOwnership(java.awt.datatransfer.Clipboard clipboard, Transferable contents) {
+        }
+    };
+    // Colors and Paint
+    private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
+    private final Color clearPaint = new Color(0, 0, 0, 0);
+    private final double[] minStageSize = {100, 100};
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -80,22 +89,16 @@ public class AnnotationToolApplication extends Application {
     private Group root;
     private Group notRoot;
     private VBox box;
-
-    // Colors and Paint
-    private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
-    private final Color clearPaint = new Color(0, 0, 0, 0);
-    
     private Color textColor = Color.BLACK;
     private Color borderColor = Color.BLUE;
     private javafx.scene.paint.Paint paint = Color.BLACK;
-    
     // Handlers
     private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
     private MovingHandler movingHandler = new MovingHandler();
     private DrawingHandler drawingHandler = new DrawingHandler();
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler();
-    private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();					
+    private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();
     private ShortcutHandler shortcutHandler = new ShortcutHandler();
     private TextBoxHandler textBoxHandler = new TextBoxHandler();
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
@@ -103,7 +106,6 @@ public class AnnotationToolApplication extends Application {
     private CircleHandler circleHandler = new CircleHandler();
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
-    
     // Annotation Objects
     private Path path;
     private Line line;
@@ -115,17 +117,14 @@ public class AnnotationToolApplication extends Application {
     private StringBuffer textBoxText = new StringBuffer(64);
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
-    
     // Cursors
     private Cursor pencilCursor = new ImageCursor(new Image("pencil-cursor.png"));
     private Cursor eraserCursor = new ImageCursor(new Image("eraser-cursor.png"));
     private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
-    
     // Settings
     private String windowID = "";
     private String textFont = "Times New Roman";
-    private final double[] minStageSize = {100, 100};
     private double strokeWidth = 5d;
     private double textSize = 24d;
     private int borderWidth = 5;
@@ -134,25 +133,29 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private boolean clickable = true;
     private boolean makingTextBox = false;
-    private boolean lockedControllerBox = true;
 
     //================================================================================
     // Constructors/Starts
     //================================================================================
+    private boolean lockedControllerBox = true;
 
-	public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
-    	start(primaryStage, secondaryStage, x, y, sizedWindow);
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
+        start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
-	
-	public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) {
-		this.windowID = windowID;
+
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) {
+        this.windowID = windowID;
 		start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
-    
+
     public void start(Stage primaryStage) {
     	start(primaryStage, new Stage(), 0, 0, false);
     }
 
+    //================================================================================
+    // Mutators
+    //================================================================================
+    
     /**
      * The code starts here.
      * @param primaryStage
@@ -245,14 +248,14 @@ public class AnnotationToolApplication extends Application {
         borderShape.setStrokeWidth(borderWidth);
         borderShape.setFill(clearPaint);
         root.getChildren().add(borderShape);
-        
+
         if(windowID != "") {
         	ScheduledExecutorService windowChecker = Executors.newScheduledThreadPool(1);
         	Runnable task = () -> resnapToWindow(windowID, windowChecker);
-        	
+
         	int initialDelay = 0;
         	int period = 10;
-        	
+
         	windowChecker.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
         }
 
@@ -262,16 +265,6 @@ public class AnnotationToolApplication extends Application {
         pictureStage.setAlwaysOnTop(true);
         mouseCatchingStage.setAlwaysOnTop(true);
     }
-    
-    //================================================================================
-    // Mutators
-    //================================================================================
-    
-    final ClipboardOwner clipboardOwner = new ClipboardOwner() {
-        @Override
-        public void lostOwnership(java.awt.datatransfer.Clipboard clipboard, Transferable contents) {
-        }
-    };
 
     public void showTextOptionStage() 
     {
@@ -1025,6 +1018,7 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
+
     }
 
     /**
@@ -1040,25 +1034,24 @@ public class AnnotationToolApplication extends Application {
                 paintColor.getBlue() / 255d,
                 paintColor.getAlpha() / 255d);*/
     }
-	
-    public void setMakingTextBox(boolean makingTextBox) {
-        if (makingTextBox)
-        {
-        	this.makingTextBox = true;
+
+    public void setMakingText() {
+        this.makingTextBox = true;
             this.resetHandlers();
             this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
             this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
             mouseCatchingScene.setCursor(textCursor);
         }
-        else
+
+
+    public void setDrawingText()
         {
         	this.makingTextBox = false;
             this.resetHandlers();
             this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             textBoxText.delete(0,textBoxText.length());
         }
-        showTextOptionStage();
-    }
+
 
     public Group getRoot()
     {
@@ -1167,6 +1160,7 @@ public class AnnotationToolApplication extends Application {
                 originalY = event.getScreenY();
                 originalStageX = mouseCatchingStage.getX();
                 originalStageY = mouseCatchingStage.getY();
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("grab.png")));
             }
             else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
             {
@@ -1178,6 +1172,7 @@ public class AnnotationToolApplication extends Application {
             else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
                 originalX = -1;
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
             }
         }
     }
@@ -1315,9 +1310,9 @@ public class AnnotationToolApplication extends Application {
     	{
     		if(event.getCode() == KeyCode.ESCAPE) {
     			if(makingTextBox) {
-    				setMakingTextBox(false);
-    			} else {
-    				Platform.runLater(new Runnable() {
+                    setDrawingText();
+                } else {
+                    Platform.runLater(new Runnable() {
     				    @Override
     				    public void run() {
     				    	System.exit(0);
@@ -1475,13 +1470,12 @@ public class AnnotationToolApplication extends Application {
    
     private class TwoTouchHandler implements EventHandler<TouchEvent>
     {
-    	private double[] primaryTouchCoords = {-1d, -1d};
-    	private double[] secondaryTouchCoords = {-1d, -1d};
+        TouchPoint firstPoint;
+        TouchPoint secondPoint;
+        private double[] primaryTouchCoords = {-1d, -1d};
+        private double[] secondaryTouchCoords = {-1d, -1d};
     	private double[] touchDist = {0, 0};
     	private double resizeTolerance = 6;
-
-    	TouchPoint firstPoint;
-    	TouchPoint secondPoint;
 
 		@Override
 		public void handle(TouchEvent event)
