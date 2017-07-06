@@ -279,8 +279,12 @@ public class AnnotationToolApplication extends Application {
     		if(textOptionStage == null) {
     			textOptionStage = new Stage();
     			HBox textOptions = new HBox();
+
     			Label fontSizeLabel = new Label("Font Size:");
     			textOptions.getChildren().add(fontSizeLabel);
+    			/*
+    			List of all possible font sizes
+    			 */
     			ObservableList<Double> fontSizeList = 
     					FXCollections.observableArrayList(5d, 6d, 8d, 10d, 12d, 14d, 16d, 18d, 20d, 24d, 28d, 32d, 36d, 40d, 44d, 48d, 52d, 56d, 60d, 64d, 80d, 100d);
     			ComboBox<Double> fontSizes = new ComboBox<>(fontSizeList);
@@ -300,7 +304,8 @@ public class AnnotationToolApplication extends Application {
     			ComboBox<String> fontStyles = new ComboBox<>(fontStyleList);
     			fontStyles.valueProperty().addListener(new ChangeListener<String>() {
     				@Override
-    				public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont) {
+    				public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont)
+                    {
     					setTextFont(newFont);
     				}
     			});
