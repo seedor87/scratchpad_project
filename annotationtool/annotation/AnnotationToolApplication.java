@@ -935,7 +935,9 @@ public class AnnotationToolApplication extends Application {
 
                 try
                 {
-                	textOptionStage.hide();
+                	if(textOptionStage != null) {
+                		textOptionStage.hide();
+                	}
                 	controllerBox.hide();
                     java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)mouseCatchingStage.getX() /*+ borderThickness*/, (int)mouseCatchingStage.getY() /* + borderThickness*/,
                             (int)mouseCatchingStage.getWidth()/* - (2 * borderThickness)*/, (int)mouseCatchingStage.getHeight()/* - (2 * borderThickness)*/);
