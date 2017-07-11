@@ -196,7 +196,8 @@ public class IconControllerBox extends Stage
             {
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Brush and Text Size");
-                dialog.initStyle(StageStyle.UTILITY);
+                //dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
@@ -260,8 +261,10 @@ public class IconControllerBox extends Stage
                         return at.getStrokeWidth();
                     }
                 });
+//                dialog.setX(at.getPictureStage().getX() + at.getPictureStage().getWidth()/2 - dialog.getWidth()/2);
+//                dialog.setY((at.getPictureStage().getY()) + (at.getPictureStage().getHeight()/2));
+
                 Optional<Double> result = dialog.showAndWait();
-                at.resetStages();
 
                 at.setStroke(result.get());
                 at.setTextSize(result.get().intValue());
