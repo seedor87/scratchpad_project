@@ -267,9 +267,8 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingStage.show();
         pictureStage.show();
-        
-        pictureStage.setAlwaysOnTop(true);
-        mouseCatchingStage.setAlwaysOnTop(true);
+
+        resetStages();
     }
 
     public void showTextOptionStage() 
