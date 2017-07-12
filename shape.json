@@ -1,0 +1,119 @@
+{
+  "uuid": 1,
+  "type": "circle",
+  "location": {
+    "x": 30.0,
+    "y": 31.0
+  },
+  "color": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 1.0,
+    "opacity": 1.0,
+    "opaque": true,
+    "hue": 240.0,
+    "brightness": 1.0,
+    "saturation": 1.0
+  },
+  "strokeWidth": 5.0,
+  "points": null,
+  "radius": 0.0,
+  "start": null,
+  "end": null,
+  "string": null,
+  "font": null
+}
+{
+  "uuid": 2,
+  "type": "circle",
+  "location": {
+    "x": 322.0,
+    "y": 193.0
+  },
+  "color": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 1.0,
+    "opacity": 1.0,
+    "opaque": true,
+    "hue": 240.0,
+    "brightness": 1.0,
+    "saturation": 1.0
+  },
+  "strokeWidth": 5.0,
+  "points": null,
+  "radius": 0.0,
+  "start": null,
+  "end": null,
+  "string": null,
+  "font": null
+}
+{
+  "uuid": 1,
+  "type": "arrow",
+  "location": null,
+  "color": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 1.0,
+    "opacity": 1.0,
+    "opaque": true,
+    "brightness": 1.0,
+    "hue": 240.0,
+    "saturation": 1.0
+  },
+  "strokeWidth": 5.0,
+  "points": null,
+  "radius": 0.0,
+  "start": null,
+  "end": null,
+  "string": null,
+  "font": null
+}
+{
+  "uuid": 2,
+  "type": "arrow",
+  "location": null,
+  "color": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 1.0,
+    "opacity": 1.0,
+    "opaque": true,
+    "brightness": 1.0,
+    "hue": 240.0,
+    "saturation": 1.0
+  },
+  "strokeWidth": 5.0,
+  "points": null,
+  "radius": 0.0,
+  "start": null,
+  "end": null,
+  "string": null,
+  "font": null
+}
+{
+  "uuid": 3,
+  "type": "circle",
+  "location": {
+    "x": 283.0,
+    "y": 97.0
+  },
+  "color": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 1.0,
+    "opacity": 1.0,
+    "opaque": true,
+    "brightness": 1.0,
+    "hue": 240.0,
+    "saturation": 1.0
+  },
+  "strokeWidth": 5.0,
+  "points": null,
+  "radius": 0.0,
+  "start": null,
+  "end": null,
+  "string": null,
+  "font": null
+}
