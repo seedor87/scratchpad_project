@@ -89,6 +89,8 @@ public class IconControllerBox extends Stage
 
                 alert.initOwner(IconControllerBox.this);        // this is what causes it to show off screen if it is on the left.
 
+                setDialogLocation(alert);
+
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
                     System.exit(0);
@@ -263,6 +265,7 @@ public class IconControllerBox extends Stage
                 });
 //                dialog.setX(at.getPictureStage().getX() + at.getPictureStage().getWidth()/2 - dialog.getWidth()/2);
 //                dialog.setY((at.getPictureStage().getY()) + (at.getPictureStage().getHeight()/2));
+                setDialogLocation(dialog);
 
                 Optional<Double> result = dialog.showAndWait();
 
@@ -338,6 +341,7 @@ public class IconControllerBox extends Stage
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Button Size");
                 dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
@@ -400,6 +404,8 @@ public class IconControllerBox extends Stage
                         return buttonSize;
                     }
                 });
+
+                setDialogLocation(dialog);
 
                 Optional<Double> result = dialog.showAndWait();
 
@@ -768,6 +774,26 @@ public class IconControllerBox extends Stage
 			}
 		});
     }
-    
+
+    private void setDialogLocation(Dialog dialog)
+    {
+        Stage pictureStage = at.getPictureStage();
+        if(pictureStage.getX() < 0)
+        {
+            dialog.setX(0);
+        }
+        else
+        {
+            dialog.setX(pictureStage.getX());
+        }
+        if(pictureStage.getY() < 0)
+        {
+            dialog.setY(0);
+        }
+        else
+        {
+            dialog.setY(pictureStage.getY());
+        }
+    }
 }
 
