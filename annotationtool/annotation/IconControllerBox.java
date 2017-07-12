@@ -613,6 +613,23 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
+
+        Button saveStateButton = new Button();
+        //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
+        ImageView saveStateImage = new ImageView("saveState.png");
+        saveStateImage.setFitHeight(IMAGE_HEIGHT);
+        saveStateImage.setFitWidth(IMAGE_WIDTH);
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.setTooltip(getToolTip("Save the state of the Window."));
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.saveSceneState();
+            }
+        });
+        nodes.add(saveStateButton);
         
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
