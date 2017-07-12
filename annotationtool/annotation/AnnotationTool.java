@@ -45,19 +45,19 @@ public class AnnotationTool extends JFrame {
     private class ShapeDef
     {
 
-        Shape shape;
+        Shp shape;
         Paint paint;
         Stroke stroke;
         boolean isWord = false;
         boolean isBubbleWord = false;
 
-        ShapeDef(Stroke stroke, Paint paint, Shape shape)
+        ShapeDef(Stroke stroke, Paint paint, Shp shape)
         {
             this.stroke = stroke;
             this.paint = paint;
             this.shape = shape;
         }
-        ShapeDef(Stroke stroke, Paint paint, Shape shape, boolean isWord, boolean isBubbleWord)
+        ShapeDef(Stroke stroke, Paint paint, Shp shape, boolean isWord, boolean isBubbleWord)
         {
             this.stroke = stroke;
             this.paint = paint;
@@ -742,7 +742,7 @@ public class AnnotationTool extends JFrame {
         Font font = new Font(fontString, fontStyle, fontSize);
 
         GlyphVector v = font.createGlyphVector(getFontMetrics(font).getFontRenderContext(), textBoxText.toString());
-        Shape s = v.getOutline((float)textBoxPoint.getX(),(float)textBoxPoint.getY());                                                                                           //The shape
+        Shp s = v.getOutline((float)textBoxPoint.getX(),(float)textBoxPoint.getY());                                                                                           //The shape
 
         //GeneralPath shape = new GeneralPath(s);
         //shape.moveTo(textBoxPoint.getX(),textBoxPoint.getY());

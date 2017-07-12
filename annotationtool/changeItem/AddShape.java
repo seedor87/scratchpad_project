@@ -56,7 +56,7 @@ public class AddShape implements ChangeItem
             @Override
             public void handle(MouseEvent event)
             {
-                System.out.println("Shape clicked");
+                System.out.println("Shp clicked");
                 annotationToolApplication.setClickedShape(shape);
             }
         });*/

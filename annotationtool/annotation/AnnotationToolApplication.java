@@ -2,8 +2,8 @@ package annotation;
 /**
  * Created by remem on 5/30/2017.
  */
-
 import changeItem.*;
+import TransferableShapes.*;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -35,6 +35,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import util.ProcessRunner;
 
 import javax.imageio.ImageIO;
@@ -55,6 +58,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -83,6 +87,9 @@ public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private final double[] minStageSize = {100, 100};
+    //Mapper for jackson
+    ObjectMapper mapper = new ObjectMapper();
+    int uuid = 0;
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -404,7 +411,7 @@ public class AnnotationToolApplication extends Application {
         /*
         if (redoStack.size() > 0)
         {
-            Shape temp = redoStack.pop();
+            Shp temp = redoStack.pop();
             Platform.runLater(new Runnable() {
                 @Override
                 public void run()
@@ -428,7 +435,7 @@ public class AnnotationToolApplication extends Application {
         }
 /*        if (undoStack.size() > 0)
         {
-            Shape temp = undoStack.pop();
+            Shp temp = undoStack.pop();
             if(temp instanceof EraseShape)
             {
                 undoAnEraseShape((EraseShape) temp);
@@ -817,15 +824,15 @@ public class AnnotationToolApplication extends Application {
      */
 /*    private void eraseShapes(EraseShape eraseShape)
     {
-        Shape oldShape;
-        Shape newShape;
+        Shp oldShape;
+        Shp newShape;
         ListIterator<ChangeItem> iterator = undoStack.listIterator(undoStack.size());        //list iterator starting from top of stack.
         while(iterator.hasPrevious())
         {
             oldShape = iterator.previous();
             if(!(oldShape instanceof EraseShape))                                       //not instance of eraseshape
             {
-                newShape = Shape.subtract(oldShape, eraseShape.eraseArea);
+                newShape = Shp.subtract(oldShape, eraseShape.eraseArea);
                 newShape.setFill(oldShape.getFill());
                 if(oldShape.getFill() == null)
                 {
@@ -1001,9 +1008,9 @@ public class AnnotationToolApplication extends Application {
     }
     
     /*private CirclePopupMenu initializeShapeMenu() {
-    	StackPane popupPane = new StackPane();
+        StackPane popupPane = new StackPane();
     	popupPane.setMinSize(mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
-    	notRoot.getChildren().add(popupPane);
+    	notRoot.getChildren().add(popupPane);ƒ
     	CirclePopupMenu shapeMenu = new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
     	MenuItem testItem = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
     	shapeMenu.getItems().add(testItem);
@@ -1169,13 +1176,35 @@ public class AnnotationToolApplication extends Application {
     /*    private class EraseShape extends Path
     {
         Path eraseArea;
-        Stack<Shape> shapesPartiallyErased = new Stack<>();
+        Stack<Shp> shapesPartiallyErased = new Stack<>();
         EraseShape(Path eraseArea)
         {
             this.eraseArea = eraseArea;
         }
     }*/
 
+    /**
+     * Sets the state of the program so that the user can move shapes that are on the screen.
+     */
+    public void setSelectAndMoveHandler() {
+        mouseCatchingStage.toFront();
+        pictureStage.toFront();
+        controllerBox.toFront();
+        AddShape.movingShapes = true;
+    }
+
+    /**
+     * Sets the state of the program so that the user is editing text
+     *
+     * @param text The text that is to be edited.
+     */
+    public void setEditingText(Text text) {
+        System.out.println("Here");
+        System.out.println(textBoxText);
+        this.resetHandlers();
+        commitChange(new EditText(text, this));
+    }
+    
     /**
      * Small class to provide struct functionality.
      * The event type what type should be used when adding the handler to the
@@ -1192,17 +1221,6 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-    /**
-     * Sets the state of the program so that the user can move shapes that are on the screen.
-     */
-    public void setSelectAndMoveHandler()
-    {
-        mouseCatchingStage.toFront();
-        pictureStage.toFront();
-        controllerBox.toFront();
-        AddShape.movingShapes = true;
-    }
-    
     /**
      * Creates arrows. should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
@@ -1237,6 +1255,19 @@ public class AnnotationToolApplication extends Application {
                 {
                     addArrowToEndOfLine(event);
                     //undoStack.push(path);
+
+                    try {
+                        Custom_Shape shape = new Custom_Shape(++uuid, "arrow", borderColor, strokeWidth, new Point(line.getStartX(), line.getStartY()), new Point(line.getEndX(), line.getEndY()));
+                        shape.writeJSON(shape);
+
+                    } catch (JsonParseException e) {
+                        e.printStackTrace();
+                    } catch (JsonMappingException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace(); }
+
+
                     line = null;
                     redoStack.clear();
                 }
@@ -1326,17 +1357,6 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     * Sets the state of the program so that the user is editing text
-     * @param text The text that is to be edited.
-     */
-    public void setEditingText(Text text)
-    {
-        System.out.println("Here");
-        System.out.println(textBoxText);
-        this.resetHandlers();
-        commitChange(new EditText(text, this));
-    }
-    /**
      * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
      * TextBoxKeyHandler changes the text in the box if needed.
      */
@@ -1416,6 +1436,23 @@ public class AnnotationToolApplication extends Application {
                 root.getChildren().remove(eraserPath);
                 changeItem.EraseShape eraseShape = new changeItem.EraseShape(eraserPath);
                 commitChange(eraseShape);
+
+
+                ArrayList<PathElement> pathElements = eraserPath.getElements().stream().collect(Collectors.toList());
+
+
+                try {
+                    Custom_Shape shape = new Custom_Shape(++uuid, "erase shape", eraserPath.getElements());
+                    shape.writeJSON(shape);
+
+                } catch (JsonParseException e) {
+                    e.printStackTrace();
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace(); }
+
+
                 eraseShape = null;
                 redoStack.clear();
             }
@@ -1702,15 +1739,16 @@ public class AnnotationToolApplication extends Application {
                 circle.setStrokeWidth(strokeWidth);
                 commitChange(new AddShape(circle));
 
+
             }
             else if (circle != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED)
             {
                 double xDistance = event.getX() - circle.getCenterX();
                 double yDistance = event.getY() - circle.getCenterY();
                 circle.setRadius(pythagorize(xDistance,yDistance ));
+
             }
-            else if (circle != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
-            {
+            else if (circle != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
                 undo();
                 circle.setFill(paint);
                 Shape newCircle = Shape.subtract(circle, new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius() - (strokeWidth/2)));
@@ -1718,11 +1756,32 @@ public class AnnotationToolApplication extends Application {
                 AddShape addShape = new AddShape(newCircle);
                 commitChange(addShape);
 
+                try {
+                    Custom_Shape shape = new Custom_Shape(++uuid, "circle");
+                    shape.setLocation(new Point(circle.getCenterX(), circle.getCenterY()));
+                    shape.setColor(borderColor);
+                    shape.setStrokeWidth(strokeWidth);
+                    shape.writeJSON(shape);
+
+                } catch (JsonParseException e) {
+                    e.printStackTrace();
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace(); }
+
+
                 redoStack.clear();
                 circle = null;
             }
+
+
         }
+
+
     }
-    
-    
+
+
+
+
 }
