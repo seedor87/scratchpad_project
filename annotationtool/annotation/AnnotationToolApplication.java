@@ -277,6 +277,7 @@ public class AnnotationToolApplication extends Application {
         resetStages();
     }
 
+
     public void showTextOptionStage() 
     {
     	if(makingTextBox) {
@@ -1037,6 +1038,11 @@ public class AnnotationToolApplication extends Application {
             	mouseCatchingStage.setIconified(true);
             }
         });
+    }
+
+    public void saveSceneState()
+    {
+
     }
     
     
