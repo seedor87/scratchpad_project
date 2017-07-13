@@ -653,7 +653,7 @@ public class IconControllerBox extends Stage
         recordInputImage.setFitWidth(IMAGE_WIDTH);
         recordInputButton.setGraphic(recordInputImage);
         recordInputButton.setTooltip(getToolTip("Begin recording all input."));
-        lockControllerBoxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+        recordInputButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
             {
