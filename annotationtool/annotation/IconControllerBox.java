@@ -604,7 +604,6 @@ public class IconControllerBox extends Stage
         moveShapesImage.setFitWidth(IMAGE_WIDTH);
         moveShapesButton.setGraphic(moveShapesImage);
         moveShapesButton.setTooltip(getToolTip("Select and move shapes."));
-        moveShapesButton.setGraphic(moveShapesImage);
         moveShapesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -621,7 +620,6 @@ public class IconControllerBox extends Stage
         lockControllerBoxImage.setFitWidth(IMAGE_WIDTH);
         lockControllerBoxButton.setGraphic(lockControllerBoxImage);
         lockControllerBoxButton.setTooltip(getToolTip("Lock the toolbar to the annotation window"));
-        lockControllerBoxButton.setGraphic(lockControllerBoxImage);
         lockControllerBoxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -630,6 +628,22 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(lockControllerBoxButton);
+        
+        Button recordInputButton = new Button();
+        //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
+        ImageView recordInputImage = new ImageView("record.png");
+        recordInputImage.setFitHeight(IMAGE_HEIGHT);
+        recordInputImage.setFitWidth(IMAGE_WIDTH);
+        recordInputButton.setGraphic(recordInputImage);
+        recordInputButton.setTooltip(getToolTip("Begin recording all input."));
+        lockControllerBoxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.recordInput();
+            }
+        });
+        nodes.add(recordInputButton);
         
         setIconSizes(medButtonSize);
 

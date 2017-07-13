@@ -14,9 +14,14 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
 import org.jnativehook.NativeInputEvent;
 import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
 import org.jnativehook.keyboard.SwingKeyAdapter;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseWheelEvent;
@@ -26,9 +31,32 @@ import javafx.scene.input.KeyCode;
 
 public class InputAutomator {
 	
+	static boolean quitReplay = false;
+	
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
+		InputAutomator automator = new InputAutomator();
+		
+		try {
+			GlobalScreen.registerNativeHook();
+		}
+		catch (NativeHookException ex) {
+			System.err.println("There was a problem registering the native hook.");
+			System.err.println(ex.getMessage());
+
+			System.exit(1);
+		}
+		
+		GlobalScreen.addNativeKeyListener(automator.new ReplayController());
+		
+		// Get the logger for "org.jnativehook" and set the level to warning.
+		Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+		logger.setLevel(Level.WARNING);
+
+		// Don't forget to disable the parent handlers.
+		logger.setUseParentHandlers(false);
+		
 		LinkedHashMap<NativeInputEvent, Long> inputEvents = new LinkedHashMap<NativeInputEvent, Long>();
 		try {
 			FileInputStream fileIn = new FileInputStream("inputEvents.ser");
@@ -48,11 +76,11 @@ public class InputAutomator {
 //		for(Map.Entry<NativeInputEvent, Long> entry : inputEvents.entrySet()) {
 //			System.out.println(getLongFormInputEvent(entry));
 //		}
-		recreateInputs(inputEvents);
+		automator.recreateInputs(inputEvents);
 		
 	}
 	
-	public static void recreateInputs(LinkedHashMap<NativeInputEvent, Long> inputEvents) {
+	public void recreateInputs(LinkedHashMap<NativeInputEvent, Long> inputEvents) {
 		Robot robot;
 		try {
 			robot = new Robot();
@@ -64,6 +92,10 @@ public class InputAutomator {
 		HashSet<Integer> pressedMouseButtons = new HashSet<Integer>();
 		HashSet<Integer> pressedKeys = new HashSet<Integer>();
 		for(Map.Entry<NativeInputEvent, Long> entry : inputEvents.entrySet()) {
+			if(quitReplay) {
+				quitReplay = false;
+				return;
+			}
 			String eventType = entry.getKey().getClass().getSimpleName();
 			robot.delay((int) (entry.getValue() - lastTime));
 			lastTime = entry.getValue();
@@ -544,5 +576,21 @@ public class InputAutomator {
             // End Sun keyboards
         }
         return keyCode;
+    }
+
+    private class ReplayController implements NativeKeyListener {
+
+		@Override
+		public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
+			if(nativeEvent.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
+				quitReplay = true;
+			}
+		}
+
+		@Override
+		public void nativeKeyReleased(NativeKeyEvent nativeEvent) {}
+		@Override
+		public void nativeKeyTyped(NativeKeyEvent nativeEvent) {}
+    	
     }
 }

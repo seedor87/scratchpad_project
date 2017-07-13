@@ -35,9 +35,13 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.GlobalInputListener;
 import util.ProcessRunner;
 
 import javax.imageio.ImageIO;
+
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -112,6 +116,7 @@ public class AnnotationToolApplication extends Application {
     private CircleHandler circleHandler = new CircleHandler();
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
+    private GlobalInputListener globalInputListener = new GlobalInputListener();
     // Annotation Objects
     private Path path;
     private Line line;
@@ -139,11 +144,12 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private boolean clickable = true;
     private boolean makingTextBox = false;
+    private boolean lockedControllerBox = true;
+    private boolean recording = false;
 
     //================================================================================
     // Constructors/Starts
     //================================================================================
-    private boolean lockedControllerBox = true;
 
     public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
         start(primaryStage, secondaryStage, x, y, sizedWindow);
@@ -558,6 +564,20 @@ public class AnnotationToolApplication extends Application {
      */
     private void setupListeners()
     {
+    	try {
+			GlobalScreen.registerNativeHook();
+		}
+		catch (NativeHookException ex) {
+			System.err.println("There was a problem registering the native hook.");
+			System.err.println(ex.getMessage());
+
+			System.exit(1);
+		}
+		GlobalScreen.addNativeKeyListener(globalInputListener);
+		GlobalScreen.addNativeMouseListener(globalInputListener);
+		GlobalScreen.addNativeMouseWheelListener(globalInputListener);
+		GlobalScreen.addNativeMouseMotionListener(globalInputListener);
+    	
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
@@ -581,6 +601,18 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
         //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
+    }
+    
+    public void recordInput()
+    {
+		if(!recording) {
+    		recording = true;
+    		globalInputListener.record();
+    		System.out.println("gggggg");
+    	} else {
+    		recording = false;
+    		globalInputListener.saveInputEvents();
+    	}
     }
 
     private void unMaximize()
