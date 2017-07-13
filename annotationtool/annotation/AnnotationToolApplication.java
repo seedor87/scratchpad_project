@@ -41,6 +41,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import util.ProcessRunner;
 
 import javax.imageio.ImageIO;
+import javax.print.DocFlavor;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -53,12 +54,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 
 /**
@@ -87,9 +91,9 @@ public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private final double[] minStageSize = {100, 100};
-    //Mapper for jackson
-    ObjectMapper mapper = new ObjectMapper();
-    int uuid = 0;
+    //jackson
+    UUID uuid;
+    ArrayList<Custom_Shape> holder = new ArrayList<>();
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -1216,7 +1220,34 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         commitChange(new EditText(text, this));
     }
-    
+
+    public ArrayList<Custom_Shape> readJSON() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(new File("shape.json"), ArrayList.class);
+    }
+
+    public void writeJSON(ArrayList holder) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String json = mapper.writeValueAsString(holder);
+        //   if (uuid == 0) {
+
+        //} else {
+
+        // try {
+        //    Files.write(new File("shape.json").toPath(), Arrays.asList(json), StandardOpenOption.APPEND);
+        // }
+        //catch (IOException e)
+        //  {
+        Files.write(new File("shape.json").toPath(), Arrays.asList(json), StandardOpenOption.CREATE);
+        // }
+        // }
+
+
+        //  mapper.writeValue(new File("shape.json"), shape);
+    }
+
     /**
      * Small class to provide struct functionality.
      * The event type what type should be used when adding the handler to the
@@ -1269,8 +1300,10 @@ public class AnnotationToolApplication extends Application {
                     //undoStack.push(path);
 
                     try {
-                        Custom_Shape shape = new Custom_Shape(++uuid, "arrow", borderColor, strokeWidth, new Point(line.getStartX(), line.getStartY()), new Point(line.getEndX(), line.getEndY()));
-                        shape.writeJSON(shape);
+                        uuid = UUID.randomUUID();
+                        Custom_Shape shape = new Custom_Shape(uuid, "arrow", borderColor, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
+                        holder.add(shape);
+                        writeJSON(holder);
 
                     } catch (JsonParseException e) {
                         e.printStackTrace();
@@ -1348,7 +1381,7 @@ public class AnnotationToolApplication extends Application {
                     MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                     LineTo lineTo = new LineTo(event.getX(), event.getY());
                     pathElements = new ArrayList<>();
-                    pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
+                    pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                     path.getElements().add(moveTo);
                     //root.getChildren().add(path);
                     commitChange(new AddShape(path));
@@ -1356,18 +1389,21 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
-                pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
+                    pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 path.getElements().add(moveTo);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
 
                     try {
-                        Custom_Shape shape = new Custom_Shape(++uuid, "path", pathElements);
-                        shape.setStrokeWidth(path.getStrokeWidth());
+                        uuid = UUID.randomUUID();
+                        Custom_Shape shape = new Custom_Shape(uuid, "path", pathElements);
+                        shape.setStrokeWidth(String.valueOf(path.getStrokeWidth()));
                         shape.setColorString(path.getStroke().toString());
 
-                        shape.writeJSON(shape);
+                        holder.add(shape);
+                        writeJSON(holder);
+
 
                     } catch (JsonParseException e) {
                         e.printStackTrace();
@@ -1457,14 +1493,14 @@ public class AnnotationToolApplication extends Application {
                 eraserPath.setStrokeWidth(strokeWidth);
                 eraserPath.setSmooth(true);
                 MoveTo moveTo = new MoveTo(event.getX(), event.getY());
-                pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
+                pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 eraserPath.getElements().add(moveTo);
                 root.getChildren().add(eraserPath);
                 eraserPath.setStroke(eraserColor);
             }
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
-                pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
+                pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 eraserPath.getElements().add(moveTo);
             }
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
@@ -1478,10 +1514,12 @@ public class AnnotationToolApplication extends Application {
 
 
                 try {
-                    Custom_Shape shape = new Custom_Shape(++uuid, "erase shape", pathElements);
-                    shape.setStrokeWidth(eraserPath.getStrokeWidth());
+                    uuid = UUID.randomUUID();
+                    Custom_Shape shape = new Custom_Shape(uuid, "erase shape", pathElements);
+                    shape.setStrokeWidth(String.valueOf(eraserPath.getStrokeWidth()));
 
-                    shape.writeJSON(shape);
+                    holder.add(shape);
+                    writeJSON(holder);
 
                 } catch (JsonParseException e) {
                     e.printStackTrace();
@@ -1522,7 +1560,6 @@ public class AnnotationToolApplication extends Application {
     		}
     	}
     }
-    
 
     /**
      * Triggers toggleClickable when triggered. Should be implemented with ZoomEvent.ANY
@@ -1699,11 +1736,11 @@ public class AnnotationToolApplication extends Application {
 			if(event.getTouchCount() == 2) {
 				TouchPoint primaryTouch = event.getTouchPoints().get(0);
 				TouchPoint secondaryTouch = event.getTouchPoints().get(1);
-				
+
 				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
 					setPoints(primaryTouch, secondaryTouch);
 				}
-				
+
 				if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
 					if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
 						setPoints(primaryTouch, secondaryTouch);
@@ -1722,8 +1759,8 @@ public class AnnotationToolApplication extends Application {
 					}
 				}
 			}
-			
-			if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
+
+            if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
 				clickable = true;
 				primaryTouchCoords[0] = -1;
 				primaryTouchCoords[1] = -1;
@@ -1733,8 +1770,8 @@ public class AnnotationToolApplication extends Application {
 				touchDist[1] = 0;
 			}
 		}
-		
-		private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
+
+        private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
 			clickable = false;
 			primaryTouchCoords[0] = primaryTouch.getScreenX();
 			primaryTouchCoords[1] = primaryTouch.getScreenY();
@@ -1743,7 +1780,7 @@ public class AnnotationToolApplication extends Application {
 			touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
 			touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
 		}
-    	
+
     }
 
     /**
@@ -1795,12 +1832,15 @@ public class AnnotationToolApplication extends Application {
                 commitChange(addShape);
 
                 try {
-                    Custom_Shape shape = new Custom_Shape(++uuid, "circle");
-                    shape.setLocation(new Point(circle.getCenterX(), circle.getCenterY()));
+                    uuid = UUID.randomUUID();
+                    Custom_Shape shape = new Custom_Shape(uuid, "circle");
+                    shape.setLocation(new Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
                     shape.setColorString((paint.toString()));
-                    shape.setStrokeWidth(strokeWidth);
-                    shape.setRadius(circle.getRadius());
-                    shape.writeJSON(shape);
+                    shape.setStrokeWidth(String.valueOf(strokeWidth));
+                    shape.setRadius(String.valueOf(circle.getRadius()));
+
+                    holder.add(shape);
+                    writeJSON(holder);
 
                 } catch (JsonParseException e) {
                     e.printStackTrace();

@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="287206aa-008d-40ee-b6e2-9533c2cde627" name="Default" comment="Added button for saving the entire state of the program. Still not implemented yet." />
-    <ignored path="$PROJECT_DIR$/out/" />
+    <list default="true" id="42395ef2-66f6-495f-8249-b9539305d834" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/shape.json" afterPath="" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/scratchpad_project$AnnotationToolApplication.coverage" NAME="AnnotationToolApplication Coverage Results" MODIFIED="1496423883520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>annotationtool.*</FILTER>
-    </SUITE>
-    <SUITE FILE_PATH="coverage/scratchpad_project$AnnotationTool.coverage" NAME="AnnotationTool Coverage Results" MODIFIED="1496427572299" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
-      <FILTER>annotationtool.*</FILTER>
-    </SUITE>
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -27,43 +20,109 @@
     <option name="SHOW_EMPTY_GROUPS" value="false" />
     <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
   </component>
+  <component name="DockManager">
+    <window id="1">
+      <content type="file-editors">
+        <state>
+          <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+            <file leaf-file-name="Custom_Shape.java" pinned="false" current-in-tab="true">
+              <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Custom_Shape.java">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state relative-caret-position="-544">
+                    <caret line="4" column="30" lean-forward="false" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="30" />
+                    <folding>
+                      <element signature="imports" expanded="true" />
+                    </folding>
+                  </state>
+                </provider>
+              </entry>
+            </file>
+          </leaf>
+        </state>
+      </content>
+    </window>
+  </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="scratchpad_project" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="IconControllerBox.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java">
+      <file leaf-file-name="FXAnnotationToolBuilder.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-17">
-              <caret line="647" column="13" lean-forward="false" selection-start-line="647" selection-start-column="13" selection-end-line="647" selection-end-column="13" />
+            <state relative-caret-position="272">
+              <caret line="46" column="32" lean-forward="false" selection-start-line="46" selection-start-column="32" selection-end-line="46" selection-end-column="32" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <marker date="1499806026333" expanded="true" signature="10190:10193" ph="{...}" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="image-000000.png" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/image-000000.png">
-          <provider selected="true" editor-type-id="images">
-            <state />
+      <file leaf-file-name="AnnotationToolApplication.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1785">
+              <caret line="1465" column="71" lean-forward="false" selection-start-line="1465" selection-start-column="71" selection-end-line="1465" selection-end-column="71" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#13596#13597#0" expanded="true" />
+                <element signature="e#13640#13641#0" expanded="true" />
+                <element signature="e#14424#14425#0" expanded="true" />
+                <element signature="e#14480#14481#0" expanded="true" />
+                <element signature="e#38186#38187#0" expanded="true" />
+                <element signature="e#38226#38227#0" expanded="true" />
+                <element signature="e#38279#38280#0" expanded="true" />
+                <element signature="e#38322#38323#0" expanded="true" />
+                <element signature="e#38364#38365#0" expanded="true" />
+                <element signature="e#38399#38400#0" expanded="true" />
+                <element signature="e#38571#38572#0" expanded="true" />
+                <element signature="e#38649#38650#0" expanded="true" />
+                <element signature="e#39976#39977#0" expanded="true" />
+                <element signature="e#40008#40009#0" expanded="true" />
+                <element signature="e#41561#41562#0" expanded="true" />
+                <element signature="e#41593#41594#0" expanded="true" />
+                <element signature="e#41646#41647#0" expanded="true" />
+                <element signature="e#41692#41693#0" expanded="true" />
+                <element signature="e#54589#54590#0" expanded="true" />
+                <element signature="e#54632#54633#0" expanded="true" />
+                <element signature="e#55469#55470#0" expanded="true" />
+                <element signature="e#55542#55543#0" expanded="true" />
+              </folding>
+            </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AnnotationToolApplication.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java">
+      <file leaf-file-name="Point.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Point.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1180">
-              <caret line="1008" column="0" lean-forward="false" selection-start-line="1008" selection-start-column="0" selection-end-line="1008" selection-end-column="0" />
+            <state relative-caret-position="136">
+              <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+              <folding>
+                <marker date="1499958461043" expanded="true" signature="283:294" ph=" { " />
+                <marker date="1499958461043" expanded="true" signature="303:309" ph=" }" />
+                <marker date="1499958461043" expanded="true" signature="341:352" ph=" { " />
+                <marker date="1499958461043" expanded="true" signature="363:369" ph=" }" />
+                <marker date="1499958461043" expanded="true" signature="395:406" ph=" { " />
+                <marker date="1499958461043" expanded="true" signature="415:421" ph=" }" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AddShape.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/annotationtool/changeItem/AddShape.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="17">
+              <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="state.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/state.txt">
+      <file leaf-file-name="AnnotationTool.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationTool.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -72,23 +131,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProcessRunner.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/annotationtool/util/ProcessRunner.java">
+      <file leaf-file-name="IconControllerBox.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="544">
-              <caret line="37" column="13" lean-forward="false" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
+            <state relative-caret-position="6732">
+              <caret line="516" column="22" lean-forward="false" selection-start-line="516" selection-start-column="22" selection-end-line="516" selection-end-column="22" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FXAnnotationToolBuilder.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java">
+      <file leaf-file-name="FXControllerBox.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXControllerBox.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="277">
-              <caret line="327" column="5" lean-forward="false" selection-start-line="327" selection-start-column="5" selection-end-line="327" selection-end-column="5" />
+            <state relative-caret-position="1122">
+              <caret line="83" column="72" lean-forward="false" selection-start-line="83" selection-start-column="72" selection-end-line="83" selection-end-column="72" />
               <folding>
-                <marker date="1499899111885" expanded="true" signature="10190:10193" ph="{...}" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -99,66 +158,50 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin File" />
-        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>picturestage</find>
-      <find>picture</find>
-      <find>if(</find>
-      <find>drawing</find>
-      <find>drawingstage.isFullscree</find>
-      <find>top</find>
-      <find>filechooser</find>
-      <find>rese</find>
-      <find>resetStages</find>
-      <find>textsize</find>
-      <find>setstroke</find>
-      <find>settextsize</find>
-      <find>setTextSize</find>
-      <find>stage</find>
-      <find>drawi</find>
-      <find>settext</find>
-      <find>getdrawingstage</find>
-      <find>getstroke</find>
-      <find>setalwaysontop</find>
-      <find>setalwaysontop(b</find>
-      <find>at.</find>
-      <find>size</find>
-      <find>dialog</find>
-      <find>line</find>
-      <find>addArrowToEndOfLine</find>
-      <find>drawinghandler</find>
-      <find>setdia</find>
-      <find>savestate</find>
-      <find>file</find>
-      <find>inputEvents.ser</find>
+      <find>setmakingtextb</find>
+      <find>setMakingTextb</find>
+      <find>main</find>
+      <find>quit</find>
+      <find>thisListener</find>
+      <find>annotationTool</find>
+      <find>FXControllerBox</find>
+      <find>hand</find>
+      <find>hand.png</find>
+      <find>movingHandler</find>
+      <find>eraser.</find>
+      <find>eraser</find>
+      <find>drawingh</find>
+      <find>implements eventHandler&lt;ke</find>
+      <find>shape</find>
+      <find>circle</find>
+      <find>dragged</find>
+      <find>json</find>
+      <find>circl</find>
+      <find>color</find>
+      <find>uuid</find>
+      <find>mapper</find>
+      <find>handler</find>
+      <find>path</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="kakoue66@students.rowan.edu" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="java-annotateFXTE" />
       </map>
     </option>
-    <excluded-from-favorite>
-      <branch-storage>
-        <map>
-          <entry type="REMOTE">
-            <value>
-              <list>
-                <branch-info repo="$PROJECT_DIR$" source="origin/master" />
-              </list>
-            </value>
-          </entry>
-        </map>
-      </branch-storage>
-    </excluded-from-favorite>
   </component>
   <component name="GradleLocalSettings">
     <option name="externalProjectsViewState">
@@ -168,27 +211,21 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/annotationtool/AnnotationTool.java" />
-        <option value="$PROJECT_DIR$/util/GridBagConstraintBuilder.class" />
-        <option value="$PROJECT_DIR$/annotationtool/ControllerBox.java" />
-        <option value="$PROJECT_DIR$/util/GridBagConstraintBuilder.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotationtool/AnnotationTool.kt" />
-        <option value="$PROJECT_DIR$/annotationtool/annotationtool/ControllerBox.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotationtool/AnnotationTool.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotationtool/FXControllerBox.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotationtool/FXAnnotationToolBuilder.java" />
-        <option value="$PROJECT_DIR$/annotationtool/changeItem/changeItem.java" />
-        <option value="$PROJECT_DIR$/annotationtool/changeItem/DeleteShape.java" />
-        <option value="$PROJECT_DIR$/annotationtool/changeItem/ChangeItem.java" />
-        <option value="$PROJECT_DIR$/annotationtool/changeItem/MoveShape.java" />
-        <option value="$PROJECT_DIR$/annotationtool/changeItem/EraseShape.java" />
         <option value="$PROJECT_DIR$/annotationtool/annotationtool/AnnotationToolApplication.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotationtool/IconControllerBox.java" />
-        <option value="$PROJECT_DIR$/annotationtool/changeItem/AddShape.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java" />
-        <option value="$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java" />
-        <option value="$PROJECT_DIR$/annotationtool/util/InputAutomator.java" />
         <option value="$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java" />
+        <option value="$PROJECT_DIR$/annotationtool/annotation/FXControllerBox.java" />
+        <option value="$PROJECT_DIR$/annotationtool/annotation/JacksonTester.java" />
+        <option value="$PROJECT_DIR$/annotationtool/annotation/JsonObject.java" />
+        <option value="$PROJECT_DIR$/annotationtool/annotation/Shp.java" />
+        <option value="$PROJECT_DIR$/annotationtool/annotation/Shape.java" />
+        <option value="$PROJECT_DIR$/annotationtool/TransferableShapes/Point.java" />
+        <option value="$PROJECT_DIR$/annotationtool/TransferableShapes/Circle.java" />
+        <option value="$PROJECT_DIR$/annotationtool/TransferableShapes/Shp.java" />
+        <option value="$PROJECT_DIR$/annotationtool/TransferableShapes/Shape.java" />
+        <option value="$PROJECT_DIR$/test.JSON" />
+        <option value="$PROJECT_DIR$/shape.json" />
+        <option value="$PROJECT_DIR$/annotationtool/TransferableShapes/Custom_Shape.java" />
+        <option value="$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java" />
       </list>
     </option>
   </component>
@@ -198,11 +235,13 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
+  <component name="PhpServers">
+    <servers />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1096" />
+    <option name="width" value="1920" />
+    <option name="height" value="1080" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -219,18 +258,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scratchpad_project" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-          </PATH>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="scratchpad_project" />
@@ -244,25 +274,141 @@
         </subPane>
       </pane>
       <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
-    <property name="settings.editor.selected.configurable" value="configurable.group.build" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/jnativehook-2.1.0.jar!/" />
-    <property name="project.structure.last.edited" value="Global Libraries" />
-    <property name="project.structure.proportion" value="0.15" />
-    <property name="project.structure.side.proportion" value="0.2" />
-    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/Resea/IdeaProjects/scratchpad_project/annotationtool/annotationtool/AnnotationTool.java" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Resea\IdeaProjects\scratchpad_project" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Research\IdeaProjects\scratchpad_project\lib" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Research\IdeaProjects\scratchpad_project\annotationtool" />
+    </key>
+  </component>
+  <component name="RestoreUpdateTree" date="Moments ago" ActionInfo="_Update">
+    <UpdatedFiles>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Updated from server" />
+        <option name="myStatusName" value="Changed on server" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="CHANGED_ON_SERVER" />
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Updated" />
+          <option name="myStatusName" value="Changed" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="UPDATED" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/annotationtool/TransferableShapes/Custom_Shape.java</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/annotationtool/TransferableShapes/Point.java</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/production/scratchpad_project/production/scratchpad_project/.idea/workspace.xml</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/production/scratchpad_project/production/scratchpad_project/shape.json</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/shape.json</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Created" />
+          <option name="myStatusName" value="Created" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="CREATED" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/temp/shape.json</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Deleted" />
+          <option name="myStatusName" value="Deleted" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="true" />
+          <option name="myId" value="REMOVED_FROM_REPOSITORY" />
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Restored" />
+          <option name="myStatusName" value="Will be restored" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="RESTORED" />
+        </FILE-GROUP>
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Modified" />
+        <option name="myStatusName" value="Modified" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MODIFIED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Skipped" />
+        <option name="myStatusName" value="Skipped" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="SKIPPED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with conflicts" />
+        <option name="myStatusName" value="Will be merged with conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_CONFLICTS" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with tree conflicts" />
+        <option name="myStatusName" value="Merged with tree conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_TREE_CONFLICT" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with property conflicts" />
+        <option name="myStatusName" value="Will be merged with property conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_PROPERTY_CONFLICT" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged" />
+        <option name="myStatusName" value="Will be merged" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Not in repository" />
+        <option name="myStatusName" value="Not in repository" />
+        <option name="mySupportsDeletion" value="true" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="UNKNOWN" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Locally added" />
+        <option name="myStatusName" value="Locally added" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="LOCALLY_ADDED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Locally removed" />
+        <option name="myStatusName" value="Locally removed" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="LOCALLY_REMOVED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Switched" />
+        <option name="myStatusName" value="Switched" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="SWITCHED" />
+      </FILE-GROUP>
+    </UpdatedFiles>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -276,107 +422,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.FXAnnotationToolBuilder (1)">
-    <configuration default="false" name="AnnotationToolApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="annotationtool.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="annotationtool.AnnotationToolApplication" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="scratchpad_project" />
-      <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="FXAnnotationToolBuilder" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="annotationtool.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="annotationtool.FXAnnotationToolBuilder" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="scratchpad_project" />
-      <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="FXAnnotationToolBuilder (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="annotation.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="annotation.FXAnnotationToolBuilder" />
-      <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-      <option name="ALTERNATIVE_JRE_PATH" value="C:\Program Files\Java\jdk1.8.0_101\jre" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="" />
-      <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="InputAutomator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="util.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="util.InputAutomator" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="annotationtool" />
-      <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="GlobalInputListener" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="util.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="util.GlobalInputListener" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="annotationtool" />
-      <envs />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Application.tool ">
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
@@ -543,6 +589,26 @@
       <envs />
       <method />
     </configuration>
+    <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="scratchpad_project" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method />
+    </configuration>
     <configuration default="true" type="FlashRunConfigurationType" factoryName="Flash App">
       <option name="BCName" value="" />
       <option name="IOSSimulatorSdkPath" value="" />
@@ -700,6 +766,60 @@
       <envs />
       <method />
     </configuration>
+    <configuration default="true" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
+      <TestRunner />
+      <method />
+    </configuration>
+    <configuration default="true" type="PhpLocalRunConfigurationType" factoryName="PHP Console">
+      <method />
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="scratchpad_project" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PyLettuceRunConfigurationType" factoryName="Lettuce">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="scratchpad_project" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="scratchpad_project" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
     <configuration default="true" type="Remote" factoryName="Remote">
       <option name="USE_SOCKET_TRANSPORT" value="true" />
       <option name="SERVER_MODE" value="false" />
@@ -742,6 +862,32 @@
       <listeners />
       <method />
     </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <module name="scratchpad_project" />
+      <method />
+    </configuration>
+    <configuration default="true" type="executeSpecs" factoryName="Gauge Execution">
+      <setting name="environment" value="" />
+      <setting name="specsToExecute" value="" />
+      <setting name="tags" value="" />
+      <setting name="parallelNodes" value="" />
+      <setting name="execInParallel" value="false" />
+      <setting name="programParameters" value="" />
+      <setting name="workingDirectory" value="" />
+      <setting name="moduleName" value="" />
+      <envMap />
+      <setting name="rowsRange" value="" />
+      <method />
+    </configuration>
     <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
       <node-interpreter>project</node-interpreter>
       <node-options />
@@ -764,401 +910,122 @@
     <configuration default="true" type="osgi.bnd.run" factoryName="Test Launcher (JUnit)">
       <method />
     </configuration>
-    <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Application.AnnotationToolApplication" />
-      <item index="1" class="java.lang.String" itemvalue="Application.FXAnnotationToolBuilder" />
-      <item index="2" class="java.lang.String" itemvalue="Application.FXAnnotationToolBuilder (1)" />
-      <item index="3" class="java.lang.String" itemvalue="Application.InputAutomator" />
-      <item index="4" class="java.lang.String" itemvalue="Application.GlobalInputListener" />
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="scratchpad_project" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="scratchpad_project" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method />
+    </configuration>
+    <configuration default="false" name="tool " type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" value="annotation.FXAnnotationToolBuilder" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="scratchpad_project" />
+      <envs />
+      <method />
+    </configuration>
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="Application.tool " />
     </list>
-    <recent_temporary>
-      <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.FXAnnotationToolBuilder (1)" />
-        <item index="1" class="java.lang.String" itemvalue="Application.InputAutomator" />
-        <item index="2" class="java.lang.String" itemvalue="Application.GlobalInputListener" />
-        <item index="3" class="java.lang.String" itemvalue="Application.FXAnnotationToolBuilder" />
-        <item index="4" class="java.lang.String" itemvalue="Application.AnnotationToolApplication" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="287206aa-008d-40ee-b6e2-9533c2cde627" name="Default" comment="" />
-      <created>1495551313952</created>
+      <changelist id="42395ef2-66f6-495f-8249-b9539305d834" name="Default" comment="" />
+      <created>1499091621877</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1495551313952</updated>
-      <workItem from="1495551315269" duration="1407000" />
-      <workItem from="1495552800582" duration="85000" />
-      <workItem from="1495552897189" duration="28598000" />
-      <workItem from="1495582665462" duration="6296000" />
-      <workItem from="1495654347474" duration="11034000" />
-      <workItem from="1495666104488" duration="1381000" />
-      <workItem from="1495668502872" duration="6040000" />
-      <workItem from="1495738611766" duration="7467000" />
-      <workItem from="1496158507737" duration="1407000" />
-      <workItem from="1496159965342" duration="76451000" />
-      <workItem from="1497367534485" duration="39322000" />
-      <workItem from="1497477789904" duration="37841000" />
-      <workItem from="1497908305849" duration="144000" />
-      <workItem from="1497909455613" duration="2656000" />
-      <workItem from="1497912178372" duration="2110000" />
-      <workItem from="1497970513457" duration="3907000" />
-      <workItem from="1497983456847" duration="2928000" />
-      <workItem from="1497987643010" duration="5937000" />
-      <workItem from="1499790588697" duration="17696000" />
+      <updated>1499091621877</updated>
+      <workItem from="1499091623325" duration="26209000" />
+      <workItem from="1499787497650" duration="32450000" />
+      <workItem from="1499892930256" duration="2321000" />
     </task>
-    <task id="LOCAL-00006" summary="Text works with undo/redo (one character at a time) Currently fixing bug that causes&#10;everything to be bubble text.&#10; &#10;Comment out 459-462 of this commit in order to avoid&#10;the bug and always have it be bubble text.&#10;&#10;Backspace calls undo if you are writing in a text box and deletes the last character&#10;that was written, if there is one to delete.">
-      <created>1495581101460</created>
+    <task id="LOCAL-00001" summary="1- broke up the 'setdrawingBox' into 2 distinct methods &#10;2 - updated controler box icons, and cursors">
+      <created>1499116613713</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1499116613713</updated>
+    </task>
+    <task id="LOCAL-00002" summary=" updated controler box icons, and cursors">
+      <created>1499277735784</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1499277735784</updated>
+    </task>
+    <task id="LOCAL-00003" summary=" updated controler box icons, and cursors">
+      <created>1499363528391</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1499363528391</updated>
+    </task>
+    <task id="LOCAL-00004" summary="change bg for &quot;To shape&quot; icon">
+      <created>1499364742954</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1499364742954</updated>
+    </task>
+    <task id="LOCAL-00005" summary="added custom_shape class &#10;TODO: still fixing path conversion issue">
+      <created>1499890567327</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1499890567327</updated>
+    </task>
+    <task id="LOCAL-00006" summary="added custom_shape class &#10;TODO: still fixing path conversion issue">
+      <created>1499895855698</created>
       <option name="number" value="00006" />
       <option name="presentableId" value="LOCAL-00006" />
       <option name="project" value="LOCAL" />
-      <updated>1495581101460</updated>
+      <updated>1499895855698</updated>
     </task>
-    <task id="LOCAL-00007" summary="just some deleted TODOs. commit in order to pull">
-      <created>1495647781810</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1495647781810</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Undo and redo stack now hold a list of shapeDef's instead of just one.">
-      <created>1495649094307</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1495649094307</updated>
-    </task>
-    <task id="LOCAL-00009" summary="Backspace does not cause bubble text anymore.">
-      <created>1495650762432</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1495650762432</updated>
-    </task>
-    <task id="LOCAL-00010" summary="undo works on entire words. Must click a color before pressing undo. Some bugs with it are still there.">
-      <created>1495654483027</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1495654483027</updated>
-    </task>
-    <task id="LOCAL-00011" summary="Fixed conflicts from recent pull.">
-      <created>1495655283100</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1495655283100</updated>
-    </task>
-    <task id="LOCAL-00012" summary="Added in the ability to condense strings from entire actions by doing an &#10;undo/redo.">
-      <created>1495657773190</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1495657773190</updated>
-    </task>
-    <task id="LOCAL-00013" summary="undid recent pull. no real changes.">
-      <created>1495657961520</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1495657961520</updated>
-    </task>
-    <task id="LOCAL-00014" summary="Merge should work now. Copied previous changes and then added mine in. &#10;&#10;Weird bug where if you make a text box and then resize the window, and then&#10;click in the window again, it continues the text where you left off.">
-      <created>1495660285079</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1495660285079</updated>
-    </task>
-    <task id="LOCAL-00015" summary="Text Color and Text Size can now be modified by the ControllerBox">
-      <created>1495663048681</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1495663048681</updated>
-    </task>
-    <task id="LOCAL-00016" summary="Toggle clickable option added.&#10;Lets user click through window when clickable is false. &#10;Does not currently work if trying to click on the home page window.">
-      <created>1495670402677</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1495670402677</updated>
-    </task>
-    <task id="LOCAL-00017" summary="Moved code to remove all handlers into a method in order to remove handlers before starting a new type of event. &#10;&#10;Touch capability for send to back should work. Still not tested.">
-      <created>1496342887861</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1496342887861</updated>
-    </task>
-    <task id="LOCAL-00018" summary="Eraser is working.">
-      <created>1496440595193</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1496440595193</updated>
-    </task>
-    <task id="LOCAL-00019" summary="Erase Transparent is working.">
-      <created>1496440934476</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1496440934476</updated>
-    </task>
-    <task id="LOCAL-00020" summary="Removed the option for Erase White.">
-      <created>1496441027904</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1496441027904</updated>
-    </task>
-    <task id="LOCAL-00021" summary="Refactored some code.">
-      <created>1496441500858</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1496441500858</updated>
-    </task>
-    <task id="LOCAL-00022" summary="More Code Refactoring.">
-      <created>1496442422808</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1496442422808</updated>
-    </task>
-    <task id="LOCAL-00023" summary="Fixed bug where circles would be created if you pressed make circles, then toggle clickable twice.">
-      <created>1496443336502</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1496443336502</updated>
-    </task>
-    <task id="LOCAL-00024" summary="Controllerbox automatically becomes smaller when not being hovered over. Becomes bigger again when&#10;being hovered over. Does not currently work very well when not clickable.">
-      <created>1496692418967</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1496692418967</updated>
-    </task>
-    <task id="LOCAL-00025" summary="Potentially fixes save image on ubuntu based on https://stackoverflow.com/questions/4373288/how-can-i-construct-java-robot-class-methods-into-a-method-of-my-own-making.&#10;If it does not, then does not introduce and new issues. Also added in some new comments.">
-      <created>1496693454456</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1496693454456</updated>
-    </task>
-    <task id="LOCAL-00026" summary="Redo stack clears on events that are not undo/redo.">
-      <created>1496697471019</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1496697471019</updated>
-    </task>
-    <task id="LOCAL-00027" summary="Added in a color picker so that any color may be picked by the user.">
-      <created>1496707337457</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1496707337457</updated>
-    </task>
-    <task id="LOCAL-00028" summary="Fixed bug where drawing on other nodes can sometimes lead to nodes not being deleted when desired.">
-      <created>1496708777499</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1496708777499</updated>
-    </task>
-    <task id="LOCAL-00029" summary="Circles are now made as annuli. (Ring shaped objects.)">
-      <created>1496764231578</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1496764231578</updated>
-    </task>
-    <task id="LOCAL-00030" summary="Fixed bug where circles get completely erased whenever the eraser is used.">
-      <created>1496764846923</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1496764846923</updated>
-    </task>
-    <task id="LOCAL-00031" summary="Arrow drawer now adds straight lines.">
-      <created>1496773401414</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1496773401415</updated>
-    </task>
-    <task id="LOCAL-00032" summary="Arrow drawer now adds straight arrows.">
-      <created>1496779359108</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1496779359108</updated>
-    </task>
-    <task id="LOCAL-00033" summary="some added comments">
-      <created>1497366538580</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1497366538580</updated>
-    </task>
-    <task id="LOCAL-00034" summary="Easier to see box as it gets created.">
-      <created>1497368147551</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1497368147551</updated>
-    </task>
-    <task id="LOCAL-00035" summary="Removed decoration from the mouse catching window. This fixed the bug where drawings were offset.">
-      <created>1497369450133</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1497369450133</updated>
-    </task>
-    <task id="LOCAL-00036" summary="Added in some items for the new stack.">
-      <created>1497370756706</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1497370756706</updated>
-    </task>
-    <task id="LOCAL-00037" summary="undoStack changed so that it now holds ChangeItems in preparation for adding more features. Change items are any kind of change that may be done. So far have implemented one that adds shapes, and one for erasing certain areas. &#10;&#10;The class MoveShape has been created, but it has not been implemented. &#10;&#10;The ChangeItems edit the stack based on what kind of change they need to bring about.">
-      <created>1497396273409</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1497396273409</updated>
-    </task>
-    <task id="LOCAL-00038" summary="Changed the name of the method commitShape to commitChange.">
-      <created>1497460536038</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1497460536038</updated>
-    </task>
-    <task id="LOCAL-00039" summary="Started making a separate controller box in javafx that has icons.">
-      <created>1497466494872</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1497466494872</updated>
-    </task>
-    <task id="LOCAL-00040" summary="added various buttons to the IconControllerBox. I also added in methods to snap the controllerbox to the left, right, and top of a given drawing stage.&#10;&#10;Most images equivalent to Ardesia images.">
-      <created>1497488669961</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1497488669961</updated>
-    </task>
-    <task id="LOCAL-00041" summary="Changed style of size changer to UTILITY.">
-      <created>1497489324178</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1497489324178</updated>
-    </task>
-    <task id="LOCAL-00042" summary="fixed bug where circles and arrows got painted underneath of other things until another circle or arrow was drawn.">
-      <created>1497545892899</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1497545892899</updated>
-    </task>
-    <task id="LOCAL-00043" summary="Added in method setIconSizes which goes through the icons and sets the size of the button.">
-      <created>1497547915328</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1497547915328</updated>
-    </task>
-    <task id="LOCAL-00044" summary="Added in button to set the buttons' sizes. Moved TODO list to google drive and to issues on github.">
-      <created>1497560690240</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1497560690240</updated>
-    </task>
-    <task id="LOCAL-00045" summary="Added some of the png files to git.">
-      <created>1497634170318</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1497634170318</updated>
-    </task>
-    <task id="LOCAL-00046" summary="Solves issue where user could not draw over toggle clickable area without being unable to later toggle clickable back on.">
-      <created>1497898853131</created>
-      <option name="number" value="00046" />
-      <option name="presentableId" value="LOCAL-00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1497898853131</updated>
-    </task>
-    <task id="LOCAL-00047" summary="Fixes some of the issues where the drawings would appear over top of the controllerbox rendering it impossible to click.">
-      <created>1497913236969</created>
-      <option name="number" value="00047" />
-      <option name="presentableId" value="LOCAL-00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1497913236969</updated>
-    </task>
-    <task id="LOCAL-00048" summary="Now shows a pencil as the cursor.">
-      <created>1497971241323</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1497971241323</updated>
-    </task>
-    <task id="LOCAL-00049" summary="Now shows various different images as cursor based on what is being done.">
-      <created>1497972921778</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1497972921778</updated>
-    </task>
-    <task id="LOCAL-00050" summary="Fixed bug where the picturestage would show itself on top of the mousecatching stage when a size is picked. &#10;Made some small name changes.">
-      <created>1498001485820</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1498001485820</updated>
-    </task>
-    <task id="LOCAL-00051" summary="Fixed bug where dialog would pop up below the drawing area.">
-      <created>1499813101983</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1499813101984</updated>
-    </task>
-    <task id="LOCAL-00052" summary="Fix issue where controllerbox dialog would show up under stage. also makes sure it stays on the screen.">
-      <created>1499884618954</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1499884618954</updated>
-    </task>
-    <task id="LOCAL-00053" summary="Fixes issue where the controllerbox would end up below the other two stages">
-      <created>1499886652499</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1499886652499</updated>
-    </task>
-    <task id="LOCAL-00054" summary="Added button for saving the entire state of the program. Still not implemented yet.">
-      <created>1499897503825</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1499897503825</updated>
-    </task>
-    <option name="localTasksCounter" value="55" />
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="252707000" />
+    <option name="totallyTimeSpent" value="60980000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1170,105 +1037,58 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296146" sideWeight="0.49791667" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.326572" sideWeight="0.50416666" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32352942" sideWeight="0.49583334" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286004" sideWeight="0.49791667" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19895834" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33164302" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2156013" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.023785926" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.11247335" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21399595" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296875" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32932165" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="processedProjectFiles" value="true" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State>
-              <option name="RECENTLY_FILTERED_USER_GROUPS">
-                <collection />
-              </option>
-              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
-                <collection />
-              </option>
-              <option name="COLUMN_ORDER">
-                <list>
-                  <option value="0" />
-                  <option value="1" />
-                  <option value="2" />
-                  <option value="3" />
-                </list>
-              </option>
-            </State>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed bug where circles get completely erased whenever the eraser is used." />
-    <MESSAGE value="Arrow drawer now adds straight lines." />
-    <MESSAGE value="Arrow drawer now adds straight arrows." />
-    <MESSAGE value="some added comments" />
-    <MESSAGE value="Easier to see box as it gets created." />
-    <MESSAGE value="Removed decoration from the mouse catching window. This fixed the bug where drawings were offset." />
-    <MESSAGE value="Added in some items for the new stack." />
-    <MESSAGE value="undoStack changed so that it now holds ChangeItems in preparation for adding more features. Change items are any kind of change that may be done. So far have implemented one that adds shapes, and one for erasing certain areas. &#10;&#10;The class MoveShape has been created, but it has not been implemented. &#10;&#10;The ChangeItems edit the stack based on what kind of change they need to bring about." />
-    <MESSAGE value="Changed the name of the method commitShape to commitChange." />
-    <MESSAGE value="Started making a separate controller box in javafx that has icons." />
-    <MESSAGE value="added various buttons to the IconControllerBox. I also added in methods to snap the controllerbox to the left, right, and top of a given drawing stage.&#10;&#10;Most images equivalent to Ardesia images." />
-    <MESSAGE value="Changed style of size changer to UTILITY." />
-    <MESSAGE value="fixed bug where circles and arrows got painted underneath of other things until another circle or arrow was drawn." />
-    <MESSAGE value="Added in method setIconSizes which goes through the icons and sets the size of the button." />
-    <MESSAGE value="Added in button to set the buttons' sizes. Moved TODO list to google drive and to issues on github." />
-    <MESSAGE value="Added some of the png files to git." />
-    <MESSAGE value="Solves issue where user could not draw over toggle clickable area without being unable to later toggle clickable back on." />
-    <MESSAGE value="Fixes some of the issues where the drawings would appear over top of the controllerbox rendering it impossible to click." />
-    <MESSAGE value="Now shows a pencil as the cursor." />
-    <MESSAGE value="Now shows various different images as cursor based on what is being done." />
-    <MESSAGE value="Fixed bug where the picturestage would show itself on top of the mousecatching stage when a size is picked. &#10;Made some small name changes." />
-    <MESSAGE value="Fixed bug where dialog would pop up below the drawing area." />
-    <MESSAGE value="Fix issue where controllerbox dialog would show up under stage. also makes sure it stays on the screen." />
-    <MESSAGE value="Fixes issue where the controllerbox would end up below the other two stages" />
-    <MESSAGE value="Added button for saving the entire state of the program. Still not implemented yet." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added button for saving the entire state of the program. Still not implemented yet." />
+    <MESSAGE value="1- broke up the 'setdrawingBox' into 2 distinct methods &#10;2 - updated controler box icons, and cursors" />
+    <MESSAGE value=" updated controler box icons, and cursors" />
+    <MESSAGE value="change bg for &quot;To shape&quot; icon" />
+    <MESSAGE value="added custom_shape class &#10;TODO: still fixing path conversion issue" />
+    <option name="LAST_COMMIT_MESSAGE" value="added custom_shape class &#10;TODO: still fixing path conversion issue" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <option name="time" value="18" />
-    </breakpoint-manager>
+    <breakpoint-manager />
     <watches-manager />
   </component>
   <component name="antWorkspaceConfiguration">
@@ -1276,188 +1096,35 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$USER_HOME$/Downloads/jnativehook-2.1.0/jnativehook/jar/jnativehook-2.1.0.jar!/org/jnativehook/NativeInputEvent.class">
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="122" column="21" lean-forward="true" selection-start-line="122" selection-start-column="21" selection-end-line="122" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/ControllerBox.java" />
-    <entry file="file://$PROJECT_DIR$/image-000002.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Desktop/Assert.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="9" column="55" lean-forward="false" selection-start-line="9" selection-start-column="55" selection-end-line="9" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/src.zip!/java/lang/Thread.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="744" column="0" lean-forward="false" selection-start-line="744" selection-start-column="0" selection-end-line="744" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000007.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000008.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/src.zip!/java/awt/Window.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="590" column="0" lean-forward="false" selection-start-line="590" selection-start-column="0" selection-end-line="590" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000006.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/AnnotationTool.java" />
-    <entry file="file://$PROJECT_DIR$/image-000009.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000010.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000011.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/AnnotationToolBuilder.java" />
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/FXAnnotationToolBuilder.java" />
-    <entry file="file://$PROJECT_DIR$/image-000012.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/src.zip!/java/lang/Object.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="234" column="18" lean-forward="false" selection-start-line="234" selection-start-column="18" selection-end-line="234" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/changeItem/MoveShape.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="33" lean-forward="false" selection-start-line="25" selection-start-column="33" selection-end-line="25" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/changeItem/ChangeItem.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="30" column="33" lean-forward="false" selection-start-line="30" selection-start-column="16" selection-end-line="30" selection-end-column="33" />
+        <state relative-caret-position="272">
+          <caret line="46" column="32" lean-forward="false" selection-start-line="46" selection-start-column="32" selection-end-line="46" selection-end-column="32" />
           <folding>
-            <marker date="1499796693171" expanded="true" signature="94:132" ph="/**...*/" />
+            <marker date="1499806026333" expanded="true" signature="10190:10193" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/image-000013.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000014.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/AnnotationToolApplication.java" />
-    <entry file="file://$PROJECT_DIR$/annotationtool/arrow.svg">
+    <entry file="file://$PROJECT_DIR$/shape.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="85">
+          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/FXControllerBox.java" />
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/IconControllerBox.java" />
-    <entry file="file://$PROJECT_DIR$/image-000015.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/exit.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/filler.PNG">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/colorSelect.PNG">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/snapLeftImage.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000016.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000017.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000018.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000019.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/image-000020.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXControllerBox.java">
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Point.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="576">
-          <caret line="243" column="12" lean-forward="false" selection-start-line="243" selection-start-column="8" selection-end-line="243" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/changeItem/EraseShape.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="850">
-          <caret line="54" column="35" lean-forward="false" selection-start-line="54" selection-start-column="35" selection-end-line="54" selection-end-column="35" />
+        <state relative-caret-position="136">
+          <caret line="8" column="0" lean-forward="true" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
           <folding>
-            <marker date="1499796693172" expanded="true" signature="3799:3807" ph="{...}" />
+            <marker date="1499958461043" expanded="true" signature="283:294" ph=" { " />
+            <marker date="1499958461043" expanded="true" signature="303:309" ph=" }" />
+            <marker date="1499958461043" expanded="true" signature="341:352" ph=" { " />
+            <marker date="1499958461043" expanded="true" signature="363:369" ph=" }" />
+            <marker date="1499958461043" expanded="true" signature="395:406" ph=" { " />
+            <marker date="1499958461043" expanded="true" signature="415:421" ph=" }" />
           </folding>
         </state>
       </provider>
@@ -1465,79 +1132,20 @@
     <entry file="file://$PROJECT_DIR$/annotationtool/changeItem/AddShape.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
-          <caret line="10" column="3" lean-forward="false" selection-start-line="10" selection-start-column="3" selection-end-line="10" selection-end-column="3" />
-          <folding>
-            <marker date="1499899111888" expanded="true" signature="4243:4249" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/javafx-src.zip!/com/sun/glass/ui/View.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="554" column="0" lean-forward="false" selection-start-line="554" selection-start-column="0" selection-end-line="554" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool.iml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" column="14" lean-forward="true" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
+          <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/util/jna_x11_test.java">
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Custom_Circle.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="8" lean-forward="false" selection-start-line="17" selection-start-column="8" selection-end-line="17" selection-end-column="8" />
+        <state relative-caret-position="85">
+          <caret line="5" column="26" lean-forward="false" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/util/ProcessRunner.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="37" column="13" lean-forward="false" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1180">
-          <caret line="1008" column="0" lean-forward="false" selection-start-line="1008" selection-start-column="0" selection-end-line="1008" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="277">
-          <caret line="327" column="5" lean-forward="false" selection-start-line="327" selection-start-column="5" selection-end-line="327" selection-end-column="5" />
-          <folding>
-            <marker date="1499899111885" expanded="true" signature="10190:10193" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/util/GlobalInputListener.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="78" column="5" lean-forward="false" selection-start-line="78" selection-start-column="5" selection-end-line="78" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/util/InputAutomator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="44" column="35" lean-forward="false" selection-start-line="44" selection-start-column="35" selection-end-line="44" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/state.txt">
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationTool.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1545,32 +1153,469 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/image-000023.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inputEvents.ser">
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1122">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="6732">
+          <caret line="516" column="22" lean-forward="false" selection-start-line="516" selection-start-column="22" selection-end-line="516" selection-end-column="22" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java">
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXControllerBox.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-17">
-          <caret line="647" column="13" lean-forward="false" selection-start-line="647" selection-start-column="13" selection-end-line="647" selection-end-column="13" />
+        <state relative-caret-position="1122">
+          <caret line="83" column="72" lean-forward="false" selection-start-line="83" selection-start-column="72" selection-end-line="83" selection-end-column="72" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/image-000000.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23188">
+          <caret line="1449" column="17" lean-forward="false" selection-start-line="1449" selection-start-column="17" selection-end-line="1449" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#13596#13597#0" expanded="true" />
+            <element signature="e#13640#13641#0" expanded="true" />
+            <element signature="e#14424#14425#0" expanded="true" />
+            <element signature="e#14480#14481#0" expanded="true" />
+            <element signature="e#38186#38187#0" expanded="true" />
+            <element signature="e#38226#38227#0" expanded="true" />
+            <element signature="e#38279#38280#0" expanded="true" />
+            <element signature="e#38322#38323#0" expanded="true" />
+            <element signature="e#38364#38365#0" expanded="true" />
+            <element signature="e#38399#38400#0" expanded="true" />
+            <element signature="e#38571#38572#0" expanded="true" />
+            <element signature="e#38649#38650#0" expanded="true" />
+            <element signature="e#39976#39977#0" expanded="true" />
+            <element signature="e#40008#40009#0" expanded="true" />
+            <element signature="e#41561#41562#0" expanded="true" />
+            <element signature="e#41593#41594#0" expanded="true" />
+            <element signature="e#41646#41647#0" expanded="true" />
+            <element signature="e#41692#41693#0" expanded="true" />
+            <element signature="e#54589#54590#0" expanded="true" />
+            <element signature="e#54632#54633#0" expanded="true" />
+            <element signature="e#55469#55470#0" expanded="true" />
+            <element signature="e#55542#55543#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="47" column="17" lean-forward="false" selection-start-line="47" selection-start-column="17" selection-end-line="47" selection-end-column="17" />
+          <folding>
+            <marker date="1499806026333" expanded="true" signature="10190:10193" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3740">
+          <caret line="222" column="60" lean-forward="false" selection-start-line="222" selection-start-column="60" selection-end-line="222" selection-end-column="60" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#13596#13597#0" expanded="true" />
+            <element signature="e#13640#13641#0" expanded="true" />
+            <element signature="e#14424#14425#0" expanded="true" />
+            <element signature="e#14480#14481#0" expanded="true" />
+            <element signature="e#38186#38187#0" expanded="true" />
+            <element signature="e#38226#38227#0" expanded="true" />
+            <element signature="e#38279#38280#0" expanded="true" />
+            <element signature="e#38322#38323#0" expanded="true" />
+            <element signature="e#38364#38365#0" expanded="true" />
+            <element signature="e#38399#38400#0" expanded="true" />
+            <element signature="e#38571#38572#0" expanded="true" />
+            <element signature="e#38649#38650#0" expanded="true" />
+            <element signature="e#39976#39977#0" expanded="true" />
+            <element signature="e#40008#40009#0" expanded="true" />
+            <element signature="e#41561#41562#0" expanded="true" />
+            <element signature="e#41593#41594#0" expanded="true" />
+            <element signature="e#41646#41647#0" expanded="true" />
+            <element signature="e#41692#41693#0" expanded="true" />
+            <element signature="e#54589#54590#0" expanded="true" />
+            <element signature="e#54632#54633#0" expanded="true" />
+            <element signature="e#55469#55470#0" expanded="true" />
+            <element signature="e#55542#55543#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7769">
+          <caret line="517" column="22" lean-forward="false" selection-start-line="517" selection-start-column="22" selection-end-line="517" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/javafx-src.zip!/javafx/scene/image/Image.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16371">
+          <caret line="1109" column="0" lean-forward="false" selection-start-line="1109" selection-start-column="0" selection-end-line="1109" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#43228#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#4030#4031#0" expanded="false" />
+            <element signature="e#4088#4089#0" expanded="false" />
+            <element signature="e#4232#4233#0" expanded="false" />
+            <element signature="e#4304#4305#0" expanded="false" />
+            <element signature="e#5304#5305#0" expanded="false" />
+            <element signature="e#5330#5331#0" expanded="false" />
+            <element signature="e#5455#5456#0" expanded="false" />
+            <element signature="e#5489#5490#0" expanded="false" />
+            <element signature="e#6170#6171#0" expanded="false" />
+            <element signature="e#6219#6220#0" expanded="false" />
+            <element signature="e#6260#6261#0" expanded="false" />
+            <element signature="e#6322#6323#0" expanded="false" />
+            <element signature="e#6384#6385#0" expanded="false" />
+            <element signature="e#6451#6452#0" expanded="false" />
+            <element signature="e#7655#7656#0" expanded="false" />
+            <element signature="e#7692#7693#0" expanded="false" />
+            <element signature="e#8702#8703#0" expanded="false" />
+            <element signature="e#8740#8741#0" expanded="false" />
+            <element signature="e#8985#8986#0" expanded="false" />
+            <element signature="e#9041#9042#0" expanded="false" />
+            <element signature="e#9100#9101#0" expanded="false" />
+            <element signature="e#9142#9143#0" expanded="false" />
+            <element signature="e#9520#9521#0" expanded="false" />
+            <element signature="e#9560#9561#0" expanded="false" />
+            <element signature="e#9609#9610#0" expanded="false" />
+            <element signature="e#9651#9652#0" expanded="false" />
+            <element signature="e#9716#9717#0" expanded="false" />
+            <element signature="e#9769#9770#0" expanded="false" />
+            <element signature="e#9818#9819#0" expanded="false" />
+            <element signature="e#9854#9855#0" expanded="false" />
+            <element signature="e#9907#9908#0" expanded="false" />
+            <element signature="e#9948#9949#0" expanded="false" />
+            <element signature="e#10001#10002#0" expanded="false" />
+            <element signature="e#10036#10037#0" expanded="false" />
+            <element signature="e#10291#10292#0" expanded="false" />
+            <element signature="e#10349#10350#0" expanded="false" />
+            <element signature="e#10409#10410#0" expanded="false" />
+            <element signature="e#10452#10453#0" expanded="false" />
+            <element signature="e#13568#13569#0" expanded="false" />
+            <element signature="e#13604#13605#0" expanded="false" />
+            <element signature="e#14752#14753#0" expanded="false" />
+            <element signature="e#14781#14782#0" expanded="false" />
+            <element signature="e#15144#15145#0" expanded="false" />
+            <element signature="e#15184#15185#0" expanded="false" />
+            <element signature="e#15393#15394#0" expanded="false" />
+            <element signature="e#15439#15440#0" expanded="false" />
+            <element signature="e#15477#15478#0" expanded="false" />
+            <element signature="e#15535#15536#0" expanded="false" />
+            <element signature="e#15595#15596#0" expanded="false" />
+            <element signature="e#15659#15660#0" expanded="false" />
+            <element signature="e#16151#16152#0" expanded="false" />
+            <element signature="e#16201#16202#0" expanded="false" />
+            <element signature="e#16246#16247#0" expanded="false" />
+            <element signature="e#16311#16312#0" expanded="false" />
+            <element signature="e#17336#17337#0" expanded="false" />
+            <element signature="e#17409#17410#0" expanded="false" />
+            <element signature="e#17488#17489#0" expanded="false" />
+            <element signature="e#17538#17539#0" expanded="false" />
+            <element signature="e#17809#17810#0" expanded="false" />
+            <element signature="e#17876#17877#0" expanded="false" />
+            <element signature="e#18130#18131#0" expanded="false" />
+            <element signature="e#18170#18171#0" expanded="false" />
+            <element signature="e#18214#18215#0" expanded="false" />
+            <element signature="e#18256#18257#0" expanded="false" />
+            <element signature="e#18493#18494#0" expanded="false" />
+            <element signature="e#18546#18547#0" expanded="false" />
+            <element signature="e#18864#18865#0" expanded="false" />
+            <element signature="e#18905#18906#0" expanded="false" />
+            <element signature="e#18958#18959#0" expanded="false" />
+            <element signature="e#18993#18994#0" expanded="false" />
+            <element signature="e#29713#29867#0" expanded="false" />
+            <element signature="e#29866#29867#0" expanded="false" />
+            <element signature="e#30712#30713#0" expanded="false" />
+            <element signature="e#30751#30752#0" expanded="false" />
+            <element signature="e#30781#30782#0" expanded="false" />
+            <element signature="e#30820#30821#0" expanded="false" />
+            <element signature="e#33097#33098#0" expanded="false" />
+            <element signature="e#33136#33137#0" expanded="false" />
+            <element signature="e#34488#34489#0" expanded="false" />
+            <element signature="e#34539#34540#0" expanded="false" />
+            <element signature="e#34718#34729#0" expanded="false" />
+            <element signature="e#34901#34902#0" expanded="false" />
+            <element signature="e#34947#34948#0" expanded="false" />
+            <element signature="e#35751#35752#0" expanded="false" />
+            <element signature="e#35787#35788#0" expanded="false" />
+            <element signature="e#35819#35820#0" expanded="false" />
+            <element signature="e#35856#35857#0" expanded="false" />
+            <element signature="e#39575#39576#0" expanded="false" />
+            <element signature="e#39615#39616#0" expanded="false" />
+            <element signature="e#39647#39648#0" expanded="false" />
+            <element signature="e#39724#39725#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXControllerBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1513">
+          <caret line="92" column="9" lean-forward="true" selection-start-line="92" selection-start-column="9" selection-end-line="92" selection-end-column="9" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scratchpad_project.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/ControllerBox.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/AnnotationTool.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/FXAnnotationToolBuilder.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotationtool/AnnotationToolApplication.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/sendToFront.png" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/ControllerBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1326">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_101/javafx-src.zip!/javafx/scene/image/Image.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16371">
+          <caret line="1109" column="0" lean-forward="false" selection-start-line="1109" selection-start-column="0" selection-end-line="1109" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#43228#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#4030#4031#0" expanded="false" />
+            <element signature="e#4088#4089#0" expanded="false" />
+            <element signature="e#4232#4233#0" expanded="false" />
+            <element signature="e#4304#4305#0" expanded="false" />
+            <element signature="e#5304#5305#0" expanded="false" />
+            <element signature="e#5330#5331#0" expanded="false" />
+            <element signature="e#5455#5456#0" expanded="false" />
+            <element signature="e#5489#5490#0" expanded="false" />
+            <element signature="e#6170#6171#0" expanded="false" />
+            <element signature="e#6219#6220#0" expanded="false" />
+            <element signature="e#6260#6261#0" expanded="false" />
+            <element signature="e#6322#6323#0" expanded="false" />
+            <element signature="e#6384#6385#0" expanded="false" />
+            <element signature="e#6451#6452#0" expanded="false" />
+            <element signature="e#7655#7656#0" expanded="false" />
+            <element signature="e#7692#7693#0" expanded="false" />
+            <element signature="e#8702#8703#0" expanded="false" />
+            <element signature="e#8740#8741#0" expanded="false" />
+            <element signature="e#8985#8986#0" expanded="false" />
+            <element signature="e#9041#9042#0" expanded="false" />
+            <element signature="e#9100#9101#0" expanded="false" />
+            <element signature="e#9142#9143#0" expanded="false" />
+            <element signature="e#9520#9521#0" expanded="false" />
+            <element signature="e#9560#9561#0" expanded="false" />
+            <element signature="e#9609#9610#0" expanded="false" />
+            <element signature="e#9651#9652#0" expanded="false" />
+            <element signature="e#9716#9717#0" expanded="false" />
+            <element signature="e#9769#9770#0" expanded="false" />
+            <element signature="e#9818#9819#0" expanded="false" />
+            <element signature="e#9854#9855#0" expanded="false" />
+            <element signature="e#9907#9908#0" expanded="false" />
+            <element signature="e#9948#9949#0" expanded="false" />
+            <element signature="e#10001#10002#0" expanded="false" />
+            <element signature="e#10036#10037#0" expanded="false" />
+            <element signature="e#10291#10292#0" expanded="false" />
+            <element signature="e#10349#10350#0" expanded="false" />
+            <element signature="e#10409#10410#0" expanded="false" />
+            <element signature="e#10452#10453#0" expanded="false" />
+            <element signature="e#13568#13569#0" expanded="false" />
+            <element signature="e#13604#13605#0" expanded="false" />
+            <element signature="e#14752#14753#0" expanded="false" />
+            <element signature="e#14781#14782#0" expanded="false" />
+            <element signature="e#15144#15145#0" expanded="false" />
+            <element signature="e#15184#15185#0" expanded="false" />
+            <element signature="e#15393#15394#0" expanded="false" />
+            <element signature="e#15439#15440#0" expanded="false" />
+            <element signature="e#15477#15478#0" expanded="false" />
+            <element signature="e#15535#15536#0" expanded="false" />
+            <element signature="e#15595#15596#0" expanded="false" />
+            <element signature="e#15659#15660#0" expanded="false" />
+            <element signature="e#16151#16152#0" expanded="false" />
+            <element signature="e#16201#16202#0" expanded="false" />
+            <element signature="e#16246#16247#0" expanded="false" />
+            <element signature="e#16311#16312#0" expanded="false" />
+            <element signature="e#17336#17337#0" expanded="false" />
+            <element signature="e#17409#17410#0" expanded="false" />
+            <element signature="e#17488#17489#0" expanded="false" />
+            <element signature="e#17538#17539#0" expanded="false" />
+            <element signature="e#17809#17810#0" expanded="false" />
+            <element signature="e#17876#17877#0" expanded="false" />
+            <element signature="e#18130#18131#0" expanded="false" />
+            <element signature="e#18170#18171#0" expanded="false" />
+            <element signature="e#18214#18215#0" expanded="false" />
+            <element signature="e#18256#18257#0" expanded="false" />
+            <element signature="e#18493#18494#0" expanded="false" />
+            <element signature="e#18546#18547#0" expanded="false" />
+            <element signature="e#18864#18865#0" expanded="false" />
+            <element signature="e#18905#18906#0" expanded="false" />
+            <element signature="e#18958#18959#0" expanded="false" />
+            <element signature="e#18993#18994#0" expanded="false" />
+            <element signature="e#29713#29867#0" expanded="false" />
+            <element signature="e#29866#29867#0" expanded="false" />
+            <element signature="e#30712#30713#0" expanded="false" />
+            <element signature="e#30751#30752#0" expanded="false" />
+            <element signature="e#30781#30782#0" expanded="false" />
+            <element signature="e#30820#30821#0" expanded="false" />
+            <element signature="e#33097#33098#0" expanded="false" />
+            <element signature="e#33136#33137#0" expanded="false" />
+            <element signature="e#34488#34489#0" expanded="false" />
+            <element signature="e#34539#34540#0" expanded="false" />
+            <element signature="e#34718#34729#0" expanded="false" />
+            <element signature="e#34901#34902#0" expanded="false" />
+            <element signature="e#34947#34948#0" expanded="false" />
+            <element signature="e#35751#35752#0" expanded="false" />
+            <element signature="e#35787#35788#0" expanded="false" />
+            <element signature="e#35819#35820#0" expanded="false" />
+            <element signature="e#35856#35857#0" expanded="false" />
+            <element signature="e#39575#39576#0" expanded="false" />
+            <element signature="e#39615#39616#0" expanded="false" />
+            <element signature="e#39647#39648#0" expanded="false" />
+            <element signature="e#39724#39725#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/IconControllerBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6732">
+          <caret line="516" column="22" lean-forward="false" selection-start-line="516" selection-start-column="22" selection-end-line="516" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXControllerBox.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1122">
+          <caret line="83" column="72" lean-forward="false" selection-start-line="83" selection-start-column="72" selection-end-line="83" selection-end-column="72" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/jna_x11_test.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/util/jna_x11_test.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/FXAnnotationToolBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="46" column="32" lean-forward="false" selection-start-line="46" selection-start-column="32" selection-end-line="46" selection-end-column="32" />
+          <folding>
+            <marker date="1499806026333" expanded="true" signature="10190:10193" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationTool.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/JacksonTester.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Circle.java" />
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Shp.java" />
+    <entry file="file://$PROJECT_DIR$/test.JSON">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Point.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding>
+            <marker date="1499958461043" expanded="true" signature="283:294" ph=" { " />
+            <marker date="1499958461043" expanded="true" signature="303:309" ph=" }" />
+            <marker date="1499958461043" expanded="true" signature="341:352" ph=" { " />
+            <marker date="1499958461043" expanded="true" signature="363:369" ph=" }" />
+            <marker date="1499958461043" expanded="true" signature="395:406" ph=" { " />
+            <marker date="1499958461043" expanded="true" signature="415:421" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Custom_Circle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="26" lean-forward="false" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/changeItem/AddShape.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/TransferableShapes/Custom_Shape.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-544">
+          <caret line="4" column="30" lean-forward="false" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="30" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/shape.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/annotationtool/annotation/AnnotationToolApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1785">
+          <caret line="1465" column="71" lean-forward="false" selection-start-line="1465" selection-start-column="71" selection-end-line="1465" selection-end-column="71" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#13596#13597#0" expanded="true" />
+            <element signature="e#13640#13641#0" expanded="true" />
+            <element signature="e#14424#14425#0" expanded="true" />
+            <element signature="e#14480#14481#0" expanded="true" />
+            <element signature="e#38186#38187#0" expanded="true" />
+            <element signature="e#38226#38227#0" expanded="true" />
+            <element signature="e#38279#38280#0" expanded="true" />
+            <element signature="e#38322#38323#0" expanded="true" />
+            <element signature="e#38364#38365#0" expanded="true" />
+            <element signature="e#38399#38400#0" expanded="true" />
+            <element signature="e#38571#38572#0" expanded="true" />
+            <element signature="e#38649#38650#0" expanded="true" />
+            <element signature="e#39976#39977#0" expanded="true" />
+            <element signature="e#40008#40009#0" expanded="true" />
+            <element signature="e#41561#41562#0" expanded="true" />
+            <element signature="e#41593#41594#0" expanded="true" />
+            <element signature="e#41646#41647#0" expanded="true" />
+            <element signature="e#41692#41693#0" expanded="true" />
+            <element signature="e#54589#54590#0" expanded="true" />
+            <element signature="e#54632#54633#0" expanded="true" />
+            <element signature="e#55469#55470#0" expanded="true" />
+            <element signature="e#55542#55543#0" expanded="true" />
+          </folding>
+        </state>
       </provider>
     </entry>
   </component>
@@ -1602,7 +1647,6 @@
       </state>
       <state key="GlobalLibrariesConfigurable.UI">
         <settings>
-          <last-edited>jna-4.4.0</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -1626,12 +1670,11 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>annotationtool</last-edited>
+          <last-edited>scratchpad_project</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
                 <option value="0.2" />
-                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>
@@ -1651,7 +1694,7 @@
       </state>
       <state key="ProjectLibrariesConfigurable.UI">
         <settings>
-          <last-edited>jnativehook-2.1.0</last-edited>
+          <last-edited>jackson-all-1.9.0</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
