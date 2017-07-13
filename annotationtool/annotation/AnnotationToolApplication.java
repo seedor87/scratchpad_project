@@ -272,9 +272,21 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingStage.show();
         pictureStage.show();
-        
-        pictureStage.setAlwaysOnTop(true);
-        mouseCatchingStage.setAlwaysOnTop(true);
+
+        resetStages();
+
+        Custom_Shape custom_shape = new Custom_Shape("circle");
+
+//        try {
+//            custom_shape = custom_shape.readJSON();
+//            commitChange(new AddShape(new Circle( custom_shape.getLocation().getX(), custom_shape.getLocation().getY(),custom_shape.getRadius(), Color.valueOf(custom_shape.getColorString()) )));
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+
+
     }
 
     public void showTextOptionStage() 
@@ -1321,6 +1333,8 @@ public class AnnotationToolApplication extends Application {
      * handler to the mousecatchingscene.
      */
     private class DrawingHandler implements EventHandler<MouseEvent> {
+        //TODO arraylist or linked?
+        ArrayList<Point> pathElements;
         @Override
         public void handle(MouseEvent event)
         {
@@ -1333,6 +1347,8 @@ public class AnnotationToolApplication extends Application {
                     path.setSmooth(true);
                     MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                     LineTo lineTo = new LineTo(event.getX(), event.getY());
+                    pathElements = new ArrayList<>();
+                    pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
                     path.getElements().add(moveTo);
                     //root.getChildren().add(path);
                     commitChange(new AddShape(path));
@@ -1340,10 +1356,25 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
+                pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
                 path.getElements().add(moveTo);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
+
+                    try {
+                        Custom_Shape shape = new Custom_Shape(++uuid, "path", pathElements);
+                        shape.setStrokeWidth(path.getStrokeWidth());
+                        shape.setColorString(path.getStroke().toString());
+
+                        shape.writeJSON(shape);
+
+                    } catch (JsonParseException e) {
+                        e.printStackTrace();
+                    } catch (JsonMappingException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace(); }
                 //path.setFillRule(FillRule.EVEN_ODD);
                 //path.setFill(paint);
                 //root.getChildren().add(path);
@@ -1413,22 +1444,27 @@ public class AnnotationToolApplication extends Application {
      */
     private class EraseHandler implements EventHandler<MouseEvent>
     {
+        //TODO probably linkedlist is better.
+        ArrayList<Point> pathElements;
         Color eraserColor = new Color(0,0,0,.1);
         @Override
         public void handle(MouseEvent event)
         {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
             {
+                pathElements = new ArrayList<>();
                 eraserPath = new Path();
                 eraserPath.setStrokeWidth(strokeWidth);
                 eraserPath.setSmooth(true);
                 MoveTo moveTo = new MoveTo(event.getX(), event.getY());
+                pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
                 eraserPath.getElements().add(moveTo);
                 root.getChildren().add(eraserPath);
                 eraserPath.setStroke(eraserColor);
             }
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
+                pathElements.add(new Point(moveTo.getX(), moveTo.getY()));
                 eraserPath.getElements().add(moveTo);
             }
             else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
@@ -1438,11 +1474,13 @@ public class AnnotationToolApplication extends Application {
                 commitChange(eraseShape);
 
 
-                ArrayList<PathElement> pathElements = eraserPath.getElements().stream().collect(Collectors.toList());
+                //ArrayList<PathElement> pathElements = eraserPath.getElements().stream().collect(Collectors.toList());
 
 
                 try {
-                    Custom_Shape shape = new Custom_Shape(++uuid, "erase shape", eraserPath.getElements());
+                    Custom_Shape shape = new Custom_Shape(++uuid, "erase shape", pathElements);
+                    shape.setStrokeWidth(eraserPath.getStrokeWidth());
+
                     shape.writeJSON(shape);
 
                 } catch (JsonParseException e) {
@@ -1759,8 +1797,9 @@ public class AnnotationToolApplication extends Application {
                 try {
                     Custom_Shape shape = new Custom_Shape(++uuid, "circle");
                     shape.setLocation(new Point(circle.getCenterX(), circle.getCenterY()));
-                    shape.setColor(borderColor);
+                    shape.setColorString((paint.toString()));
                     shape.setStrokeWidth(strokeWidth);
+                    shape.setRadius(circle.getRadius());
                     shape.writeJSON(shape);
 
                 } catch (JsonParseException e) {
