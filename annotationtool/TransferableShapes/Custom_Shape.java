@@ -104,7 +104,7 @@ public class Custom_Shape {
     }
 
 
-    public Custom_Shape readJSON() throws IOException {
+   /* public Custom_Shape readJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(new File("shape.json"), Custom_Shape.class);
     }
@@ -130,7 +130,7 @@ public class Custom_Shape {
 
 
         //  mapper.writeValue(new File("shape.json"), shape);
-    }
+    }*/
 
 
     public UUID getUuid() {

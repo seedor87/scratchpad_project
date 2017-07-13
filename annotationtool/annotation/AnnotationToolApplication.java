@@ -38,6 +38,8 @@ import javafx.stage.StageStyle;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.type.TypeReference;
 import util.ProcessRunner;
 
 import javax.imageio.ImageIO;
@@ -281,14 +283,12 @@ public class AnnotationToolApplication extends Application {
 
         Custom_Shape custom_shape = new Custom_Shape("circle");
 
-//        try {
-//            custom_shape = custom_shape.readJSON();
-//            commitChange(new AddShape(new Circle( custom_shape.getLocation().getX(), custom_shape.getLocation().getY(),custom_shape.getRadius(), Color.valueOf(custom_shape.getColorString()) )));
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
+        try {
+            custom_shape = readJSON().get(0);
+            commitChange(new AddShape(new Circle(Double.parseDouble(custom_shape.getLocation().getX()), Double.parseDouble(custom_shape.getLocation().getY()), Double.parseDouble(custom_shape.getRadius()), Color.valueOf(custom_shape.getColorString()))));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }
@@ -1223,12 +1223,16 @@ public class AnnotationToolApplication extends Application {
 
     public ArrayList<Custom_Shape> readJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(new File("shape.json"), ArrayList.class);
+        ArrayList<Custom_Shape> readShapes = mapper.reader().withType(new TypeReference<ArrayList<Custom_Shape>>() {
+        }).readValue(new File("shape.json"));
+
+        System.out.println(readShapes);
+        return readShapes;
     }
 
     public void writeJSON(ArrayList holder) throws IOException {
 
-        ObjectMapper mapper = new ObjectMapper();
+      /*  ObjectMapper mapper = new ObjectMapper();
 
         String json = mapper.writeValueAsString(holder);
         //   if (uuid == 0) {
@@ -1245,7 +1249,11 @@ public class AnnotationToolApplication extends Application {
         // }
 
 
-        //  mapper.writeValue(new File("shape.json"), shape);
+        //  mapper.writeValue(new File("shape.json"), shape);*/
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writerWithType(ArrayList.class).writeValue(new File("shape.json"), holder);
+        //System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(holder));
     }
 
     /**
