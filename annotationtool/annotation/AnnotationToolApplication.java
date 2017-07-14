@@ -281,16 +281,34 @@ public class AnnotationToolApplication extends Application {
 
         resetStages();
 
-        Custom_Shape custom_shape = new Custom_Shape("circle");
+        remakeFromJSON();
 
-        try {
-            custom_shape = readJSON().get(0);
-            commitChange(new AddShape(new Circle(Double.parseDouble(custom_shape.getLocation().getX()), Double.parseDouble(custom_shape.getLocation().getY()), Double.parseDouble(custom_shape.getRadius()), Color.valueOf(custom_shape.getColorString()))));
-        } catch (Exception e) {
+    }
+    private void remakeFromJSON()
+    {
+        try
+        {
+            ArrayList<Custom_Shape> custom_shapes = readJSON();
+            for (Custom_Shape c : custom_shapes)
+            {
+                if(c.getType().equals("undo"))
+                {
+                    undo();
+                }
+                else if(c.getType().equals("redo"))
+                {
+                    redo();
+                }
+                else
+                {
+                    commitChange(c.toChangeItem());
+                }
+            }
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
-
-
     }
 
     public void showTextOptionStage() 
@@ -1309,7 +1327,7 @@ public class AnnotationToolApplication extends Application {
 
                     try {
                         uuid = UUID.randomUUID();
-                        Custom_Shape shape = new Custom_Shape(uuid, "arrow", borderColor, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
+                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, borderColor, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
                         holder.add(shape);
                         writeJSON(holder);
 
@@ -1405,7 +1423,7 @@ public class AnnotationToolApplication extends Application {
 
                     try {
                         uuid = UUID.randomUUID();
-                        Custom_Shape shape = new Custom_Shape(uuid, "path", pathElements);
+                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.PATH_STRING, pathElements);
                         shape.setStrokeWidth(String.valueOf(path.getStrokeWidth()));
                         shape.setColorString(path.getStroke().toString());
 
@@ -1523,7 +1541,7 @@ public class AnnotationToolApplication extends Application {
 
                 try {
                     uuid = UUID.randomUUID();
-                    Custom_Shape shape = new Custom_Shape(uuid, "erase shape", pathElements);
+                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
                     shape.setStrokeWidth(String.valueOf(eraserPath.getStrokeWidth()));
 
                     holder.add(shape);
@@ -1841,7 +1859,7 @@ public class AnnotationToolApplication extends Application {
 
                 try {
                     uuid = UUID.randomUUID();
-                    Custom_Shape shape = new Custom_Shape(uuid, "circle");
+                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.CIRCLE_STRING);
                     shape.setLocation(new Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
                     shape.setColorString((paint.toString()));
                     shape.setStrokeWidth(String.valueOf(strokeWidth));
