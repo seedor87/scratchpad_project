@@ -35,6 +35,7 @@ public class Custom_Shape {
     private Point end = new Point("", "");
     private String string = "";
     private String font = "";
+    private String textSize = "";
     private String colorString = "";
     public static final String CIRCLE_STRING = "circle";
     public static final String PATH_STRING = "path";
@@ -63,42 +64,89 @@ public class Custom_Shape {
 //        }
 //    }
 
-    private Path toUncoloredPath()
+    public String getTextSize()
     {
+        return textSize;
+    }
+    public void setTextSize(String textSize)
+    {
+        this.textSize = textSize;
+    }
+    private Path toUncoloredPath() {
         Path path = new Path();
         path.getElements().add(new MoveTo(Double.valueOf(points.get(0).getX()), Double.valueOf(points.get(0).getY())));
         int size = points.size();
-        for(int i = 1;i < size;i++)
-        {
+        for (int i = 1; i < size; i++) {
             path.getElements().add(new LineTo(Double.valueOf(points.get(i).getX()), Double.valueOf(points.get(i).getY())));
         }
         path.setStrokeWidth(Double.valueOf(strokeWidth));
         return path;
     }
-    private Shape toCircle()
-    {
+
+    private Shape toCircle() {
         double xLoc = Double.valueOf(location.getX());
         double yLoc = Double.valueOf(location.getY());
         double strokeWidth = Double.valueOf(this.getStrokeWidth());
         Color color = Color.valueOf(this.getColorString());
         double radius = Double.valueOf(this.getRadius());
-        Circle circle = new Circle(xLoc,yLoc,radius,color);
+        Circle circle = new Circle(xLoc, yLoc, radius, color);
         circle.setStroke(color);
         circle.setStrokeWidth(strokeWidth);
-        Shape newCircle = Shape.subtract(circle, new Circle(xLoc,yLoc,radius - (strokeWidth/2)));
+        Shape newCircle = Shape.subtract(circle, new Circle(xLoc, yLoc, radius - (strokeWidth / 2)));
         newCircle.setFill(color);
         return newCircle;
     }
-    private Shape toPath()
-    {
+
+    private Shape toPath() {
         Path path = toUncoloredPath();
         path.setStroke(Color.valueOf(colorString));
         return path;
     }
-    private Shape toArrow()
-    {
-        //TODO this
-        return null;
+
+    private Shape toArrow() {
+        Line line = new Line(Double.valueOf(start.getX()), Double.valueOf(start.getY()), Double.valueOf(end.getX()), Double.valueOf(end.getY()));
+        line.setStroke(Color.valueOf(colorString));
+        line.setStrokeWidth(Double.valueOf(strokeWidth));
+        return addArrowToEndOfLine(line);
+    }
+
+    private Shape addArrowToEndOfLine(Line line) {
+        final double halfBaseDistance = 2;
+        final double heightDistance = 4;
+        double slope;
+        double xDistance = line.getEndX() - line.getStartX();
+        double yDistance = line.getEndY() - line.getStartY();
+        if (line.getEndY() == line.getStartY()) {
+            slope = Double.POSITIVE_INFINITY;
+        } else {
+            slope = xDistance - yDistance;
+        }
+        Polygon triangle = new Polygon();
+        double strokeWidth = Double.valueOf(this.strokeWidth);
+        if (slope == Double.POSITIVE_INFINITY)//straight upwards line.//TODO check which direction. //DO I really need this check/part?
+        {
+            //System.out.println("Thing");
+            triangle.getPoints().addAll((line.getEndX() - halfBaseDistance * strokeWidth), line.getEndY());
+            triangle.getPoints().addAll((line.getEndX() + halfBaseDistance * strokeWidth), line.getEndY());
+            triangle.getPoints().addAll(line.getEndX(), (line.getEndY() - heightDistance * strokeWidth));
+        } else {
+            //point 1
+            triangle.getPoints().
+                    addAll((line.getEndX() - (halfBaseDistance * strokeWidth * Math.sin(Math.atan2(yDistance, xDistance)))),
+                            line.getEndY() + (halfBaseDistance * strokeWidth * Math.cos(Math.atan2(yDistance, xDistance))));
+            //point 2
+            triangle.getPoints().
+                    addAll((line.getEndX() + (halfBaseDistance * strokeWidth * Math.sin(Math.atan2(yDistance, xDistance)))),
+                            line.getEndY() - (halfBaseDistance * strokeWidth * Math.cos(Math.atan2(yDistance, xDistance))));
+            //triangle.getPoints().addAll( (mouseEvent.getX() + 2*strokeWidth), mouseEvent.getY());
+            //point 3
+            triangle.getPoints().
+                    addAll(line.getEndX() + strokeWidth * heightDistance * Math.cos(Math.atan2(yDistance, xDistance)),
+                            line.getEndY() + (strokeWidth * heightDistance * Math.sin(Math.atan2(yDistance, xDistance))));
+        }
+        Shape newShape = Shape.union(triangle, line);
+        newShape.setFill(line.getStroke());
+        return newShape;
     }
 
     public ChangeItem toChangeItem()//TODO throw exception if the type is undo or redo.
@@ -120,8 +168,9 @@ public class Custom_Shape {
 
     private Text toText()
     {
-        return null;
-        //TODO this
+        Text text = new Text(this.string);
+        text.setFont(new Font(font, Double.valueOf(textSize)));
+        return text;
     }
 
 
