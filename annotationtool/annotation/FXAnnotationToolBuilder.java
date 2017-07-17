@@ -1,5 +1,6 @@
 package annotation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -130,7 +131,11 @@ public class FXAnnotationToolBuilder extends Application {
 				Window selectedWindow = (Window)table.getSelectionModel().getSelectedItem();
 				windowInfo = ProcessRunner.getWindowInfoByID(selectedWindow.getId(), proc);
 				ProcessRunner.focusWindow(selectedWindow.getTitle(), proc);
-				buildFromInfo();
+				try {
+					buildFromInfo();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				stage.close();
 			}
 		});
@@ -179,56 +184,11 @@ public class FXAnnotationToolBuilder extends Application {
     	
     }
 
-	private class BuilderMouseHandler implements javafx.event.EventHandler<MouseEvent>
-	{
-
-		@Override
-		public void handle(MouseEvent event) {
-			if(event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-				if(event.getButton() != MouseButton.SECONDARY) {
-					xPos1 = event.getX();
-					yPos1 = event.getY();
-					dragging = true;
-				}
-			}
-			
-			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-				if(event.getButton() == MouseButton.SECONDARY) {
-					build(true);
-				}
-				xPos2 = event.getX();
-				yPos2 = event.getY();
-				dragging = false;
-				build(false);
-			}
-			
-			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-				xPosCurr = event.getX();
-				yPosCurr = event.getY();
-				highlight(gc);
-			}
-			
-		}
-		
-	}
-	
-	private class BuilderKeyHandler implements javafx.event.EventHandler<KeyEvent>
-	{
-
-		@Override
-		public void handle(KeyEvent event) {
-			if(event.getCode() == KeyCode.ESCAPE) {
-				close();
-			}
-		}
-		
-	}
-	
-	private void buildFromInfo() {
+	private void buildFromInfo() throws IOException {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
-		
+
 		Stage newStage = new Stage();
 		Stage newSecondaryStage = new Stage();
 		newStage.setWidth((Double)windowInfo[0]);
@@ -238,25 +198,25 @@ public class FXAnnotationToolBuilder extends Application {
 		double x = (Double)windowInfo[2];
 		double y = (Double)windowInfo[3];
 		AnnotationToolApplication app = new AnnotationToolApplication(
-				newStage, 
-				newSecondaryStage, 
-				x, 
-				y, 
-				true, 
+				newStage,
+				newSecondaryStage,
+				x,
+				y,
+				true,
 				String.valueOf(windowInfo[0])
 				);
 	}
-	
-	private void build(boolean snapToWindow) {
+
+	private void build(boolean snapToWindow) throws IOException {
 		if(building) {
 			return;
 		}
 		building = true;
-		
+
 		if(snapToWindow) {
 			this.stage.setOpacity(0f);
 			this.stage.setIconified(true);
-			
+
 			Platform.runLater(new Runnable() {
 			    @Override
 			    public void run() {
@@ -265,51 +225,55 @@ public class FXAnnotationToolBuilder extends Application {
 			    		String programID = ProcessRunner.getProgramID((String)windowInfo[0], proc);
 			    		String programName = ProcessRunner.getProgramName(programID, proc);
 			    		System.out.println(programName);
-			    		
-						Stage newStage = new Stage(); 		
+
+						Stage newStage = new Stage();
 						Stage newSecondaryStage = new Stage();
-						newStage.setWidth((Double)windowInfo[1]);			
+						newStage.setWidth((Double) windowInfo[1]);
 						newSecondaryStage.setWidth((Double)windowInfo[1]);
-						newStage.setHeight((Double)windowInfo[2]);			
+						newStage.setHeight((Double) windowInfo[2]);
 						newSecondaryStage.setHeight((Double)windowInfo[2]);
 						double x = (Double)windowInfo[3];
 						double y = (Double)windowInfo[4];
-						
-						AnnotationToolApplication app = new AnnotationToolApplication(
-														newStage, 
-														newSecondaryStage, 
-														x, 
-														y, 
-														true, 
-														(String)windowInfo[0]
-														);
-			    	}
-			    }
+
+						try {
+							AnnotationToolApplication app = new AnnotationToolApplication(
+									newStage,
+									newSecondaryStage,
+									x,
+									y,
+									true,
+									(String) windowInfo[0]
+							);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			});
 		}
 		else {
 			double x, y, w, h;
-			
+
 			x = Double.min(xPos1, xPos2);
 			y = Double.min(yPos1, yPos2);
-			
+
 			w = Double.max(xPos1, xPos2) - x;
 			h = Double.max(yPos1, yPos2) - y;
-			
+
 			if(w >= 50 && h >= 50) {
 				String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
-				
+
 				Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
 				newStage.setWidth(w);			newSecondaryStage.setWidth(w);
 				newStage.setHeight(h);			newSecondaryStage.setHeight(h);
-				
+
 				AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
-				
+
 			} else if (w < 25 && h < 25) {
 				AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
 			}
 		}
-		
+
 		Platform.runLater(new Runnable() {
 		    @Override
 		    public void run() {
@@ -325,5 +289,56 @@ public class FXAnnotationToolBuilder extends Application {
 		    	System.exit(0);
 		    }
 		});
+	}
+
+	private class BuilderMouseHandler implements javafx.event.EventHandler<MouseEvent> {
+
+		@Override
+		public void handle(MouseEvent event) {
+			if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+				if (event.getButton() != MouseButton.SECONDARY) {
+					xPos1 = event.getX();
+					yPos1 = event.getY();
+					dragging = true;
+				}
+			}
+
+			if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+				if (event.getButton() == MouseButton.SECONDARY) {
+					try {
+						build(true);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				xPos2 = event.getX();
+				yPos2 = event.getY();
+				dragging = false;
+				try {
+					build(false);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+				xPosCurr = event.getX();
+				yPosCurr = event.getY();
+				highlight(gc);
+			}
+
+		}
+
+	}
+
+	private class BuilderKeyHandler implements javafx.event.EventHandler<KeyEvent> {
+
+		@Override
+		public void handle(KeyEvent event) {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				close();
+			}
+		}
+
 	}
 }

@@ -1,6 +1,7 @@
 package annotation;
 
 
+import TransferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -25,6 +26,7 @@ import javafx.stage.StageStyle;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -91,6 +93,11 @@ public class IconControllerBox extends Stage
 
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
+                    try { // apend the bracket at the end
+                        at.writeJSON(new Custom_Shape(), true);
+                    } catch (IOException x) {
+                        x.printStackTrace();
+                    }
                     System.exit(0);
                 }
             }
