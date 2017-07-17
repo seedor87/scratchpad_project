@@ -5,12 +5,14 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.event.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.util.*;
 import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputAdapter;
 
+import TransferableShapes.Custom_Shape;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.*;
 import javafx.scene.Group;
