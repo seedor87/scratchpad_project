@@ -172,6 +172,7 @@ public class Custom_Shape {
     {
         Text text = new Text(this.string);
         text.setFont(new Font(font, Double.valueOf(textSize)));
+
         return text;
     }
 

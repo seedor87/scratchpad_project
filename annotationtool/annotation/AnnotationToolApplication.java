@@ -281,7 +281,6 @@ public class AnnotationToolApplication extends Application {
     private void remakeFromJSON() {
         try {
             ArrayList<Custom_Shape> custom_shapes = readJSON();
-            System.out.println(custom_shapes.size());
             for (Custom_Shape c : custom_shapes) {
                 if(c.getType().equals("undo")) {
                     undo();
@@ -293,6 +292,29 @@ public class AnnotationToolApplication extends Application {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void saveTextBox()
+    {
+
+        uuid = UUID.randomUUID();
+        Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
+        custom_shape.setTextSize(strokeWidth + "");
+        System.out.println(strokeWidth + "here");
+        custom_shape.setColorString(paint.toString());
+        custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
+    }
+    private class SaveTextBoxHandler implements EventHandler<MouseEvent>
+    {
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(makingTextBox && text !=null)
+            {
+                saveTextBox();
+            }
         }
     }
 
@@ -545,6 +567,11 @@ public class AnnotationToolApplication extends Application {
         for (HandlerGroup h : eventHandlers) {
             this.mouseCatchingScene.removeEventHandler(h.eventType,h.handler);
         }
+//        if(this.makingTextBox)
+//        {
+//            saveTextBox();
+//        }
+        this.makingTextBox = false;
         AddShape.movingShapes = false;
         resetStages();
         mouseCatchingScene.setCursor(pencilCursor);
@@ -565,6 +592,7 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
         //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
+        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, new SaveTextBoxHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -1079,7 +1107,6 @@ public class AnnotationToolApplication extends Application {
      * Sets the state of the program so that you are drawing.
      */
     public void setDrawingText() {
-        this.makingTextBox = false;
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         textBoxText.delete(0,textBoxText.length());
@@ -1157,9 +1184,11 @@ public class AnnotationToolApplication extends Application {
         String json = mapper.writeValueAsString(shape);
 
         if (!flag) {
-            try {
+            try
+            {
                 Files.write(new File("shape.json").toPath(), Arrays.asList("," + json), StandardOpenOption.APPEND);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Files.write(new File("shape.json").toPath(), Arrays.asList("[", json), StandardOpenOption.CREATE);
 
             }
