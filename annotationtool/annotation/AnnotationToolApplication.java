@@ -281,6 +281,7 @@ public class AnnotationToolApplication extends Application {
     private void remakeFromJSON() {
         try {
             ArrayList<Custom_Shape> custom_shapes = readJSON();
+            System.out.println(custom_shapes.size());
             for (Custom_Shape c : custom_shapes) {
                 if(c.getType().equals("undo")) {
                     undo();

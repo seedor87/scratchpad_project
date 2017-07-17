@@ -153,6 +153,8 @@ public class Custom_Shape {
     {
         switch (type)
         {
+            case PATH_STRING:
+                return new AddShape(toPath());
             case ERASE_STRING:
                 return new EraseShape(toUncoloredPath());
             case ARROW_STRING:
@@ -366,5 +368,9 @@ public class Custom_Shape {
     public void setColorString(String colorString)
     {
         this.colorString = colorString;
+    }
+    public String toString()
+    {
+        return type;
     }
 }
