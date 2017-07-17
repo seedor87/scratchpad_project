@@ -215,6 +215,8 @@ public class Custom_Shape {
         colorString  = color.toString();
         this.strokeWidth = strokeWidth;
         this.radius = radius;
+        this.start = start;
+        this.end = end;
     }
 
 

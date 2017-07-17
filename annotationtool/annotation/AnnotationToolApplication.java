@@ -1239,7 +1239,8 @@ public class AnnotationToolApplication extends Application {
 
                     try {
                         uuid = UUID.randomUUID();
-                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, borderColor, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
+                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, (Color)paint, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
+
                         // holder.add(shape);
                         writeJSON(shape, false);
 
