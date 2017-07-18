@@ -1,6 +1,7 @@
 package annotation;
 
 
+import TransferableShapes.Custom_Circle;
 import TransferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -94,7 +95,7 @@ public class IconControllerBox extends Stage
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
                     try { // apend the bracket at the end
-                        at.writeJSON(new Custom_Shape(), true);
+                        at.writeJSON(new Custom_Circle(), true);
                     } catch (IOException x) {
                         x.printStackTrace();
                     }

@@ -94,6 +94,7 @@ public class AnnotationToolApplication extends Application {
     //jackson
     UUID uuid;
     ArrayList<Custom_Shape> holder = new ArrayList<>();
+    Boolean saveTextbox = false;
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -299,22 +300,16 @@ public class AnnotationToolApplication extends Application {
     {
 
         uuid = UUID.randomUUID();
-        Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
-        custom_shape.setTextSize(strokeWidth + "");
-        System.out.println(strokeWidth + "here");
-        custom_shape.setColorString(paint.toString());
-        custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
-    }
-    private class SaveTextBoxHandler implements EventHandler<MouseEvent>
-    {
+        Custom_Text custom_Text = new Custom_Text(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
+        custom_Text.setTextSize(text.getFont().getSize() + "");
+        custom_Text.setColorString(paint.toString());
+        custom_Text.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
 
-        @Override
-        public void handle(MouseEvent event)
-        {
-            if(makingTextBox && text !=null)
-            {
-                saveTextBox();
-            }
+        try {
+            writeJSON(custom_Text, false);
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
         }
     }
 
@@ -485,6 +480,21 @@ public class AnnotationToolApplication extends Application {
         }*/
     }
 
+    /**
+     * clears the undo and redo stack and all changes from them.
+     */
+    public void clearHistory() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                root.getChildren().clear();
+                root.getChildren().add(borderShape);
+            }
+        });
+        undoStack.clear();
+        redoStack.clear();
+    }
+
 /*    private void undoAnEraseShape(EraseShape eraseShape)
     {
         undoStack.clear();
@@ -501,21 +511,6 @@ public class AnnotationToolApplication extends Application {
         });
 
     }*/
-
-    /**
-     * clears the undo and redo stack and all changes from them.
-     */
-    public void clearHistory() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                root.getChildren().clear();
-                root.getChildren().add(borderShape);
-            }
-        });
-        undoStack.clear();
-        redoStack.clear();
-    }
 
     /**
      * Sets the state of the program so that it is making circles.
@@ -577,7 +572,6 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.setCursor(pencilCursor);
     }
 
-
     /**
      * Sets up all default listeners that the code might need.
      * adds all listeners to the list of handlers so all can be removed at once if needed.
@@ -592,7 +586,7 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
         //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
-        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, new SaveTextBoxHandler());
+        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -602,7 +596,7 @@ public class AnnotationToolApplication extends Application {
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
-        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_RELEASED, textBoxHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
@@ -730,7 +724,6 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-
     /**
      * x^2 + y^2 = z^2
      * @param x
@@ -743,28 +736,6 @@ public class AnnotationToolApplication extends Application {
         result = result + (y*y);
         return Math.sqrt(result);
     }
-
-
-    /**
-     * Hides the box when not being used.
-     */
-/*    private class BoxHidingHandler implements EventHandler<MouseEvent>
-    {
-
-        @Override
-        public void handle(MouseEvent event)
-        {
-            if(event.getEventType() == MouseEvent.MOUSE_ENTERED)
-            {
-                controllerBox.setBounds(controllerBox.getX(), controllerBox.getY(), boxWidth,0);
-            }
-            else if(event.getEventType() == MouseEvent.MOUSE_EXITED)
-            {
-                controllerBox.pack();
-            }
-        }
-    }*/
-
 
     /**
      *  adds a triangle to the most recent straight line drawn to make it an arrow.
@@ -812,6 +783,27 @@ public class AnnotationToolApplication extends Application {
 
     }
 
+
+    /**
+     * Hides the box when not being used.
+     */
+/*    private class BoxHidingHandler implements EventHandler<MouseEvent>
+    {
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_ENTERED)
+            {
+                controllerBox.setBounds(controllerBox.getX(), controllerBox.getY(), boxWidth,0);
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_EXITED)
+            {
+                controllerBox.pack();
+            }
+        }
+    }*/
+
     /**
      * Sets the state of the program so that the user can draw arrows.
      */
@@ -819,6 +811,20 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         this.mouseCatchingScene.setCursor(arrowCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, arrowHandler);
+    }
+
+    /**
+     * clears the main window and then repaints it from scratch.
+     */
+    public void paintFromUndoStack() {
+        root.getChildren().clear();
+        root.getChildren().add(borderShape);
+        for (ChangeItem changeItem : undoStack) {
+            if (!(changeItem instanceof changeItem.EraseShape))          // infinite callse to paintFromUndoStack() if it is an EraseShape
+            {
+                changeItem.addChangeToStage(this);
+            }
+        }
     }
 
 
@@ -857,20 +863,6 @@ public class AnnotationToolApplication extends Application {
             }
         });
     }*/
-
-    /**
-     * clears the main window and then repaints it from scratch.
-     */
-    public void paintFromUndoStack() {
-        root.getChildren().clear();
-        root.getChildren().add(borderShape);
-        for(ChangeItem changeItem : undoStack) {
-            if(!(changeItem instanceof changeItem.EraseShape))          // infinite callse to paintFromUndoStack() if it is an EraseShape
-            {
-                changeItem.addChangeToStage(this);
-            }
-        }
-    }
 
     /**
      * changes the state of the program so that the user is erasing.
@@ -943,7 +935,6 @@ public class AnnotationToolApplication extends Application {
         });
     }
 
-
     /**
      * Resets the stages so that they are in the right order so they do not interfere with
      * each other. The order should be
@@ -986,6 +977,10 @@ public class AnnotationToolApplication extends Application {
             }
         });
     }
+
+    public Stage getPictureStage() {
+        return this.pictureStage;
+    }
     
     /*private CirclePopupMenu initializeShapeMenu() {
         StackPane popupPane = new StackPane();
@@ -1005,11 +1000,6 @@ public class AnnotationToolApplication extends Application {
     //================================================================================
     // Getters/Setters
     //================================================================================
-
-
-    public Stage getPictureStage() {
-        return this.pictureStage;
-    }
 
     public Stage getMouseCatchingStage() {
         return this.mouseCatchingStage;
@@ -1097,11 +1087,10 @@ public class AnnotationToolApplication extends Application {
     public void setMakingText() {
         this.makingTextBox = true;
         this.resetHandlers();
-        this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
+        this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_RELEASED, textBoxHandler);
         this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
         mouseCatchingScene.setCursor(textCursor);
     }
-
 
     /**
      * Sets the state of the program so that you are drawing.
@@ -1111,7 +1100,6 @@ public class AnnotationToolApplication extends Application {
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         textBoxText.delete(0,textBoxText.length());
     }
-
 
     public Group getRoot() {
         return this.root;
@@ -1133,6 +1121,16 @@ public class AnnotationToolApplication extends Application {
         return lockedControllerBox;
     }
 
+    /**
+     * Sets the state of the program so that the user can move shapes that are on the screen.
+     */
+    public void setSelectAndMoveHandler() {
+        mouseCatchingStage.toFront();
+        pictureStage.toFront();
+        controllerBox.toFront();
+        AddShape.movingShapes = true;
+    }
+
     //================================================================================
     // Inner Classes
     //================================================================================
@@ -1146,16 +1144,6 @@ public class AnnotationToolApplication extends Application {
             this.eraseArea = eraseArea;
         }
     }*/
-
-    /**
-     * Sets the state of the program so that the user can move shapes that are on the screen.
-     */
-    public void setSelectAndMoveHandler() {
-        mouseCatchingStage.toFront();
-        pictureStage.toFront();
-        controllerBox.toFront();
-        AddShape.movingShapes = true;
-    }
 
     /**
      * Sets the state of the program so that the user is editing text
@@ -1222,6 +1210,18 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    private class SaveTextBoxHandler implements EventHandler<MouseEvent> {
+
+        @Override
+        public void handle(MouseEvent event) {
+            if (saveTextbox) {
+                saveTextBox();
+                saveTextbox = false;
+
+            }
+        }
+    }
+
     /**
      * Small class to provide struct functionality.
      * The event type what type should be used when adding the handler to the
@@ -1268,7 +1268,7 @@ public class AnnotationToolApplication extends Application {
 
                     try {
                         uuid = UUID.randomUUID();
-                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, (Color)paint, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
+                        Custom_Arrow shape = new Custom_Arrow(uuid, Custom_Shape.ARROW_STRING, (Color) paint, strokeWidth, new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
 
                         // holder.add(shape);
                         writeJSON(shape, false);
@@ -1353,7 +1353,7 @@ public class AnnotationToolApplication extends Application {
 
                     try {
                         uuid = UUID.randomUUID();
-                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.PATH_STRING, pathElements);
+                        Custom_Path shape = new Custom_Path(uuid, Custom_Shape.PATH_STRING, pathElements);
                         shape.setStrokeWidth(String.valueOf(path.getStrokeWidth()));
                         shape.setColorString(path.getStroke().toString());
 
@@ -1395,20 +1395,8 @@ public class AnnotationToolApplication extends Application {
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
 
-            try {
-                uuid = UUID.randomUUID();
-                Custom_Shape shape = new Custom_Shape(uuid, "text", new Point(String.valueOf(event.getX()), String.valueOf(event.getY())), textColor, text.getText(), textFont.toString());
-                //holder.add(shape);
-                writeJSON(shape, false);
 
-            } catch (JsonParseException e) {
-                e.printStackTrace();
-            } catch (JsonMappingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            saveTextbox = true;
             redoStack.clear();
         }
     }
@@ -1473,7 +1461,7 @@ public class AnnotationToolApplication extends Application {
 
                 try {
                     uuid = UUID.randomUUID();
-                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
+                    Custom_EraserPath shape = new Custom_EraserPath(uuid, Custom_Shape.ERASE_STRING, pathElements);
                     shape.setStrokeWidth(String.valueOf(eraserPath.getStrokeWidth()));
 
                     // holder.add(shape);
@@ -1510,7 +1498,7 @@ public class AnnotationToolApplication extends Application {
                         @Override
                         public void run() {
                             try { // apend the bracket at the end
-                                writeJSON(new Custom_Shape(), true);
+                                writeJSON(new Custom_Circle(), true);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -1757,7 +1745,7 @@ public class AnnotationToolApplication extends Application {
 
                 try {
                     uuid = UUID.randomUUID();
-                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.CIRCLE_STRING);
+                    Custom_Circle shape = new Custom_Circle(uuid, Custom_Shape.CIRCLE_STRING);
                     shape.setLocation(new Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
                     shape.setColorString((paint.toString()));
                     shape.setStrokeWidth(String.valueOf(strokeWidth));
