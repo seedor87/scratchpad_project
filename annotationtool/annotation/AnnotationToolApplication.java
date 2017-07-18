@@ -1092,6 +1092,7 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.setCursor(textCursor);
     }
 
+
     /**
      * Sets the state of the program so that you are drawing.
      */
