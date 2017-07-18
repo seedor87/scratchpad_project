@@ -1,5 +1,12 @@
 package util;
 
+import org.jnativehook.NativeInputEvent;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseWheelEvent;
+
+import java.lang.reflect.Field;
+
 public class InputRecord {
 	private String eventType;
 	private Long inputTime;
@@ -20,6 +27,23 @@ public class InputRecord {
 		this.inputTime = inputTime;
 		this.input = input;
 	}
+
+	public InputRecord(NativeInputEvent nativeEvent, Long inputTime) {
+		this.eventType = nativeEvent.getClass().getSimpleName();
+		this.inputTime = inputTime;
+		if (nativeEvent instanceof NativeMouseWheelEvent) {
+			this.input = ((NativeMouseWheelEvent) nativeEvent).getWheelRotation();
+		}
+		else if (nativeEvent instanceof NativeKeyEvent) {
+			this.input = ((NativeKeyEvent) nativeEvent).getKeyCode();
+		}
+		else { // (nativeEvent instanceof NativeMouseEvent) {
+			this.xPos = ((NativeMouseEvent) nativeEvent).getX();
+			this.yPos = ((NativeMouseEvent) nativeEvent).getY();
+			this.input = ((NativeMouseEvent) nativeEvent).getButton();
+		}
+
+	}
 	
 	public String getEventType() {
 		return eventType;
@@ -39,6 +63,35 @@ public class InputRecord {
 	
 	public int getEventVar() {
 		return input;
+	}
+
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		String newLine = System.getProperty("line.separator");
+
+		result.append( this.getClass().getName() );
+		result.append( " Object {" );
+		result.append(newLine);
+
+		//determine fields declared in this class only (no fields of superclass)
+		Field[] fields = this.getClass().getDeclaredFields();
+
+		//print field names paired with their values
+		for ( Field field : fields  ) {
+			result.append("  ");
+			try {
+				result.append( field.getName() );
+				result.append(": ");
+				//requires access to private field:
+				result.append( field.get(this) );
+			} catch ( IllegalAccessException ex ) {
+				System.out.println(ex);
+			}
+			result.append(newLine);
+		}
+		result.append("}");
+
+		return result.toString();
 	}
 	
 }

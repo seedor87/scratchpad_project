@@ -1,15 +1,11 @@
 package util;
 
-import java.awt.AWTException;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +13,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonStreamParser;
+import com.google.gson.stream.MalformedJsonException;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.NativeInputEvent;
@@ -29,12 +30,15 @@ import org.jnativehook.mouse.NativeMouseWheelEvent;
 import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 
+import javax.print.attribute.standard.MediaSize;
+
 public class InputAutomator {
 	
 	static boolean quitReplay = false;
-	
+    private static final String JSON_FILE_NAME = "./ser.json";
 
-	@SuppressWarnings("unchecked")
+
+    @SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		InputAutomator automator = new InputAutomator();
 		
@@ -76,7 +80,11 @@ public class InputAutomator {
 //		for(Map.Entry<NativeInputEvent, Long> entry : inputEvents.entrySet()) {
 //			System.out.println(getLongFormInputEvent(entry));
 //		}
-		automator.recreateInputs(inputEvents);
+
+        automator.recreateInputs(inputEvents);
+
+        /* Call This method to use the json file to recreate instead*/
+//		automator.recreateInputs();
 		
 	}
 	
@@ -130,6 +138,83 @@ public class InputAutomator {
 			}
 		}
 	}
+
+    public void recreateInputs() {
+
+        ArrayList<InputRecord> inputRecords = new ArrayList<>();
+
+        try {
+            InputStream is = new FileInputStream(new File(JSON_FILE_NAME));
+            Reader r = new InputStreamReader(is, "UTF-8");
+            Gson gson = new GsonBuilder().create();
+            JsonStreamParser p = new JsonStreamParser(r);
+            while (p.hasNext()) {
+                JsonElement e;
+                try {
+                    e = p.next();
+                } catch (Exception ex) {
+                    /* break case for malformed json exception */
+                    break;
+                }
+                if (e.isJsonObject()) {
+                    Map m = gson.fromJson(e, Map.class);
+                    InputRecord event = gson.fromJson(e, InputRecord.class);
+                    inputRecords.add(event);
+                }
+            }
+        }
+        catch (Exception exc) {
+            exc.printStackTrace();
+        }
+
+        Robot robot;
+        try {
+            robot = new Robot();
+        } catch (AWTException e)
+        {
+            throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+        }
+        long lastTime = inputRecords.get(0).getInputTime();
+        HashSet<Integer> pressedMouseButtons = new HashSet<Integer>();
+        HashSet<Integer> pressedKeys = new HashSet<Integer>();
+
+        for(InputRecord entry : inputRecords) {
+            if(quitReplay) {
+                quitReplay = false;
+                return;
+            }
+            String eventType = entry.getEventType();
+            robot.delay((int) (entry.getInputTime() - lastTime));
+            lastTime = entry.getInputTime();
+            if(eventType.equals("NativeMouseEvent")) {
+                robot.mouseMove(entry.getxPos(), entry.getyPos());
+                if(entry.getEventVar() != 0) {
+                    Integer pressedButton = entry.getEventVar();
+                    if(pressedMouseButtons.contains(pressedButton)) {
+                        robot.mouseRelease(InputEvent.getMaskForButton(pressedButton));
+                        pressedMouseButtons.remove(pressedButton);
+                    } else {
+                        robot.mousePress(InputEvent.getMaskForButton(pressedButton));
+                        pressedMouseButtons.add(pressedButton);
+                    }
+                }
+            }
+            else if(eventType.equals("NativeMouseWheelEvent")) {
+                robot.mouseMove(entry.getxPos(), entry.getyPos());
+                robot.mouseWheel(entry.getEventVar());
+            }
+            else if(eventType.equals("NativeKeyEvent")) {
+                Integer pressedKey = entry.getEventVar();
+                if(pressedKeys.contains(pressedKey)) {
+                    robot.keyRelease(pressedKey);
+                    pressedKeys.remove(pressedKey);
+                } else {
+                    robot.keyPress(pressedKey);
+                    pressedKeys.add(pressedKey);
+                }
+            }
+        }
+    }
 	
 	public static String getLongFormInputEvent(Map.Entry<NativeInputEvent, Long> entry) {
 		String inputInfo = "";
