@@ -15,6 +15,7 @@ import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -25,6 +26,12 @@ import javafx.scene.paint.Color;
  * Created by Research on 7/11/2017.
  */
 public class Custom_Shape {
+    public static final String CIRCLE_STRING = "circle";
+    public static final String PATH_STRING = "path";
+    public static final String ERASE_STRING = "erase";
+    public static final String ARROW_STRING = "arrow";
+    public static final String TEXT_STRING = "text";
+    private String timestamp = "";
     private UUID uuid;
     private String type;
     private Point location = new Point("", "");
@@ -37,13 +44,9 @@ public class Custom_Shape {
     private String font = "";
     private String textSize = "";
     private String colorString = "";
-    public static final String CIRCLE_STRING = "circle";
-    public static final String PATH_STRING = "path";
-    public static final String ERASE_STRING = "erase";
-    public static final String ARROW_STRING = "arrow";
-    public static final String TEXT_STRING = "text";
 
-//    public Shape toShape() // TODO throws some custom exception if can not be made into a shape.
+
+    //    public Shape toShape() // TODO throws some custom exception if can not be made into a shape.
 //    {
 //        if(this.getType().equals("circle"))
 //        {
@@ -64,14 +67,83 @@ public class Custom_Shape {
 //        }
 //    }
 
-    public String getTextSize()
-    {
-        return textSize;
+
+    public Custom_Shape(UUID uuid, String type) {
+        setTimestamp();
+        this.uuid = uuid;
+        this.type = type;
     }
-    public void setTextSize(String textSize)
-    {
-        this.textSize = textSize;
+
+    //path
+    public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
+        setTimestamp();
+        this.uuid = uuid;
+        this.type = type;
+        this.location = location;
+        colorString = color.toString();
+        this.strokeWidth = strokeWidth;
+        this.points = points;
     }
+
+    //circle , text
+    public Custom_Shape(UUID uuid, String type, Point location, Color color, String stroke_string, String radius_font) {
+        setTimestamp();
+        this.uuid = uuid;
+        this.type = type;
+        this.location = location;
+        colorString = color.toString();
+
+        if (type.equals("circle")) {
+            this.strokeWidth = stroke_string;
+            this.radius = radius_font;
+        } else {
+            this.string = stroke_string;
+            this.font = radius_font;
+        }
+    }
+
+    //Arrow
+    public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
+        setTimestamp();
+        this.uuid = uuid;
+        this.type = type;
+        this.location = location;
+        colorString = color.toString();
+        this.strokeWidth = strokeWidth;
+        this.radius = radius;
+        this.start = start;
+        this.end = end;
+    }
+
+    public Custom_Shape()
+    {
+        setTimestamp();
+
+    }
+
+    //earse shape
+    public Custom_Shape(UUID uuid, String type, ArrayList<Point> points) {
+        setTimestamp();
+        this.uuid = uuid;
+        this.type = type;
+        this.points = points;
+    }
+
+    //edit text
+    public Custom_Shape(UUID uuid, String type, String string, String font) {
+        setTimestamp();
+        this.uuid = uuid;
+        this.type = type;
+        this.string = string;
+        this.font = font;
+    }
+
+
+    public Custom_Shape(String type) {
+        setTimestamp();
+        this.type = type;
+    }
+
     private Path toUncoloredPath() {
         Path path = new Path();
         path.getElements().add(new MoveTo(Double.valueOf(points.get(0).getX()), Double.valueOf(points.get(0).getY())));
@@ -177,76 +249,6 @@ public class Custom_Shape {
     }
 
 
-    public Custom_Shape(UUID uuid, String type) {
-        this.uuid = uuid;
-        this.type = type;
-    }
-
-    //path
-    public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
-        this.uuid = uuid;
-        this.type = type;
-        this.location = location;
-        colorString  = color.toString();
-        this.strokeWidth = strokeWidth;
-        this.points = points;
-    }
-
-    //circle , text
-    public Custom_Shape(UUID uuid, String type, Point location, Color color, String stroke_string, String radius_font) {
-        this.uuid = uuid;
-        this.type = type;
-        this.location = location;
-        colorString  = color.toString();
-
-        if (type.equals("circle")) {
-            this.strokeWidth = stroke_string;
-            this.radius = radius_font;
-        } else {
-            this.string = stroke_string;
-            this.font = radius_font;
-        }
-    }
-
-    //Arrow
-    public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
-        this.uuid = uuid;
-        this.type = type;
-        this.location = location;
-        colorString  = color.toString();
-        this.strokeWidth = strokeWidth;
-        this.radius = radius;
-        this.start = start;
-        this.end = end;
-    }
-
-
-    public Custom_Shape()
-    {
-
-    }
-
-
-    //earse shape
-    public Custom_Shape(UUID uuid, String type, ArrayList<Point> points) {
-        this.uuid = uuid;
-        this.type = type;
-        this.points = points;
-    }
-
-    //edit text
-    public Custom_Shape(UUID uuid, String type, String string, String font) {
-        this.uuid = uuid;
-        this.type = type;
-        this.string = string;
-        this.font = font;
-    }
-
-    public Custom_Shape(String type) {
-        this.type = type;
-    }
-
-
    /* public Custom_Shape readJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(new File("shape.json"), Custom_Shape.class);
@@ -274,7 +276,6 @@ public class Custom_Shape {
 
         //  mapper.writeValue(new File("shape.json"), shape);
     }*/
-
 
     public UUID getUuid() {
         return uuid;
@@ -376,4 +377,22 @@ public class Custom_Shape {
     {
         return type;
     }
+
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp() {
+        String timeStamp = String.valueOf(System.currentTimeMillis() / 1000L);
+    }
+
+    public String getTextSize() {
+        return textSize;
+    }
+
+    public void setTextSize(String textSize) {
+        this.textSize = textSize;
+    }
+
 }
