@@ -244,6 +244,9 @@ public class Custom_Shape {
     {
         Text text = new Text(this.string);
         text.setFont(new Font(font, Double.valueOf(textSize)));
+        text.setFill(Color.valueOf(colorString));
+        text.setX(Double.valueOf(location.getX()));
+        text.setY(Double.valueOf(location.getY()));
 
         return text;
     }

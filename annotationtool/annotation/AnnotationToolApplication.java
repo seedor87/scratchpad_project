@@ -39,6 +39,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.TypeReference;
 import util.ProcessRunner;
 
@@ -148,6 +149,7 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private boolean clickable = true;
     private boolean makingTextBox = false;
+    private boolean saveTextBox = false;
 
     //================================================================================
     // Constructors/Starts
@@ -304,6 +306,13 @@ public class AnnotationToolApplication extends Application {
         System.out.println(strokeWidth + "here");
         custom_shape.setColorString(paint.toString());
         custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
+        try{
+            writeJSON(custom_shape, false);
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
     }
     private class SaveTextBoxHandler implements EventHandler<MouseEvent>
     {
@@ -311,9 +320,13 @@ public class AnnotationToolApplication extends Application {
         @Override
         public void handle(MouseEvent event)
         {
-            if(makingTextBox && text !=null)
+            System.out.println("here");
+            if(saveTextBox)
             {
+                System.out.println("here2");
+
                 saveTextBox();
+                saveTextBox = false;
             }
         }
     }
@@ -592,7 +605,7 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
         //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
-        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, new SaveTextBoxHandler());
+        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -602,7 +615,7 @@ public class AnnotationToolApplication extends Application {
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
-        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_RELEASED, textBoxHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
@@ -1097,7 +1110,7 @@ public class AnnotationToolApplication extends Application {
     public void setMakingText() {
         this.makingTextBox = true;
         this.resetHandlers();
-        this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
+        this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_RELEASED, textBoxHandler);
         this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
         mouseCatchingScene.setCursor(textCursor);
     }
@@ -1173,7 +1186,6 @@ public class AnnotationToolApplication extends Application {
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Custom_Shape> readShapes = mapper.reader().withType(new TypeReference<ArrayList<Custom_Shape>>() {
         }).readValue(new File("shape.json"));
-
         System.out.println(readShapes);
         return readShapes;
     }
@@ -1394,20 +1406,7 @@ public class AnnotationToolApplication extends Application {
             commitChange(new AddShape(text));
             root.getChildren().add(text);
             textBoxText.delete(0,textBoxText.length());
-
-            try {
-                uuid = UUID.randomUUID();
-                Custom_Shape shape = new Custom_Shape(uuid, "text", new Point(String.valueOf(event.getX()), String.valueOf(event.getY())), textColor, text.getText(), textFont.toString());
-                //holder.add(shape);
-                writeJSON(shape, false);
-
-            } catch (JsonParseException e) {
-                e.printStackTrace();
-            } catch (JsonMappingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            saveTextBox = true;
 
             redoStack.clear();
         }
