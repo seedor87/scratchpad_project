@@ -609,7 +609,6 @@ public class AnnotationToolApplication extends Application {
 		if(!recording) {
     		recording = true;
     		globalInputListener.record();
-    		System.out.println("gggggg");
     	} else {
     		recording = false;
     		globalInputListener.saveInputEvents();
