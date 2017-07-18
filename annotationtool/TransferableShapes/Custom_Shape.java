@@ -247,6 +247,7 @@ public class Custom_Shape {
         text.setFill(Color.valueOf(colorString));
         text.setX(Double.valueOf(location.getX()));
         text.setY(Double.valueOf(location.getY()));
+        text.setStroke(Color.valueOf(colorString));
 
         return text;
     }

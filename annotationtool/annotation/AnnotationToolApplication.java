@@ -302,7 +302,7 @@ public class AnnotationToolApplication extends Application {
 
         uuid = UUID.randomUUID();
         Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
-        custom_shape.setTextSize(strokeWidth + "");
+        custom_shape.setTextSize(text.getFont().getSize() + "");
         System.out.println(strokeWidth + "here");
         custom_shape.setColorString(paint.toString());
         custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
