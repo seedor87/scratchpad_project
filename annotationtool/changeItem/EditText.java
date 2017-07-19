@@ -35,6 +35,12 @@ public class EditText implements ChangeItem
         annotationToolApplication.getPictureStage().requestFocus();
         lastEditText = this;
     }
+    public EditText(Text text, String newString)
+    {
+        oldString = text.getText();
+        this.text = text;
+        text.setText(newString);
+    }
     public void reset(AnnotationToolApplication annotationToolApplication)
     {
         annotationToolApplication.getPictureStage().removeEventHandler(KeyEvent.KEY_TYPED, editTextKeyHandler);
