@@ -176,9 +176,9 @@ public class FXAnnotationToolBuilder extends Application {
 			
 			double[] xPoints = {beginX, beginX + width, beginX + width, beginX};
 			double[] yPoints = {beginY, beginY, beginY + height, beginY + height};
-			
+
 			System.out.println(xPosCurr + " " + yPosCurr);
-			
+
 			gc.strokePolygon(xPoints, yPoints, 4);
     	}
     	

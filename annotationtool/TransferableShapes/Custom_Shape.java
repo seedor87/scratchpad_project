@@ -14,10 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.PathMatcher;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import javafx.scene.paint.Color;
 
@@ -35,7 +32,7 @@ public class Custom_Shape {
     public static final String MOVE_SHAPE_STRING = "move shape";
     public static final String EDIT_TEXT_STRING = "edit text";
     private static HashMap<UUID, Shape> addedShapes = new HashMap<>();
-    private static HashMap<Shape, UUID> shapesToUUIDMap = new HashMap<>();
+    private static Map<Shape, UUID> shapesToUUIDMap = new HashMap<>();
     private String timestamp = "";
     private UUID uuid;
     private String type;
@@ -424,7 +421,6 @@ public class Custom_Shape {
     public String getTimestamp() {
         Long temp = System.currentTimeMillis() / 1000L;
         String timeStamp = temp.toString();
-        System.out.println(timeStamp);
         return timeStamp; 
     }
 

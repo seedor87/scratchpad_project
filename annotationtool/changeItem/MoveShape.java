@@ -35,7 +35,6 @@ public class MoveShape implements ChangeItem
         {
 
         }
-        //TODO write out to the file here with the moveshape.
     }
     public MoveShape(double newX, double newY, Shape shape)
     {
@@ -47,29 +46,19 @@ public class MoveShape implements ChangeItem
         shape.setLayoutX(newX);
         shape.setLayoutY(newY);
     }
-    //TODO set it so that I can move more than once and retain undo/redo info for those moves
-    // is there any way to get the
-    //        shape.layoutXProperty().set(); and get();
-    // should prob fix it.
 
     @Override
     public void addChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
-        System.out.println(newX + "," + newY);
         shape.layoutXProperty().set(newX);
         shape.layoutYProperty().set(newY);
-        //shape.setLayoutX(newX);
-        //shape.setLayoutY(newY);
     }
 
     @Override
     public void undoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
-        System.out.println(oldX + ", " + oldY + '\n' + newX + ", " + newY);
         shape.layoutYProperty().set(oldY);
         shape.layoutXProperty().set(oldX);
-        //shape.setLayoutX(oldX);
-        //shape.setLayoutY(oldY);
     }
 
     @Override
