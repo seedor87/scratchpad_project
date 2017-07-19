@@ -34,6 +34,8 @@ public class Custom_Shape {
     public static final String UNDO_STRING = "undo";
     public static final String MOVE_SHAPE_STRING = "move shape";
     public static final String EDIT_TEXT_STRING = "edit text";
+    private static HashMap<UUID, Shape> addedShapes = new HashMap<>();
+    private static HashMap<Shape, UUID> shapesToUUIDMap = new HashMap<>();
     private String timestamp = "";
     private UUID uuid;
     private String type;
@@ -47,8 +49,6 @@ public class Custom_Shape {
     private String font = "";
     private String textSize = "";
     private String colorString = "";
-    private static HashMap<UUID, Shape> addedShapes = new HashMap<>();
-    private static HashMap<Shape, UUID> shapesToUUIDMap = new HashMap<>();
 
 
     //    public Shape toShape() // TODO throws some custom exception if can not be made into a shape.
@@ -74,14 +74,14 @@ public class Custom_Shape {
 
 
     public Custom_Shape(UUID uuid, String type) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.uuid = uuid;
         this.type = type;
     }
 
     //path
     public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.uuid = uuid;
         this.type = type;
         this.location = location;
@@ -92,7 +92,7 @@ public class Custom_Shape {
 
     //circle , text
     public Custom_Shape(UUID uuid, String type, Point location, Color color, String stroke_string, String radius_font) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.uuid = uuid;
         this.type = type;
         this.location = location;
@@ -109,7 +109,7 @@ public class Custom_Shape {
 
     //Arrow
     public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.uuid = uuid;
         this.type = type;
         this.location = location;
@@ -122,13 +122,13 @@ public class Custom_Shape {
 
     public Custom_Shape()
     {
-        setTimestamp();
+        timestamp = getTimestamp();
 
     }
 
     //earse shape
     public Custom_Shape(UUID uuid, String type, ArrayList<Point> points) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.uuid = uuid;
         this.type = type;
         this.points = points;
@@ -136,7 +136,7 @@ public class Custom_Shape {
 
     //edit text
     public Custom_Shape(UUID uuid, String type, String string, String font) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.uuid = uuid;
         this.type = type;
         this.string = string;
@@ -145,7 +145,7 @@ public class Custom_Shape {
 
 
     public Custom_Shape(String type) {
-        setTimestamp();
+        timestamp = getTimestamp();
         this.type = type;
     }
 
@@ -422,12 +422,12 @@ public class Custom_Shape {
 
 
     public String getTimestamp() {
-        return timestamp;
+        Long temp = System.currentTimeMillis() / 1000L;
+        String timeStamp = temp.toString();
+        System.out.println(timeStamp);
+        return timeStamp; 
     }
 
-    public void setTimestamp() {
-        String timeStamp = String.valueOf(System.currentTimeMillis() / 1000L);
-    }
 
     public String getTextSize() {
         return textSize;
