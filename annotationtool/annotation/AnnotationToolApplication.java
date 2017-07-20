@@ -233,22 +233,6 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingScene.setCursor(pencilCursor);
 
-
-/*        ImageView backgroundImage = new ImageView("eraser.png");
-        if(this.pictureStage.isFullScreen() || this.pictureStage.isMaximized())
-        {
-            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-            backgroundImage.setFitWidth(primScreenBounds.getWidth());
-            backgroundImage.setFitHeight(primScreenBounds.getHeight());
-        }
-        else
-        {
-            backgroundImage.setFitHeight(getDrawingStage().getHeight());
-            backgroundImage.setFitWidth(getDrawingStage().getWidth());
-        }
-
-        root.getChildren().add(backgroundImage);*/
-
         if(pictureStage.isFullScreen() || pictureStage.isMaximized()) {
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             borderShape = new Rectangle(screenSize.getWidth(), screenSize.getHeight());
@@ -299,7 +283,6 @@ public class AnnotationToolApplication extends Application {
 
     private void saveTextBox()
     {
-
         uuid = UUID.randomUUID();
         Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
         custom_shape.setTextSize(text.getFont().getSize() + "");
@@ -308,6 +291,7 @@ public class AnnotationToolApplication extends Application {
         custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
         try{
             writeJSON(custom_shape, false);
+            Custom_Shape.setUpUUIDMaps(text, uuid);
         }
         catch (IOException ioe)
         {
@@ -779,7 +763,7 @@ public class AnnotationToolApplication extends Application {
      *  adds a triangle to the most recent straight line drawn to make it an arrow.
      * @param mouseEvent
      */
-    private void addArrowToEndOfLine(MouseEvent mouseEvent) {
+    private void addArrowToEndOfLine(MouseEvent mouseEvent, UUID uuid) {
         final double halfBaseDistance = 2;
         final double heightDistance = 4;
         double slope;
@@ -817,6 +801,7 @@ public class AnnotationToolApplication extends Application {
             newShape.setFill(line.getStroke());
             undo();
             commitChange(new AddShape(newShape));
+            Custom_Shape.setUpUUIDMaps(newShape, uuid);
         }
 
     }
@@ -1252,30 +1237,26 @@ public class AnnotationToolApplication extends Application {
     private class ArrowHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
-            if(clickable) {
-                if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+            if(clickable)
+            {
+                if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
+                {
                     line = new Line(event.getX(), event.getY(), event.getX(), event.getY());
                     line.setStroke(paint);
                     line.setStrokeWidth(strokeWidth);
-                    //line.setStartX(event.getX());
-                    //line.setStartY(event.getY());
-                    //path.setStrokeWidth(strokeWidth);
-                    //path.setSmooth(true);
-                    //MoveTo moveTo = new MoveTo(event.getX(), event.getY());
-                    //path.getElements().add(moveTo);
                     commitChange(new AddShape(line));
-                    //root.getChildren().add(path);
-                } else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                }
+                else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+                {
                     line.setEndX(event.getX());
                     line.setEndY(event.getY());
-                    //LineTo moveTo = new LineTo(event.getX(), event.getY());
-                    //path.getElements().add(moveTo);
-                } else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-                    addArrowToEndOfLine(event);
-                    //undoStack.push(path);
+                }
+                else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
+                {
+                    uuid = UUID.randomUUID();
+                    addArrowToEndOfLine(event, uuid);
 
                     try {
-                        uuid = UUID.randomUUID();
                         Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, (Color)paint, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
 
                         // holder.add(shape);
@@ -1285,8 +1266,11 @@ public class AnnotationToolApplication extends Application {
                         e.printStackTrace();
                     } catch (JsonMappingException e) {
                         e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace(); }
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
 
 
                     line = null;
@@ -1367,6 +1351,7 @@ public class AnnotationToolApplication extends Application {
 
                         //holder.add(shape);
                         writeJSON(shape, false);
+                        Custom_Shape.setUpUUIDMaps(path, uuid);
 
 
                     } catch (JsonParseException e) {
@@ -1760,6 +1745,8 @@ public class AnnotationToolApplication extends Application {
 
                     //holder.add(shape);
                     writeJSON(shape, false);
+                    Custom_Shape.setUpUUIDMaps(newCircle, uuid);
+
 
                 } catch (JsonParseException e) {
                     e.printStackTrace();

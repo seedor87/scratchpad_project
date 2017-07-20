@@ -69,18 +69,20 @@ public class Custom_Shape {
 //        }
 //    }
 
-
+    public static void changeShape(Shape oldShape, Shape newShape)
+    {
+        UUID uuid = shapesToUUIDMap.get(oldShape);
+        setUpUUIDMaps(newShape, uuid);
+    }
     public Custom_Shape(UUID uuid, String type) {
-        timestamp = getTimestamp();
+        this();
         this.uuid = uuid;
         this.type = type;
     }
 
     //path
     public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
-        timestamp = getTimestamp();
-        this.uuid = uuid;
-        this.type = type;
+        this(uuid, type);
         this.location = location;
         colorString = color.toString();
         this.strokeWidth = strokeWidth;
@@ -89,9 +91,7 @@ public class Custom_Shape {
 
     //circle , text
     public Custom_Shape(UUID uuid, String type, Point location, Color color, String stroke_string, String radius_font) {
-        timestamp = getTimestamp();
-        this.uuid = uuid;
-        this.type = type;
+        this(uuid, type);
         this.location = location;
         colorString = color.toString();
 
@@ -106,9 +106,8 @@ public class Custom_Shape {
 
     //Arrow
     public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
-        timestamp = getTimestamp();
-        this.uuid = uuid;
-        this.type = type;
+        this(uuid, type);
+
         this.location = location;
         colorString = color.toString();
         this.strokeWidth = strokeWidth;
@@ -120,22 +119,19 @@ public class Custom_Shape {
     public Custom_Shape()
     {
         timestamp = getTimestamp();
-
     }
 
     //earse shape
     public Custom_Shape(UUID uuid, String type, ArrayList<Point> points) {
-        timestamp = getTimestamp();
-        this.uuid = uuid;
-        this.type = type;
+        this(uuid, type);
+
         this.points = points;
     }
 
     //edit text
     public Custom_Shape(UUID uuid, String type, String string, String font) {
-        timestamp = getTimestamp();
-        this.uuid = uuid;
-        this.type = type;
+        this(uuid, type);
+
         this.string = string;
         this.font = font;
     }
@@ -177,16 +173,14 @@ public class Custom_Shape {
         circle.setStrokeWidth(strokeWidth);
         Shape newCircle = Shape.subtract(circle, new Circle(xLoc, yLoc, radius - (strokeWidth / 2)));
         newCircle.setFill(color);
-        addedShapes.put(uuid, newCircle);
-        shapesToUUIDMap.put(newCircle, uuid);
+        setUpUUIDMaps(newCircle, uuid);
         return newCircle;
     }
 
     private Shape toPath() {
         Path path = toUncoloredPath();
         path.setStroke(Color.valueOf(colorString));
-        addedShapes.put(uuid, path);
-        shapesToUUIDMap.put(path, uuid);
+        setUpUUIDMaps(path, uuid);
         return path;
     }
 
@@ -195,8 +189,7 @@ public class Custom_Shape {
         line.setStroke(Color.valueOf(colorString));
         line.setStrokeWidth(Double.valueOf(strokeWidth));
         Shape arrow = addArrowToEndOfLine(line);
-        addedShapes.put(uuid, arrow);
-        shapesToUUIDMap.put(arrow, uuid);
+        setUpUUIDMaps(arrow, uuid);
         return arrow;
     }
 
@@ -273,6 +266,22 @@ public class Custom_Shape {
         Text editedText = (Text) addedShapes.get(uuid);
         return new EditText(editedText, string);
     }
+    public static void setUpUUIDMaps(Shape shape, UUID uuid)
+    {
+        addedShapes.put(uuid, shape);
+        shapesToUUIDMap.put(shape, uuid);
+    }
+//    public boolean isAddShape()
+//    {
+//        if(type.equals(PATH_STRING) || type.equals(CIRCLE_STRING) || type.equals(ARROW_STRING) || type.equals(TEXT_STRING))
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            return false;
+//        }
+//    }
 
     private Text toText()
     {
@@ -282,8 +291,7 @@ public class Custom_Shape {
         text.setX(Double.valueOf(location.getX()));
         text.setY(Double.valueOf(location.getY()));
         text.setStroke(Color.valueOf(colorString));
-        addedShapes.put(uuid, text);
-        shapesToUUIDMap.put(text, uuid);
+        setUpUUIDMaps(text, uuid);
         return text;
     }
 
