@@ -457,6 +457,14 @@ public class AnnotationToolApplication extends Application {
         if(redoStack.size() > 0) {
             ChangeItem temp = redoStack.pop();
             temp.redoChangeToStage(this);
+            try
+            {
+                writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING), false);
+            }
+            catch (IOException ioe)
+            {
+                ioe.printStackTrace();
+            }
             undoStack.push(temp);
         }
         /*
@@ -480,6 +488,14 @@ public class AnnotationToolApplication extends Application {
         if(undoStack.size() > 0) {
             ChangeItem temp = undoStack.pop();
             temp.undoChangeToStage(this);
+            try
+            {
+                writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING), false);
+            }
+            catch (IOException ioe)
+            {
+                ioe.printStackTrace();
+            }
             redoStack.push(temp);
         }
 /*        if (undoStack.size() > 0)
