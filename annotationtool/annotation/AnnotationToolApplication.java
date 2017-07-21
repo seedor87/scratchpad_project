@@ -536,14 +536,14 @@ public class AnnotationToolApplication extends Application {
         });
         undoStack.clear();
         redoStack.clear();
-//        try
-//        {
-//            Files.write(new File("shape.json").toPath(), Arrays.asList("["), StandardOpenOption.CREATE_NEW);
-//        }
-//        catch (IOException ioe)
-//        {
-//            ioe.printStackTrace();
-//        }
+        try
+        {
+            Files.write(new File("shape.json").toPath(), Arrays.asList("["), StandardOpenOption.TRUNCATE_EXISTING);
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
     }
 
     /**
