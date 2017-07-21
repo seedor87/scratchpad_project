@@ -428,6 +428,23 @@ public class AnnotationToolApplication extends Application {
                 commitChange(eraseShape);
             }
         });
+        ArrayList<Point> pathElements = new ArrayList<>();
+        pathElements.add(new Point(0 +"",h/2 +""));
+        pathElements.add(new Point(w + "", h/2 + ""));
+        try
+        {
+            uuid = UUID.randomUUID();
+            Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
+            shape.setStrokeWidth(String.valueOf(h));
+
+            writeJSON(shape, false);
+
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace(); }      
         redoStack.clear();
     }
 
