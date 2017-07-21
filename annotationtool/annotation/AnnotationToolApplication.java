@@ -453,18 +453,11 @@ public class AnnotationToolApplication extends Application {
     /**
      * Redoes the top item on the redo stack, if there is one to be redone.
      */
-    public void redo() {
+    public void redo()
+    {
         if(redoStack.size() > 0) {
             ChangeItem temp = redoStack.pop();
             temp.redoChangeToStage(this);
-            try
-            {
-                writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING), false);
-            }
-            catch (IOException ioe)
-            {
-                ioe.printStackTrace();
-            }
             undoStack.push(temp);
         }
         /*
@@ -488,14 +481,6 @@ public class AnnotationToolApplication extends Application {
         if(undoStack.size() > 0) {
             ChangeItem temp = undoStack.pop();
             temp.undoChangeToStage(this);
-            try
-            {
-                writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING), false);
-            }
-            catch (IOException ioe)
-            {
-                ioe.printStackTrace();
-            }
             redoStack.push(temp);
         }
 /*        if (undoStack.size() > 0)
@@ -551,6 +536,14 @@ public class AnnotationToolApplication extends Application {
         });
         undoStack.clear();
         redoStack.clear();
+//        try
+//        {
+//            Files.write(new File("shape.json").toPath(), Arrays.asList("["), StandardOpenOption.CREATE_NEW);
+//        }
+//        catch (IOException ioe)
+//        {
+//            ioe.printStackTrace();
+//        }
     }
 
     /**
@@ -1493,10 +1486,6 @@ public class AnnotationToolApplication extends Application {
                 root.getChildren().remove(eraserPath);
                 changeItem.EraseShape eraseShape = new changeItem.EraseShape(eraserPath);
                 commitChange(eraseShape);
-
-
-                //ArrayList<PathElement> pathElements = eraserPath.getElements().stream().collect(Collectors.toList());
-
 
                 try {
                     uuid = UUID.randomUUID();

@@ -308,6 +308,14 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.undo();
+                try
+                {
+                    at.writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING), false);
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
         });
         nodes.add(undoButton);
@@ -323,6 +331,14 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.redo();
+                try
+                {
+                    at.writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING), false);
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
         });
         nodes.add(redoButton);
