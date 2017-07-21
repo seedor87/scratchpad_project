@@ -150,6 +150,14 @@ public class Custom_Shape {
         this.type = type;
         location = new Point(movedShape.getLayoutX() +"", movedShape.getLayoutY() +"");
     }
+    //EditText
+    public Custom_Shape(EditText editText)
+    {
+        Text text = editText.getText();
+        uuid = shapesToUUIDMap.get(text);
+        this.type = Custom_Shape.EDIT_TEXT_STRING;
+        this.string = text.getText();
+    }
 
     private Path toUncoloredPath() {
         Path path = new Path();

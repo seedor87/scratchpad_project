@@ -21,6 +21,12 @@ public class EditText implements ChangeItem
     private EditTextKeyHandler editTextKeyHandler = new EditTextKeyHandler();
     private static EditText lastEditText;
 
+    public Text getText()
+    {
+        return text;
+    }
+
+
     public EditText(Text text, AnnotationToolApplication annotationToolApplication)
     {
         if(lastEditText != null)
@@ -39,7 +45,7 @@ public class EditText implements ChangeItem
     {
         oldString = text.getText();
         this.text = text;
-        text.setText(newString);
+        this.newString = new StringBuilder(newString);
     }
     public void reset(AnnotationToolApplication annotationToolApplication)
     {

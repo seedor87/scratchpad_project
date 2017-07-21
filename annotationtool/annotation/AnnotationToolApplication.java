@@ -150,6 +150,8 @@ public class AnnotationToolApplication extends Application {
     private boolean clickable = true;
     private boolean makingTextBox = false;
     private boolean saveTextBox = false;
+    private boolean saveEditText = false;
+    private EditText editTextToSave;
 
     //================================================================================
     // Constructors/Starts
@@ -286,7 +288,6 @@ public class AnnotationToolApplication extends Application {
         uuid = UUID.randomUUID();
         Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
         custom_shape.setTextSize(text.getFont().getSize() + "");
-        System.out.println(strokeWidth + "here");
         custom_shape.setColorString(paint.toString());
         custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
         try{
@@ -308,6 +309,32 @@ public class AnnotationToolApplication extends Application {
                 saveTextBox();
                 saveTextBox = false;
             }
+        }
+    }
+    private void saveEditText()
+    {
+        Custom_Shape custom_shape = new Custom_Shape(editTextToSave);
+        try
+        {
+            writeJSON(custom_shape, false);
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
+    }
+    private class SaveEditTextHandler implements EventHandler<MouseEvent>
+    {
+        //TODO, add this to the stages that it needs to be added to
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(saveEditText)
+            {
+                saveEditText();
+                saveEditText = false;
+            }
+
         }
     }
 
@@ -587,6 +614,8 @@ public class AnnotationToolApplication extends Application {
         //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
         pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
+        mouseCatchingStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
+        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -1157,11 +1186,12 @@ public class AnnotationToolApplication extends Application {
      *
      * @param text The text that is to be edited.
      */
-    public void setEditingText(Text text) {
-        System.out.println("Here");
-        System.out.println(textBoxText);
+    public void setEditingText(Text text)
+    {
         this.resetHandlers();
-        commitChange(new EditText(text, this));
+        editTextToSave = new EditText(text, this);
+        commitChange(editTextToSave);
+        saveEditText = true;
     }
 
     public ArrayList<Custom_Shape> readJSON() throws IOException {
