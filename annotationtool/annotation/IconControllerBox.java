@@ -69,7 +69,6 @@ public class IconControllerBox extends Stage
         {
             dotsPerInch = Toolkit.getDefaultToolkit().getScreenResolution();
         }
-        System.out.println(dotsPerInch);
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
