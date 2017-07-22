@@ -444,7 +444,7 @@ public class AnnotationToolApplication extends Application {
         } catch (JsonMappingException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace(); }      
+            e.printStackTrace(); }
         redoStack.clear();
     }
 

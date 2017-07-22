@@ -65,6 +65,11 @@ public class IconControllerBox extends Stage
         this.setScene(scene);
         
         double dotsPerInch = Screen.getPrimary().getDpi();
+        if(dotsPerInch == 0)//fixes dual duplicate screen issue.
+        {
+            dotsPerInch = Toolkit.getDefaultToolkit().getScreenResolution();
+        }
+        System.out.println(dotsPerInch);
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
