@@ -32,8 +32,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import util.ProcessRunner;
-import util.Window;
+import util.WindowInfo;
+import util.X11InfoGatherer;
 
 /**
  * Both the main class as well as the builder for the application. Using this you can create a maximized window, a window of a specific size
@@ -41,14 +41,15 @@ import util.Window;
  */
 public class FXAnnotationToolBuilder extends Application {
 	
+	private X11InfoGatherer gatherer = X11InfoGatherer.getX11InfoGatherer();
 	private Stage stage;
 	private Stage tableStage;
 	private GraphicsContext gc;
 	private Process proc;
 	private TableView table;
 	
-	private ArrayList<Window> windows = new ArrayList<Window>();
-	private Object[] windowInfo;
+	private ArrayList<WindowInfo> windows;
+	private int[] windowAttributes;
 	
 	private static String programRestore;
     
@@ -147,21 +148,14 @@ public class FXAnnotationToolBuilder extends Application {
     	gc.setLineWidth(4);
     	
     	if(System.getProperty("os.name").equals("Linux")) {
-    		ArrayList<String> windowIDs = ProcessRunner.getAllWindows(proc);
-
-    		for(String id : windowIDs) {
-    			String windowTitle = ProcessRunner.getWindowTitleByID(id, proc);
-    			String programID = ProcessRunner.getProgramID(id, proc);
-    			String programTitle = ProcessRunner.getProgramName(programID, proc);
-    			windows.add(new Window(id, windowTitle, programID, programTitle));
-    		}
+    		windows = gatherer.getAllWindows();
     		tableStage = new Stage();
     		createWindowList(tableStage);
     	}
     }
     
     private void createWindowList(Stage stage) {
-    	final ObservableList<Window> windows = FXCollections.observableArrayList(this.windows);
+    	final ObservableList<WindowInfo> windows = FXCollections.observableArrayList(this.windows);
     	
     	Scene scene = new Scene(new Group());
         stage.setTitle("Windows");
@@ -174,15 +168,12 @@ public class FXAnnotationToolBuilder extends Application {
         table = new TableView(); 
         table.setEditable(false);
  
-        TableColumn<Window, String> windowTitles = new TableColumn<>("Window Titles");
-        windowTitles.setCellValueFactory(new PropertyValueFactory<Window, String>("title"));
-        windowTitles.setPrefWidth(220);
-        TableColumn<Window, String> programTitles = new TableColumn<>("Program Names");
-        programTitles.setCellValueFactory(new PropertyValueFactory<Window, String>("programName"));
-        programTitles.setPrefWidth(220);
+        TableColumn<WindowInfo, String> windowTitles = new TableColumn<WindowInfo, String>("Available Windows");
+        windowTitles.setCellValueFactory(new PropertyValueFactory<WindowInfo, String>("Title"));
+        windowTitles.setPrefWidth(500);
         
         table.setItems(windows);
-        table.getColumns().addAll(windowTitles, programTitles);
+        table.getColumns().addAll(windowTitles);
  
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
@@ -193,11 +184,12 @@ public class FXAnnotationToolBuilder extends Application {
         selectWindowButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				Window selectedWindow = (Window)table.getSelectionModel().getSelectedItem();
-				windowInfo = ProcessRunner.getWindowInfoByID(selectedWindow.getId(), proc);
-				ProcessRunner.focusWindow(selectedWindow.getTitle(), proc);
-				buildFromInfo(selectedWindow.getId());
-				stage.close();
+				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
+				if(selectedItem != null) {
+					windowAttributes = selectedItem.getDimensions();
+					buildFromInfo(selectedItem);
+					stage.close();
+				}
 			}
 		});
         Button annotateDesktopButton = new Button();
@@ -290,26 +282,26 @@ public class FXAnnotationToolBuilder extends Application {
 		
 	}
 	
-	private void buildFromInfo(String windowID) {
+	private void buildFromInfo(WindowInfo window) {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
 		
 		Stage newStage = new Stage();
 		Stage newSecondaryStage = new Stage();
-		newStage.setWidth((Double)windowInfo[0]);
-		newSecondaryStage.setWidth((Double)windowInfo[0]);
-		newStage.setHeight((Double)windowInfo[1]);
-		newSecondaryStage.setHeight((Double)windowInfo[1]);
-		double x = (Double)windowInfo[2];
-		double y = (Double)windowInfo[3];
+		newStage.setWidth(Double.valueOf(windowAttributes[0]));
+		newSecondaryStage.setWidth(Double.valueOf(windowAttributes[0]));
+		newStage.setHeight(Double.valueOf(windowAttributes[1]));
+		newSecondaryStage.setHeight(Double.valueOf(windowAttributes[1]));
+		double x = Double.valueOf(windowAttributes[2]);
+		double y = Double.valueOf(windowAttributes[3]);
 		AnnotationToolApplication app = new AnnotationToolApplication(
 				newStage, 
 				newSecondaryStage, 
 				x, 
 				y, 
-				true, 
-				windowID
+				true,
+				window
 				);
 	}
 	
@@ -320,38 +312,8 @@ public class FXAnnotationToolBuilder extends Application {
 		building = true;
 		
 		if(snapToWindow) {
-			this.stage.setOpacity(0f);
-			this.stage.setIconified(true);
 			
-			Platform.runLater(new Runnable() {
-			    @Override
-			    public void run() {
-			    	windowInfo = ProcessRunner.getWindowInfo(proc);
-			    	if(windowInfo != null) {
-			    		String programID = ProcessRunner.getProgramID((String)windowInfo[0], proc);
-			    		String programName = ProcessRunner.getProgramName(programID, proc);
-			    		System.out.println(programName);
-			    		
-						Stage newStage = new Stage(); 		
-						Stage newSecondaryStage = new Stage();
-						newStage.setWidth((Double)windowInfo[1]);			
-						newSecondaryStage.setWidth((Double)windowInfo[1]);
-						newStage.setHeight((Double)windowInfo[2]);			
-						newSecondaryStage.setHeight((Double)windowInfo[2]);
-						double x = (Double)windowInfo[3];
-						double y = (Double)windowInfo[4];
-						
-						AnnotationToolApplication app = new AnnotationToolApplication(
-														newStage, 
-														newSecondaryStage, 
-														x, 
-														y, 
-														true, 
-														(String)windowInfo[0]
-														);
-			    	}
-			    }
-			});
+		
 		}
 		else {
 			double x, y, w, h;
@@ -381,6 +343,9 @@ public class FXAnnotationToolBuilder extends Application {
 		    public void run() {
 		    	if(stage != null) {
 		    		stage.close();
+		    	}
+		    	if(tableStage != null) {
+		    		tableStage.close();
 		    	}
 		    }
 		});

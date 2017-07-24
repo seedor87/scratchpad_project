@@ -37,11 +37,14 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import util.GlobalInputListener;
 import util.ProcessRunner;
+import util.WindowInfo;
 
 import javax.imageio.ImageIO;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -61,6 +64,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -116,6 +121,7 @@ public class AnnotationToolApplication extends Application {
     private CircleHandler circleHandler = new CircleHandler();
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
+    private ResizeHandler resizeHandler = new ResizeHandler();
     private GlobalInputListener globalInputListener = new GlobalInputListener();
     // Annotation Objects
     private Path path;
@@ -134,7 +140,7 @@ public class AnnotationToolApplication extends Application {
     private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
     // Settings
-    private String windowID = "";
+    private WindowInfo windowID;
     private String textFont = "Times New Roman";
     private double strokeWidth = 5d;
     private double textSize = 24d;
@@ -155,7 +161,7 @@ public class AnnotationToolApplication extends Application {
         start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID) {
         this.windowID = windowID;
 		start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
@@ -260,16 +266,6 @@ public class AnnotationToolApplication extends Application {
         borderShape.setStrokeWidth(borderWidth);
         borderShape.setFill(clearPaint);
         root.getChildren().add(borderShape);
-
-        if(windowID != "") {
-        	ScheduledExecutorService windowChecker = Executors.newScheduledThreadPool(1);
-        	Runnable task = () -> resnapToWindow(windowID, windowChecker);
-
-        	int initialDelay = 0;
-        	int period = 10;
-
-        	windowChecker.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
-        }
 
         mouseCatchingStage.show();
         pictureStage.show();
@@ -578,6 +574,7 @@ public class AnnotationToolApplication extends Application {
 		GlobalScreen.addNativeMouseListener(globalInputListener);
 		GlobalScreen.addNativeMouseWheelListener(globalInputListener);
 		GlobalScreen.addNativeMouseMotionListener(globalInputListener);
+		GlobalScreen.addNativeMouseListener(resizeHandler);
     	
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
@@ -735,16 +732,12 @@ public class AnnotationToolApplication extends Application {
      * @param windowID The window to snap to.
      * @param executor The Scheduled Executor Service calling this method.
      */
-    private void resnapToWindow(String windowID, ScheduledExecutorService executor) {
-    	Process proc = null;
-    	Double[] windowInfo = ProcessRunner.getWindowInfoByID(windowID, proc);
+    public void resnapToWindow(WindowInfo windowID) {
+    	int[] windowInfo = windowID.getDimensions();
     	if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
     		resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
     		mouseCatchingStage.setX(windowInfo[2]);
     		mouseCatchingStage.setY(windowInfo[3]);
-    	}
-    	else {
-    		executor.shutdownNow();
     	}
     }
 
@@ -1478,6 +1471,36 @@ public class AnnotationToolApplication extends Application {
                 redoStack.clear();
             }
         }
+    }
+    
+    private class ResizeHandler implements NativeMouseInputListener
+    {
+    	
+    	public ResizeHandler() {
+    		// Get the logger for "org.jnativehook" and set the level to warning.
+    		Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+    		logger.setLevel(Level.WARNING);
+
+    		// Don't forget to disable the parent handlers.
+    		logger.setUseParentHandlers(false);
+    		
+    	}
+
+		@Override
+		public void nativeMouseReleased(NativeMouseEvent nativeEvent) {
+			if(windowID != null) {
+				resnapToWindow(windowID);
+			}
+		}
+
+		@Override
+		public void nativeMouseClicked(NativeMouseEvent nativeEvent) {}
+		@Override
+		public void nativeMousePressed(NativeMouseEvent nativeEvent) {}
+		@Override
+		public void nativeMouseDragged(NativeMouseEvent nativeEvent) {}
+		@Override
+		public void nativeMouseMoved(NativeMouseEvent nativeEvent) {}
     }
 
     /**
