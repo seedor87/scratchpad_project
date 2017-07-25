@@ -97,10 +97,10 @@ public class IconControllerBox extends Stage
 
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
-                    try { // apend the bracket at the end
-                        at.writeJSON(new Custom_Shape(), true);
-                    } catch (IOException x) {
-                        x.printStackTrace();
+                    try {
+                        at.writer.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                     System.exit(0);
                 }
@@ -314,7 +314,7 @@ public class IconControllerBox extends Stage
                 at.undo();
                 try
                 {
-                    at.writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING), false);
+                    at.writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING));
                 }
                 catch (IOException ioe)
                 {
@@ -337,7 +337,7 @@ public class IconControllerBox extends Stage
                 at.redo();
                 try
                 {
-                    at.writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING), false);
+                    at.writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING));
                 }
                 catch (IOException ioe)
                 {

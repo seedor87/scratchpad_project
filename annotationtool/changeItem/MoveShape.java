@@ -29,7 +29,7 @@ public class MoveShape implements ChangeItem
         Custom_Shape custom_shape = new Custom_Shape(Custom_Shape.MOVE_SHAPE_STRING, shape);
         try
         {
-            annotationToolApplication.writeJSON(custom_shape, false);
+            annotationToolApplication.writeJSON(custom_shape);
         }
         catch (IOException ioe)
         {

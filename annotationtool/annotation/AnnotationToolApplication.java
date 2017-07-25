@@ -5,6 +5,8 @@ package annotation;
 import changeItem.*;
 import TransferableShapes.*;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonStreamParser;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -58,6 +60,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -65,6 +68,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.UUID;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
 /**
@@ -92,9 +98,13 @@ public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private final double[] minStageSize = {100, 100};
-    //jackson
+    public static FileWriter writer = null;
+    //record keeping
     UUID uuid;
-    ArrayList<Custom_Shape> holder = new ArrayList<>();
+    private Gson gson = new Gson();
+    private String JSON_FILE_NAME = getJSON_FILE_NAME();
+    private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
+
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -262,25 +272,65 @@ public class AnnotationToolApplication extends Application {
         resetStages();
 
         remakeFromJSON();
-        reopenJSON("shape.json");
+        try {
+            writer = new FileWriter(JSON_FILE_NAME);
+        } catch (FileNotFoundException fileNotFound) {
+            System.out.println("ERROR: While Creating or Opening the File " + JSON_FILE_NAME);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        for (Object prev_shape : prev_shapes) {
+            writeJSON((Custom_Shape) prev_shape);
+        }
+
+
+
+
 
     }
 
     private void remakeFromJSON() {
+
+
         try {
-            ArrayList<Custom_Shape> custom_shapes = readJSON();
-            for (Custom_Shape c : custom_shapes) {
-                if(c.getType().equals("undo")) {
-                    undo();
-                } else if(c.getType().equals("redo")) {
-                    redo();
-                } else {
-                    commitChange(c.toChangeItem());
+            InputStream is = new FileInputStream(new File(JSON_FILE_NAME));
+            Reader r = new InputStreamReader(is, "UTF-8");
+            Gson gson = new GsonBuilder().create();
+            JsonStreamParser p = new JsonStreamParser(r);
+            while (p.hasNext()) {
+                JsonElement e;
+                try {
+                    e = p.next();
+                } catch (Exception ex) {
+                    /* break case for malformed json exception */
+                    break;
+                }
+                if (e.isJsonObject()) {
+                    Custom_Shape c = gson.fromJson(e, Custom_Shape.class);
+                    switch (c.getType()) {
+                        case "undo":
+                            undo();
+                            break;
+                        case "redo":
+                            redo();
+                            break;
+                        default:
+                            commitChange(c.toChangeItem());
+                            break;
+                    }
+
+                    prev_shapes.add(c);
+                    System.out.println("reading: " + c);
+
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception exc) {
+            exc.printStackTrace();
         }
+
+
+
     }
 
     private void saveTextBox()
@@ -291,7 +341,7 @@ public class AnnotationToolApplication extends Application {
         custom_shape.setColorString(paint.toString());
         custom_shape.setLocation(new Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
         try{
-            writeJSON(custom_shape, false);
+            writeJSON(custom_shape);
             Custom_Shape.setUpUUIDMaps(text, uuid);
         }
         catch (IOException ioe)
@@ -316,7 +366,7 @@ public class AnnotationToolApplication extends Application {
         Custom_Shape custom_shape = new Custom_Shape(editTextToSave);
         try
         {
-            writeJSON(custom_shape, false);
+            writeJSON(custom_shape);
         }
         catch (IOException ioe)
         {
@@ -437,7 +487,7 @@ public class AnnotationToolApplication extends Application {
             Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
             shape.setStrokeWidth(String.valueOf(h));
 
-            writeJSON(shape, false);
+            writeJSON(shape);
 
         } catch (JsonParseException e) {
             e.printStackTrace();
@@ -555,7 +605,7 @@ public class AnnotationToolApplication extends Application {
         redoStack.clear();
         try
         {
-            Files.write(new File("shape.json").toPath(), Arrays.asList("["), StandardOpenOption.TRUNCATE_EXISTING);
+            Files.write(new File(JSON_FILE_NAME).toPath(), Arrays.asList(""), StandardOpenOption.TRUNCATE_EXISTING);
         }
         catch (IOException ioe)
         {
@@ -1223,54 +1273,29 @@ public class AnnotationToolApplication extends Application {
     public ArrayList<Custom_Shape> readJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Custom_Shape> readShapes = mapper.reader().withType(new TypeReference<ArrayList<Custom_Shape>>() {
-        }).readValue(new File("shape.json"));
+        }).readValue(new File(JSON_FILE_NAME));
         System.out.println(readShapes);
         return readShapes;
     }
 
-    public void writeJSON(Custom_Shape shape, Boolean flag) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(shape);
-
-        if (!flag) {
-            try
-            {
-                Files.write(new File("shape.json").toPath(), Arrays.asList("," + json), StandardOpenOption.APPEND);
-            }
-            catch (Exception e) {
-                Files.write(new File("shape.json").toPath(), Arrays.asList("[", json), StandardOpenOption.CREATE);
-
-            }
-        } else {
-            Files.write(new File("shape.json").toPath(), Arrays.asList("]"), StandardOpenOption.APPEND);
-
-        }
+    public void writeJSON(Custom_Shape shape) throws IOException {
 
 
-        //  mapper.writeValue(new File("shape.json"), shape);*/
+        System.out.println(gson.toJson(shape));
+        gson.toJson(shape, writer);
 
-        //ObjectMapper mapper = new ObjectMapper();
-        // mapper.writerWithType(ArrayList.class).writeValue(new File("shape.json"), holder);
-        //System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(holder));
+
+
+        /*ObjectMapper mapper = new ObjectMapper();
+        holder.add(shape);
+
+        String json = mapper.writeValueAsString(holder);
+        System.out.println(json);
+        FileWriter writer = new FileWriter(JSON_FILE_NAME);
+        writer.write(json);
+        writer.close();*/
     }
 
-    public void reopenJSON(String fileName) throws IOException {
-
-        RandomAccessFile f = new RandomAccessFile(fileName, "rw");
-        byte b;
-        long length = f.length() - 1;
-        do {
-            length -= 1;
-            f.seek(length);
-            b = f.readByte();
-        } while (b != 10 && length > 0);
-        if (length == 0) {
-            f.setLength(length);
-        } else {
-            f.setLength(length + 1);
-        }
-    }
 
     /**
      * Small class to provide struct functionality.
@@ -1284,6 +1309,48 @@ public class AnnotationToolApplication extends Application {
         HandlerGroup(EventType eventType, EventHandler handler) {
             this.eventType = eventType;
             this.handler = handler;
+        }
+    }
+
+    /**
+     * Generates a file name based on date and time
+     *
+     * @return File name as a string.
+     */
+    public String getJSON_FILE_NAME() {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        timeStamp += ".json";
+        //return timeStamp;
+        return "shape.json";
+    }
+
+    /**
+     * Handler for moving the stage. should be implemented with MouseEvent.ANY when you add the
+     * handler to the mousecatchingscene.
+     */
+    private class MovingHandler implements EventHandler<MouseEvent> {
+        double originalX = -1;
+        double originalY;
+        double originalStageX;
+        double originalStageY;
+
+        @Override
+        public void handle(MouseEvent event) {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                originalX = event.getScreenX();
+                originalY = event.getScreenY();
+                originalStageX = mouseCatchingStage.getX();
+                originalStageY = mouseCatchingStage.getY();
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("grab.png")));
+            } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                double changeX = event.getScreenX() - originalX;
+                double changeY = event.getScreenY() - originalY;
+                mouseCatchingStage.setX(originalStageX + changeX);
+                mouseCatchingStage.setY(originalStageY + changeY);
+            } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+                originalX = -1;
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+            }
         }
     }
 
@@ -1317,7 +1384,7 @@ public class AnnotationToolApplication extends Application {
                         Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, (Color)paint, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
 
                         // holder.add(shape);
-                        writeJSON(shape, false);
+                        writeJSON(shape);
 
                     } catch (JsonParseException e) {
                         e.printStackTrace();
@@ -1339,31 +1406,45 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     * Handler for moving the stage. should be implemented with MouseEvent.ANY when you add the
-     * handler to the mousecatchingscene.
+     * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
+     * TextBoxKeyHandler changes the text in the box if needed.
      */
-    private class MovingHandler implements EventHandler<MouseEvent> {
-        double originalX = -1;
-        double originalY;
-        double originalStageX;
-        double originalStageY;
-
+    private class TextBoxHandler implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent event) {
-            if(event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                originalX = event.getScreenX();
-                originalY = event.getScreenY();
-                originalStageX = mouseCatchingStage.getX();
-                originalStageY = mouseCatchingStage.getY();
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("grab.png")));
-            } else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                double changeX = event.getScreenX() - originalX;
-                double changeY = event.getScreenY() - originalY;
-                mouseCatchingStage.setX(originalStageX + changeX);
-                mouseCatchingStage.setY(originalStageY + changeY);
-            } else if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-                originalX = -1;
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+            String defaultText = "Text";
+            text = new Text(event.getX(), event.getY(), defaultText);
+            text.setFont(new Font(textFont, textSize));
+            text.setFill(textColor);
+            //undoStack.push(new AddShape(text));
+            commitChange(new AddShape(text));
+            root.getChildren().add(text);
+            textBoxText.delete(0, textBoxText.length());
+            saveTextBox = true;
+
+            redoStack.clear();
+        }
+    }
+
+    /**
+     * Edits the current text box based on key inputs. should be implemented with KeyEvent.KEY_TYPED
+     */
+    private class TextBoxKeyHandler implements EventHandler<KeyEvent> {
+        @Override
+        public void handle(KeyEvent event) {
+            char c = event.getCharacter().charAt(0);
+            System.out.println(c);
+            if (((c > 31) && (c < 127))) {
+                textBoxText.append(c);
+                text.setText(textBoxText.toString());
+            } else if (c == 8) {
+                if (textBoxText.length() > 0) {
+                    textBoxText.deleteCharAt(textBoxText.length() - 1);
+                    text.setText(textBoxText.toString());
+                }
+            } else if (c == 13) {
+                textBoxText.append(System.lineSeparator());
+                text.setText(textBoxText.toString());
             }
         }
     }
@@ -1407,7 +1488,7 @@ public class AnnotationToolApplication extends Application {
                         shape.setColorString(path.getStroke().toString());
 
                         //holder.add(shape);
-                        writeJSON(shape, false);
+                        writeJSON(shape);
                         Custom_Shape.setUpUUIDMaps(path, uuid);
 
 
@@ -1425,50 +1506,6 @@ public class AnnotationToolApplication extends Application {
                     redoStack.clear();
                 }
 
-            }
-        }
-    }
-
-    /**
-     * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
-     * TextBoxKeyHandler changes the text in the box if needed.
-     */
-    private class TextBoxHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent event) {
-            String defaultText = "Text";
-            text = new Text(event.getX(), event.getY() , defaultText);
-            text.setFont(new Font(textFont, textSize));
-            text.setFill(textColor);
-            //undoStack.push(new AddShape(text));
-            commitChange(new AddShape(text));
-            root.getChildren().add(text);
-            textBoxText.delete(0,textBoxText.length());
-            saveTextBox = true;
-
-            redoStack.clear();
-        }
-    }
-
-    /**
-     * Edits the current text box based on key inputs. should be implemented with KeyEvent.KEY_TYPED
-     */
-    private class TextBoxKeyHandler implements EventHandler<KeyEvent> {
-        @Override
-        public void handle(KeyEvent event) {
-            char c = event.getCharacter().charAt(0);
-            System.out.println(c);
-            if((( c > 31)&&(c < 127))) {
-                textBoxText.append(c);
-                text.setText(textBoxText.toString());
-            } else if(c == 8) {
-                if(textBoxText.length() > 0) {
-                    textBoxText.deleteCharAt(textBoxText.length()-1);
-                    text.setText(textBoxText.toString());
-                }
-            } else if(c == 13) {
-                textBoxText.append(System.lineSeparator());
-                text.setText(textBoxText.toString());
             }
         }
     }
@@ -1510,7 +1547,7 @@ public class AnnotationToolApplication extends Application {
                     shape.setStrokeWidth(String.valueOf(eraserPath.getStrokeWidth()));
 
                     // holder.add(shape);
-                    writeJSON(shape, false);
+                    writeJSON(shape);
 
                 } catch (JsonParseException e) {
                     e.printStackTrace();
@@ -1522,35 +1559,6 @@ public class AnnotationToolApplication extends Application {
 
                 eraseShape = null;
                 redoStack.clear();
-            }
-        }
-    }
-
-    /**
-     * Handles if the user presses the escape button.
-     * If the user is in a text box, it closes the text box. It returns you to
-     * drawing mode if you are in a text box.
-     *
-     * If you are not in a text box, the program is closed.
-     */
-    private class ShortcutHandler implements EventHandler<KeyEvent> {
-        public void handle(KeyEvent event) {
-            if(event.getCode() == KeyCode.ESCAPE) {
-                if(makingTextBox) {
-                    setDrawingText();
-                } else {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            try { // apend the bracket at the end
-                                writeJSON(new Custom_Shape(), true);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            System.exit(0);
-                        }
-                    });
-                }
             }
         }
     }
@@ -1760,6 +1768,35 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
+     * Handles if the user presses the escape button.
+     * If the user is in a text box, it closes the text box. It returns you to
+     * drawing mode if you are in a text box.
+     * <p>
+     * If you are not in a text box, the program is closed.
+     */
+    private class ShortcutHandler implements EventHandler<KeyEvent> {
+        public void handle(KeyEvent event) {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                if (makingTextBox) {
+                    setDrawingText();
+                } else {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                writer.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            System.exit(0);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    /**
      * Adds a circle at the given location of the MouseEvent. should be
      * implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
@@ -1797,7 +1834,7 @@ public class AnnotationToolApplication extends Application {
                     shape.setRadius(String.valueOf(circle.getRadius()));
 
                     //holder.add(shape);
-                    writeJSON(shape, false);
+                    writeJSON(shape);
                     Custom_Shape.setUpUUIDMaps(newCircle, uuid);
 
 
