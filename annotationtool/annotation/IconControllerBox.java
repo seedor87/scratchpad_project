@@ -113,6 +113,13 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.setBorderVisibility(false);
+            	try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             	final Clipboard clipboard = Clipboard.getSystemClipboard();
                 Image clipImage = null;
                 String clipString = null;
@@ -145,6 +152,7 @@ public class IconControllerBox extends Stage
 				}
                 
                 at.doSave();
+                at.setBorderVisibility(true);
                 
                 ClipboardContent clipContent = new ClipboardContent();
             	if(clipImage != null) {
