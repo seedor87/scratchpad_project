@@ -127,6 +127,7 @@ public class GlobalInputListener implements
 	@Override
 	public void nativeKeyReleased(NativeKeyEvent nativeEvent) {
 		inputEvents.put(nativeEvent, getTime());
+		System.out.println(InputAutomator.convertToKeyCode(nativeEvent));
 		gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
 	}
 

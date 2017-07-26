@@ -11,6 +11,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Rectangle2D;
@@ -36,7 +37,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import util.GlobalInputListener;
-import util.ProcessRunner;
 import util.WindowInfo;
 
 import javax.imageio.ImageIO;
@@ -46,10 +46,8 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
 
-import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
-import java.awt.Robot;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.datatransfer.*;
@@ -61,9 +59,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -903,6 +898,87 @@ public class AnnotationToolApplication extends Application {
         this.mouseCatchingScene.setCursor(eraserCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, eraseHandler);
     }
+    
+    /**
+     * Saves a screenshot of the current window as well as anything behind the window
+     * and anything that may be drawn on the window.
+     */
+//    public void doSave()
+//    {
+//        try
+//        {
+//            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
+//            defaultHeadlessField.setAccessible(true);
+//            defaultHeadlessField.set(null,Boolean.TRUE);
+//            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
+//            headlessField.setAccessible(true);
+//            headlessField.set(null,Boolean.FALSE);
+//        }
+//        catch (IllegalAccessException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (NoSuchFieldException e)
+//        {
+//            e.printStackTrace();
+//            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
+//        }
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run()
+//            {
+//                Robot robot;
+//                try
+//                {
+//                    robot = new Robot();
+//                }
+//                catch (AWTException e)
+//                {
+//                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+//                }
+//                File outFile;
+//                String fname;
+//                do
+//                {
+//                    fname = String.format("image-%06d.png", saveImageIndex++);
+//                    System.out.println("Trying " + fname);
+//                    outFile = new File(fname);
+//                }
+//                while (outFile.exists());
+//
+//                String imageTag = "<img src='" + fname +"'>";
+//                robot.keyPress(154);
+//                robot.keyRelease(154);
+//                
+//                final Clipboard clipboard = Clipboard.getSystemClipboard();
+//                if(clipboard.hasContent(DataFormat.IMAGE)) {
+//                	BufferedImage screenGrab = SwingFXUtils.fromFXImage(clipboard.getImage(), null);
+//                	BufferedImage croppedScreenGrab = screenGrab.getSubimage((int)mouseCatchingStage.getX(), (int)mouseCatchingStage.getY(), 
+//                									  						 (int)mouseCatchingStage.getWidth(), (int)mouseCatchingStage.getHeight());
+//                try
+//                {
+//                	if(textOptionStage != null) {
+//                  		textOptionStage.hide();
+//                  	}
+//                      ImageIO.write(croppedScreenGrab, "png", outFile);
+//                }
+//                  catch (HeadlessException e)
+//                  {
+//                      e.printStackTrace();
+//                  }
+//                  catch (IOException e)
+//                  {
+//                      e.printStackTrace();
+//                  }
+//                  finally {
+//                  	controllerBox.show();
+//                  	if(makingTextBox)
+//                  		textOptionStage.show();
+//                  }
+//                }
+//            }
+//        });
+//    }
 
     /**
      * Saves a screenshot of the current window as well as anything behind the window
@@ -910,38 +986,12 @@ public class AnnotationToolApplication extends Application {
      */
     public void doSave()
     {
-    	
-        try
-        {
-            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
-            defaultHeadlessField.setAccessible(true);
-            defaultHeadlessField.set(null,Boolean.TRUE);
-            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
-            headlessField.setAccessible(true);
-            headlessField.set(null,Boolean.FALSE);
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (NoSuchFieldException e)
-        {
-            e.printStackTrace();
-            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
-        }
+    	final Clipboard clipboard = Clipboard.getSystemClipboard();
         Platform.runLater(new Runnable() {
             @Override
             public void run()
             {
-                Robot robot;
-                try
-                {
-                    robot = new Robot();
-                }
-                catch (AWTException e)
-                {
-                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
-                }
+                
                 File outFile;
                 String fname;
                 do
@@ -953,20 +1003,36 @@ public class AnnotationToolApplication extends Application {
                 while (outFile.exists());
 
                 String imageTag = "<img src='" + fname +"'>";
-                Clipboard clip = Clipboard.getSystemClipboard();//this.getToolkit().getSystemClipboard();
-                clip.setContent(new HashMap<DataFormat, Object>());
                 System.out.println(imageTag);
 
+                if(textOptionStage != null) {
+                	textOptionStage.hide();
+                }
+                
                 try
                 {
-                	if(textOptionStage != null) {
-                		textOptionStage.hide();
-                	}
-                	controllerBox.hide();
-                    java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)mouseCatchingStage.getX() /*+ borderThickness*/, (int)mouseCatchingStage.getY() /* + borderThickness*/,
-                            (int)mouseCatchingStage.getWidth()/* - (2 * borderThickness)*/, (int)mouseCatchingStage.getHeight()/* - (2 * borderThickness)*/);
-                    BufferedImage outImg = robot.createScreenCapture(screenGrabArea);
-                    ImageIO.write(outImg, "png", outFile);
+                    int i = 0;
+                    while(!clipboard.hasContent(DataFormat.IMAGE)) {
+                    	i++;
+                    	try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+                    	if(i > 50) {
+                    		break;
+                    	}
+                    }
+                    if(clipboard.hasContent(DataFormat.IMAGE)) {
+                    	clipboard.getImage();
+                    	BufferedImage screenGrab = SwingFXUtils.fromFXImage(clipboard.getImage(), null);
+                    	BufferedImage croppedScreenGrab = screenGrab.getSubimage((int)mouseCatchingStage.getX(), (int)mouseCatchingStage.getY(), 
+                    									  						 (int)mouseCatchingStage.getWidth(), (int)mouseCatchingStage.getHeight());
+                    ImageIO.write(croppedScreenGrab, "png", outFile);
+                    System.out.println("Successful screenshot");
+                    } else {
+                    	System.out.println("No image to edit");
+                    }
                 }
                 catch (HeadlessException e)
                 {
@@ -978,8 +1044,10 @@ public class AnnotationToolApplication extends Application {
                 }
                 finally {
                 	controllerBox.show();
-                	if(makingTextBox)
+                	if(makingTextBox) {
                 		textOptionStage.show();
+                	}
+                	
                 }
             }
         });
@@ -1049,6 +1117,11 @@ public class AnnotationToolApplication extends Application {
     	} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} 
+    }
+    
+    public void setBorderVisibility(boolean borderVisibility) 
+    {
+    	borderShape.setVisible(borderVisibility);
     }
     
     /*private CirclePopupMenu initializeShapeMenu() {

@@ -11,7 +11,10 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -22,8 +25,9 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-
+import java.awt.AWTException;
 import java.awt.Dimension;
+import java.awt.Robot;
 import java.awt.Toolkit;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -109,7 +113,47 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	final Clipboard clipboard = Clipboard.getSystemClipboard();
+                Image clipImage = null;
+                String clipString = null;
+                if(clipboard.hasImage()) {
+                	clipImage = clipboard.getImage();
+                } else if(clipboard.hasString()) {
+                	clipString = clipboard.getString();
+                }
+                clipboard.clear();
+                
+                Robot robot;
+                try
+                {
+                    robot = new Robot();
+                }
+                catch (AWTException e)
+                {
+                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+                }
+
+                try {
+                	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+					Thread.sleep(200);
+					robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+					Thread.sleep(200);
+					robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+					robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+                
                 at.doSave();
+                
+                ClipboardContent clipContent = new ClipboardContent();
+            	if(clipImage != null) {
+            		clipContent.putImage(clipImage);
+            		clipboard.setContent(clipContent);
+            	} else if(clipString != null) {
+            		clipContent.putString(clipString);
+            		clipboard.setContent(clipContent);
+            	}
             }
         });
         nodes.add(saveImageButton);
