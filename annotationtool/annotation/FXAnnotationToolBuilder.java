@@ -123,7 +123,7 @@ public class FXAnnotationToolBuilder extends Application {
 
 		Optional<ButtonType> result = dialog.showAndWait();
 		if (result.get() == buttonTypeOne) { //create new project/file
-
+            // ... user chose "One"
             chooser.setInitialDirectory(new File("."));
             //Set extension filter
             chooser.setInitialFileName(path);
@@ -135,21 +135,7 @@ public class FXAnnotationToolBuilder extends Application {
             File file = chooser.showSaveDialog(stage);
             path = file.getAbsoluteFile().toString();
 
-			// ... user chose "One"
 
-			/*File f = new File(path);
-            path = f.getAbsolutePath();
-
-			TextInputDialog dlg = new TextInputDialog(path);
-			dlg.setTitle("New Project");
-			dlg.setHeaderText("Rename Project");
-
-// Traditional way to get the response value.
-			Optional<String> rslt = dlg.showAndWait();
-			if (rslt.isPresent()) {
-				path = rslt.get();
-				new FileWriter(path).close();
-			}*/
 
 		} else if (result.get() == buttonTypeTwo) { //import from file
 			// ... user chose "Two"
