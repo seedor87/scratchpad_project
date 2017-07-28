@@ -1,8 +1,13 @@
 package annotation;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,6 +17,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
+import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -20,10 +27,6 @@ import javafx.scene.text.Font;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -33,6 +36,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import util.ProcessRunner;
 import util.Window;
+
+import static javax.swing.UIManager.get;
 
 /**
  * Both the main class as well as the builder for the application. Using this you can create a maximized window, a window of a specific size
@@ -57,6 +62,7 @@ public class FXAnnotationToolBuilder extends Application {
     
     private boolean dragging;
     private boolean building;
+	private String workingPath;
 
     public static void main(String[] args) {
         launch(args);
@@ -64,6 +70,9 @@ public class FXAnnotationToolBuilder extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+		workingPath = promptDialogBox();
+		System.out.println("from start" + workingPath);
+
     	this.stage = stage;
     	this.stage.initStyle(StageStyle.UNDECORATED);
     	this.stage.setOpacity(0.2d);
@@ -95,9 +104,62 @@ public class FXAnnotationToolBuilder extends Application {
     		createWindowList(new Stage());
     	}
     }
-    
-    private void createWindowList(Stage stage) {
-    	final ObservableList<Window> windows = FXCollections.observableArrayList(this.windows);
+
+	private String promptDialogBox() throws IOException {
+
+		String path = getFileName();
+		FileChooser chooser = new FileChooser();
+		Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+		dialog.setTitle("Scratchpad.exe");
+		dialog.setHeaderText("Welcome to Scratchpad");
+		dialog.setContentText("");
+		ButtonType buttonTypeOne = new ButtonType("Create New Project");
+		ButtonType buttonTypeTwo = new ButtonType("Import Project");
+		ButtonType buttonTypeThree = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+		dialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
+
+		Optional<ButtonType> result = dialog.showAndWait();
+		if (result.get() == buttonTypeOne) { //create new project/file
+			// ... user chose "One"
+			File f = new File(path);
+			path = f.getAbsolutePath();
+			TextInputDialog dlg = new TextInputDialog(path);
+			dlg.setTitle("New Project");
+			dlg.setHeaderText("Rename Project");
+
+// Traditional way to get the response value.
+			Optional<String> rslt = dlg.showAndWait();
+			if (rslt.isPresent()) {
+				path = rslt.get();
+				new FileWriter(path).close();
+			}
+
+		} else if (result.get() == buttonTypeTwo) { //import from file
+			// ... user chose "Two"
+			path = chooser.showOpenDialog(null).getPath();
+		} else {
+			// ... user chose CANCEL or closed the dialog
+			System.exit(0);
+		}
+
+		System.out.println(path);
+		return path;
+	}
+
+	/**
+	 * Generates a file name based on date and time
+	 *
+	 * @return File name as a string.
+	 */
+	public String getFileName() {
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+		timeStamp += ".json";
+		//return timeStamp;
+		return timeStamp;
+	}
+
+	private void createWindowList(Stage stage) {
+		final ObservableList<Window> windows = FXCollections.observableArrayList(this.windows);
     	
     	Scene scene = new Scene(new Group());
         stage.setTitle("Windows");
@@ -204,7 +266,8 @@ public class FXAnnotationToolBuilder extends Application {
 				x,
 				y,
 				true,
-				String.valueOf(windowInfo[0])
+				String.valueOf(windowInfo[0]),
+				workingPath
 				);
 	}
 
@@ -243,7 +306,8 @@ public class FXAnnotationToolBuilder extends Application {
 									x,
 									y,
 									true,
-									(String) windowInfo[0]
+									(String) windowInfo[0],
+									workingPath
 							);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -268,10 +332,10 @@ public class FXAnnotationToolBuilder extends Application {
 				newStage.setWidth(w);			newSecondaryStage.setWidth(w);
 				newStage.setHeight(h);			newSecondaryStage.setHeight(h);
 
-				AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
+				AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true, workingPath);
 
 			} else if (w < 25 && h < 25) {
-				AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
+				AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false, workingPath);
 			}
 		}
 

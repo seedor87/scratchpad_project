@@ -102,7 +102,7 @@ public class AnnotationToolApplication extends Application {
     //record keeping
     UUID uuid;
     private Gson gson = new Gson();
-    private String JSON_FILE_NAME = getJSON_FILE_NAME();
+    private String json_fileName;
     private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
 
     // Screen Setup and Layout
@@ -168,13 +168,19 @@ public class AnnotationToolApplication extends Application {
     //================================================================================
     private boolean lockedControllerBox = true;
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) throws IOException {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String json_fileName) throws IOException {
         start(primaryStage, secondaryStage, x, y, sizedWindow);
+        this.json_fileName = json_fileName;
+        System.out.println("From init" + json_fileName);
+        remakeFromJSON();
+
     }
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) throws IOException {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID, String json_fileName) throws IOException {
         this.windowID = windowID;
-        start(primaryStage, secondaryStage, x, y, sizedWindow);
+        this.json_fileName = json_fileName;
+        remakeFromJSON();
+
     }
 
     public void start(Stage primaryStage) throws IOException {
@@ -271,18 +277,7 @@ public class AnnotationToolApplication extends Application {
 
         resetStages();
 
-        remakeFromJSON();
-        try {
-            writer = new FileWriter(JSON_FILE_NAME);
-        } catch (FileNotFoundException fileNotFound) {
-            System.out.println("ERROR: While Creating or Opening the File " + JSON_FILE_NAME);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
 
-        for (Object prev_shape : prev_shapes) {
-            writeJSON((Custom_Shape) prev_shape);
-        }
 
 
 
@@ -290,11 +285,11 @@ public class AnnotationToolApplication extends Application {
 
     }
 
-    private void remakeFromJSON() {
+    private void remakeFromJSON() throws IOException {
 
 
         try {
-            InputStream is = new FileInputStream(new File(JSON_FILE_NAME));
+            InputStream is = new FileInputStream(new File(json_fileName));
             Reader r = new InputStreamReader(is, "UTF-8");
             Gson gson = new GsonBuilder().create();
             JsonStreamParser p = new JsonStreamParser(r);
@@ -330,6 +325,17 @@ public class AnnotationToolApplication extends Application {
         }
 
 
+        try {
+            writer = new FileWriter(json_fileName);
+        } catch (FileNotFoundException fileNotFound) {
+            System.out.println("ERROR: While Creating or Opening the File " + json_fileName);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        for (Object prev_shape : prev_shapes) {
+            writeJSON((Custom_Shape) prev_shape);
+        }
 
     }
 
@@ -605,7 +611,7 @@ public class AnnotationToolApplication extends Application {
         redoStack.clear();
         try
         {
-            Files.write(new File(JSON_FILE_NAME).toPath(), Arrays.asList(""), StandardOpenOption.TRUNCATE_EXISTING);
+            Files.write(new File(json_fileName).toPath(), Arrays.asList(""), StandardOpenOption.TRUNCATE_EXISTING);
         }
         catch (IOException ioe)
         {
@@ -1273,7 +1279,7 @@ public class AnnotationToolApplication extends Application {
     public ArrayList<Custom_Shape> readJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Custom_Shape> readShapes = mapper.reader().withType(new TypeReference<ArrayList<Custom_Shape>>() {
-        }).readValue(new File(JSON_FILE_NAME));
+        }).readValue(new File(json_fileName));
         System.out.println(readShapes);
         return readShapes;
     }
@@ -1291,7 +1297,7 @@ public class AnnotationToolApplication extends Application {
 
         String json = mapper.writeValueAsString(holder);
         System.out.println(json);
-        FileWriter writer = new FileWriter(JSON_FILE_NAME);
+        FileWriter writer = new FileWriter(json_fileName);
         writer.write(json);
         writer.close();*/
     }
@@ -1317,7 +1323,7 @@ public class AnnotationToolApplication extends Application {
      *
      * @return File name as a string.
      */
-    public String getJSON_FILE_NAME() {
+    public String getFileName() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
         timeStamp += ".json";
         //return timeStamp;
