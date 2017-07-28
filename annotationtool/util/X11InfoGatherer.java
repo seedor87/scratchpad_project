@@ -33,10 +33,22 @@ public class X11InfoGatherer {
 		root = x11.XDefaultRootWindow(display);
 	}
 	
+	/**
+	 * Gets an arraylist of a WindowInfo instance for each open window.
+	 * 
+	 * @return An ArrayList containing one WindowInfo for each open window.
+	 */
 	public ArrayList<WindowInfo> getAllWindows() {
 		return getAllWindows(this.root, 0);
 	}
 	
+	/**
+	 * Recursively gets an ArrayList of one WindowInfo for each open window within the root window.
+	 * 
+	 * @param root The root window to recursively retrieve open windows from.
+	 * @param depth How many windows deep the recursive search has gone.
+	 * @return The ArrayList containing one WindowInfo for each open window.
+	 */
 	private ArrayList<WindowInfo> getAllWindows(com.sun.jna.platform.unix.X11.Window root, int depth) {
 		ArrayList<WindowInfo> windowList = new ArrayList<WindowInfo>();
 		
@@ -97,6 +109,12 @@ public class X11InfoGatherer {
 	    return windowList;
 	}
 	
+	/**
+	 * Returns the title of the window associated with a given id.
+	 * 
+	 * @param id The window id of the window.
+	 * @return The title of the window associated with a given id.
+	 */
 	public String getWindowName(long id) {
 		com.sun.jna.platform.unix.X11.Window window = new com.sun.jna.platform.unix.X11.Window(id);
 		X11.XTextProperty name = new X11.XTextProperty();
@@ -105,6 +123,12 @@ public class X11InfoGatherer {
 		return name.value;
 	}
 	
+	/**
+	 * Returns an array containing the width, height, x, and y attributes of a window.
+	 * 
+	 * @param id The window id of the window to retrieve the attributes from.
+	 * @return An array containing the width, height, x, and y attributes of a window, as ints.
+	 */
 	public int[] getWindowAttributes(long id) {
 		com.sun.jna.platform.unix.X11.Window window = new com.sun.jna.platform.unix.X11.Window(id);
 		X11.XWindowAttributes attributes = new X11.XWindowAttributes();

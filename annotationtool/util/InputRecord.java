@@ -8,11 +8,16 @@ import org.jnativehook.mouse.NativeMouseWheelEvent;
 import java.lang.reflect.Field;
 
 public class InputRecord {
+	private String recordType = "InputRecord";
 	private String eventType;
 	private Long inputTime;
 	private int xPos = -1;
 	private int yPos = -1;
 	private int input;
+	
+	public InputRecord() {
+		
+	}
 	
 	public InputRecord(String eventType, Long inputTime, int xPos, int yPos, int input) {
 		this.eventType = eventType;
@@ -61,10 +66,10 @@ public class InputRecord {
 		return yPos;
 	}
 	
-	public int getEventVar() {
+	public int getInput() {
 		return input;
 	}
-
+	
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		String newLine = System.getProperty("line.separator");
@@ -92,6 +97,14 @@ public class InputRecord {
 		result.append("}");
 
 		return result.toString();
+	}
+
+	public String getRecordType() {
+		return recordType;
+	}
+
+	public void setRecordType(String recordType) {
+		this.recordType = recordType;
 	}
 	
 }

@@ -74,10 +74,10 @@ public class InputAutomator {
 //			System.out.println(getLongFormInputEvent(entry));
 //		}
 
-        automator.recreateInputs(inputEvents);
+//        automator.recreateInputs(inputEvents);
 
         /* Call This method to use the json file to recreate instead*/
-//		automator.recreateInputs();
+		automator.recreateInputs(true);
 		
 	}
 	
@@ -131,8 +131,8 @@ public class InputAutomator {
 			}
 		}
 	}
-
-    public void recreateInputs() {
+	
+    public void recreateInputs(boolean windowOnly) {
 
         ArrayList<InputRecord> inputRecords = new ArrayList<>();
 
@@ -176,36 +176,42 @@ public class InputAutomator {
                 quitReplay = false;
                 return;
             }
-            String eventType = entry.getEventType();
-            robot.delay((int) (entry.getInputTime() - lastTime));
-            lastTime = entry.getInputTime();
-            if(eventType.equals("NativeMouseEvent")) {
-                robot.mouseMove(entry.getxPos(), entry.getyPos());
-                if(entry.getEventVar() != 0) {
-                    Integer pressedButton = entry.getEventVar();
-                    if(pressedMouseButtons.contains(pressedButton)) {
-                        robot.mouseRelease(InputEvent.getMaskForButton(pressedButton));
-                        pressedMouseButtons.remove(pressedButton);
-                    } else {
-                        robot.mousePress(InputEvent.getMaskForButton(pressedButton));
-                        pressedMouseButtons.add(pressedButton);
-                    }
-                }
-            }
-            else if(eventType.equals("NativeMouseWheelEvent")) {
-                robot.mouseMove(entry.getxPos(), entry.getyPos());
-                robot.mouseWheel(entry.getEventVar());
-            }
-            else if(eventType.equals("NativeKeyEvent")) {
-                Integer pressedKey = entry.getEventVar();
-                if(pressedKeys.contains(pressedKey)) {
-                    robot.keyRelease(pressedKey);
-                    pressedKeys.remove(pressedKey);
-                } else {
-                    robot.keyPress(pressedKey);
-                    pressedKeys.add(pressedKey);
-                }
-            }
+            
+            if(!windowOnly || entry.getRecordType().equals("WindowLinkedInputRecord")) {
+            	
+            	String eventType = entry.getEventType();
+            	robot.delay((int) (entry.getInputTime() - lastTime));
+            	lastTime = entry.getInputTime();
+            	if(eventType.equals("NativeMouseEvent")) {
+            		robot.mouseMove(entry.getxPos(), entry.getyPos());
+            		if(entry.getInput() != 0) {
+            			Integer pressedButton = entry.getInput();
+            			if(pressedMouseButtons.contains(pressedButton)) {
+            				robot.mouseRelease(InputEvent.getMaskForButton(pressedButton));
+            				pressedMouseButtons.remove(pressedButton);
+            			} else {
+            				robot.mousePress(InputEvent.getMaskForButton(pressedButton));
+            				pressedMouseButtons.add(pressedButton);
+            			}
+            		}
+            	}
+            	else if(eventType.equals("NativeMouseWheelEvent")) {
+            		robot.mouseMove(entry.getxPos(), entry.getyPos());
+            		robot.mouseWheel(entry.getInput());
+            	}
+            	else if(eventType.equals("NativeKeyEvent")) {
+            		Integer pressedKey = entry.getInput();
+            		if(pressedKeys.contains(pressedKey)) {
+            			robot.keyRelease(pressedKey);
+            			pressedKeys.remove(pressedKey);
+            		} else {
+            			robot.keyPress(pressedKey);
+            			pressedKeys.add(pressedKey);
+            		}
+            	}
+            	
+            } else { System.out.println(entry.getRecordType()); } 
+            
         }
     }
 	

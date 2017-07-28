@@ -37,7 +37,9 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import util.GlobalInputListener;
+import util.InputRecord;
 import util.WindowInfo;
+import util.WindowLinkedInputRecord;
 
 import javax.imageio.ImageIO;
 
@@ -117,7 +119,7 @@ public class AnnotationToolApplication extends Application {
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
     private ResizeHandler resizeHandler = new ResizeHandler();
-    private GlobalInputListener globalInputListener = new GlobalInputListener();
+    private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
     private Path path;
     private Line line;
@@ -1122,6 +1124,25 @@ public class AnnotationToolApplication extends Application {
     public void setBorderVisibility(boolean borderVisibility) 
     {
     	borderShape.setVisible(borderVisibility);
+    }
+    
+    public boolean mouseInWindowBounds(int mouseX, int mouseY) 
+    {
+    	if(mouseX > mouseCatchingStage.getX() && mouseX < mouseCatchingStage.getWidth() + mouseCatchingStage.getX() &&
+    	   mouseY > mouseCatchingStage.getY() && mouseY < mouseCatchingStage.getHeight() + mouseCatchingStage.getY()) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+    
+    public InputRecord createWindowLinkedInputRecord(InputRecord record) {
+    	if(windowID != null && mouseInWindowBounds(record.getxPos(), record.getyPos())) {
+    		return new WindowLinkedInputRecord(record, mouseCatchingStage.getX(), mouseCatchingStage.getY(), mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
+    	} else {
+    		System.out.println("Why isn't this working?");
+    		return record;
+    	}
     }
     
     /*private CirclePopupMenu initializeShapeMenu() {

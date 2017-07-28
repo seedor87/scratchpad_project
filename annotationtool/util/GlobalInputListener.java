@@ -1,6 +1,5 @@
 package util;
 
-import java.awt.event.InputEvent;
 import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.concurrent.Executors;
@@ -10,8 +9,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
+
+import annotation.AnnotationToolApplication;
+
 import org.jnativehook.GlobalScreen;
-import org.jnativehook.NativeHookException;
 import org.jnativehook.NativeInputEvent;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
@@ -32,18 +33,21 @@ public class GlobalInputListener implements
 	private static Gson gson = new Gson();
 	private static FileWriter fw = null;
 
+	private AnnotationToolApplication at;
 	private ScheduledExecutorService moveDelay;
 	private LinkedHashMap<NativeInputEvent, Long> inputEvents = new LinkedHashMap<NativeInputEvent, Long>();
 	private long startTime = System.currentTimeMillis();
 	private boolean saveMove = true;
 	
-	public GlobalInputListener() {
+	public GlobalInputListener(AnnotationToolApplication at) {
 		// Get the logger for "org.jnativehook" and set the level to warning.
 		Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
 		logger.setLevel(Level.WARNING);
 
 		// Don't forget to disable the parent handlers.
 		logger.setUseParentHandlers(false);
+		
+		this.at = at;
 
 		try{
 			fw = new FileWriter(JSON_FILE_NAME);
@@ -90,13 +94,13 @@ public class GlobalInputListener implements
 	@Override
 	public void nativeMousePressed(NativeMouseEvent nativeEvent) {
 		inputEvents.put(nativeEvent, getTime());
-		gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
+		gson.toJson(at.createWindowLinkedInputRecord(new InputRecord(nativeEvent, getTime())), fw);
 	}
 
 	@Override
 	public void nativeMouseReleased(NativeMouseEvent nativeEvent) {
 		inputEvents.put(nativeEvent, getTime());
-		gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
+		gson.toJson(at.createWindowLinkedInputRecord(new InputRecord(nativeEvent, getTime())), fw);
 	}
 
 	@Override
@@ -104,7 +108,7 @@ public class GlobalInputListener implements
 		if(saveMove) {
 			inputEvents.put(nativeEvent, getTime());
 			saveMove = false;
-			gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
+			gson.toJson(at.createWindowLinkedInputRecord(new InputRecord(nativeEvent, getTime())), fw);
 		}
 	}
 
@@ -114,48 +118,24 @@ public class GlobalInputListener implements
 	@Override
 	public void nativeMouseWheelMoved(NativeMouseWheelEvent nativeEvent) {
 		inputEvents.put(nativeEvent, getTime());
-		gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
+		gson.toJson(at.createWindowLinkedInputRecord(new InputRecord(nativeEvent, getTime())), fw);
 		saveInputEvents();
 	}
 
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
 		inputEvents.put(nativeEvent, getTime());
-		gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
+		gson.toJson(at.createWindowLinkedInputRecord(new InputRecord(nativeEvent, getTime())), fw);
 	}
 
 	@Override
 	public void nativeKeyReleased(NativeKeyEvent nativeEvent) {
 		inputEvents.put(nativeEvent, getTime());
 		System.out.println(InputAutomator.convertToKeyCode(nativeEvent));
-		gson.toJson(new InputRecord(nativeEvent, getTime()), fw);
+		gson.toJson(at.createWindowLinkedInputRecord(new InputRecord(nativeEvent, getTime())), fw);
 	}
 
 	@Override
 	public void nativeKeyTyped(NativeKeyEvent nativeEvent) {}
 	
-	public static void main(String[] args) {
-		try {
-			GlobalScreen.registerNativeHook();
-		}
-		catch (NativeHookException ex) {
-			System.err.println("There was a problem registering the native hook.");
-			System.err.println(ex.getMessage());
-
-			try {
-				fw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			System.exit(1);
-		}
-		
-		GlobalInputListener inputListener = new GlobalInputListener();
-
-		GlobalScreen.addNativeKeyListener(inputListener);
-		GlobalScreen.addNativeMouseListener(inputListener);
-		GlobalScreen.addNativeMouseWheelListener(inputListener);
-		GlobalScreen.addNativeMouseMotionListener(inputListener);
-	}
 }
