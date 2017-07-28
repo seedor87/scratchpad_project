@@ -37,6 +37,8 @@ import javafx.scene.layout.VBox;
 import util.ProcessRunner;
 import util.Window;
 
+import javax.swing.*;
+
 import static javax.swing.UIManager.get;
 
 /**
@@ -109,7 +111,8 @@ public class FXAnnotationToolBuilder extends Application {
 
 		String path = getFileName();
 		FileChooser chooser = new FileChooser();
-		Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+        chooser.setInitialDirectory(new File("."));
+        Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
 		dialog.setTitle("Scratchpad.exe");
 		dialog.setHeaderText("Welcome to Scratchpad");
 		dialog.setContentText("");
@@ -120,9 +123,23 @@ public class FXAnnotationToolBuilder extends Application {
 
 		Optional<ButtonType> result = dialog.showAndWait();
 		if (result.get() == buttonTypeOne) { //create new project/file
+
+            chooser.setInitialDirectory(new File("."));
+            //Set extension filter
+            chooser.setInitialFileName(path);
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+            chooser.getExtensionFilters().add(extFilter);
+
+
+            //Show save file dialog
+            File file = chooser.showSaveDialog(stage);
+            path = file.getAbsoluteFile().toString();
+
 			// ... user chose "One"
-			File f = new File(path);
-			path = f.getAbsolutePath();
+
+			/*File f = new File(path);
+            path = f.getAbsolutePath();
+
 			TextInputDialog dlg = new TextInputDialog(path);
 			dlg.setTitle("New Project");
 			dlg.setHeaderText("Rename Project");
@@ -132,7 +149,7 @@ public class FXAnnotationToolBuilder extends Application {
 			if (rslt.isPresent()) {
 				path = rslt.get();
 				new FileWriter(path).close();
-			}
+			}*/
 
 		} else if (result.get() == buttonTypeTwo) { //import from file
 			// ... user chose "Two"
