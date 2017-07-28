@@ -81,6 +81,11 @@ public class InputAutomator {
 		
 	}
 	
+	/**
+	 * Recreates inputs as they originally happened, using a Linked Hash Map of NativeInputEvents and Longs.
+	 * 
+	 * @param inputEvents A linked hashmap containing NativeInputEvents and Longs representing the number of milliseconds passed before the NativeInputEvent.
+	 */
 	public void recreateInputs(LinkedHashMap<NativeInputEvent, Long> inputEvents) {
 		Robot robot;
 		try {
@@ -132,6 +137,11 @@ public class InputAutomator {
 		}
 	}
 	
+    /**
+     * Recreates inputs as they originally occurred using a JSON file. Can limit itself specifically to events that occurred within the annotation window.
+     * 
+     * @param windowOnly Limits recreation to inputs within the annotation window if true.
+     */
     public void recreateInputs(boolean windowOnly) {
 
         ArrayList<InputRecord> inputRecords = new ArrayList<>();
@@ -215,6 +225,12 @@ public class InputAutomator {
         }
     }
 	
+	/**
+	 * Returns a human-readable string describing an input event at a given time.
+	 * 
+	 * @param entry An entry containing a Native Input Event and Long
+	 * @return a human-readable string describing an input event at a given time.
+	 */
 	public static String getLongFormInputEvent(Map.Entry<NativeInputEvent, Long> entry) {
 		String inputInfo = "";
 		String eventType = entry.getKey().getClass().getSimpleName();
@@ -235,6 +251,12 @@ public class InputAutomator {
 		return inputInfo;
 	}
 	
+    /**
+     * Converts a NativeKeyEvent to a keycode usable by the awt.robot class.
+     * 
+     * @param e The NativeKeyEvent given by jnativehook
+     * @return The keycode corresponding to the NativeKeyEvent.
+     */
     protected static int convertToKeyCode(NativeKeyEvent e) {
         int keyCode = KeyEvent.VK_UNDEFINED;
 
@@ -662,6 +684,11 @@ public class InputAutomator {
         return keyCode;
     }
 
+    /**
+     * @author Brendan
+     *
+     * Class for listening to keys in order to control the Input Automator.
+     */
     private class ReplayController implements NativeKeyListener {
 
 		@Override

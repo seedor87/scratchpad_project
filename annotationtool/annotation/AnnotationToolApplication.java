@@ -707,10 +707,10 @@ public class AnnotationToolApplication extends Application {
     /**
      * Resizes the mouseCatching stage so long as the resize would not make it smaller than
      * 100x100 and not larger than the screen size.
-     * @param changeX
-     * @param changeY
+     * @param changeX The change (positive or negative) in the width of the stage.
+     * @param changeY The change (positive or negative) in the height of the stage.
      */
-    private void resizeAnnotationWindow(double changeX, double changeY) {
+    private void adjustAnnotationWindowSize(double changeX, double changeY) {
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     	double screenWidth = screenSize.getWidth();
     	double screenHeight = screenSize.getHeight();
@@ -1811,7 +1811,7 @@ public class AnnotationToolApplication extends Application {
 						double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
 						double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
 						if(pythagorize(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
-							resizeAnnotationWindow(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
+							adjustAnnotationWindowSize(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
 						} else {
 							moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
 						}
