@@ -2,7 +2,6 @@ package changeItem;
 
 import annotation.AnnotationToolApplication;
 import javafx.scene.shape.*;
-import javafx.stage.Stage;
 
 /**
  * Created by Brennan on 6/13/2017.
