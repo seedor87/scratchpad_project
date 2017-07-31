@@ -11,7 +11,10 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -23,8 +26,9 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-
+import java.awt.AWTException;
 import java.awt.Dimension;
+import java.awt.Robot;
 import java.awt.Toolkit;
 import java.util.*;
 
@@ -91,6 +95,8 @@ public class IconControllerBox extends Stage
 
                 alert.initOwner(IconControllerBox.this);        // this is what causes it to show off screen if it is on the left.
 
+                setDialogLocation(alert);
+
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
                     System.exit(0);
@@ -109,7 +115,55 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.setBorderVisibility(false);
+            	try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            	final Clipboard clipboard = Clipboard.getSystemClipboard();
+                Image clipImage = null;
+                String clipString = null;
+                if(clipboard.hasImage()) {
+                	clipImage = clipboard.getImage();
+                } else if(clipboard.hasString()) {
+                	clipString = clipboard.getString();
+                }
+                clipboard.clear();
+                
+                Robot robot;
+                try
+                {
+                    robot = new Robot();
+                }
+                catch (AWTException e)
+                {
+                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+                }
+
+                try {
+                	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+					Thread.sleep(200);
+					robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+					Thread.sleep(200);
+					robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+					robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+                
                 at.doSave();
+                at.setBorderVisibility(true);
+                
+                ClipboardContent clipContent = new ClipboardContent();
+            	if(clipImage != null) {
+            		clipContent.putImage(clipImage);
+            		clipboard.setContent(clipContent);
+            	} else if(clipString != null) {
+            		clipContent.putString(clipString);
+            		clipboard.setContent(clipContent);
+            	}
             }
         });
         nodes.add(saveImageButton);
@@ -279,7 +333,8 @@ public class IconControllerBox extends Stage
             {
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Brush and Text Size");
-                dialog.initStyle(StageStyle.UTILITY);
+                //dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
@@ -343,8 +398,11 @@ public class IconControllerBox extends Stage
                         return at.getStrokeWidth();
                     }
                 });
+//                dialog.setX(at.getPictureStage().getX() + at.getPictureStage().getWidth()/2 - dialog.getWidth()/2);
+//                dialog.setY((at.getPictureStage().getY()) + (at.getPictureStage().getHeight()/2));
+                setDialogLocation(dialog);
+
                 Optional<Double> result = dialog.showAndWait();
-                at.resetStages();
 
                 at.setStroke(result.get());
                 at.setTextSize(result.get().intValue());
@@ -482,6 +540,8 @@ public class IconControllerBox extends Stage
                         return buttonSize;
                     }
                 });
+
+                setDialogLocation(dialog);
 
                 Optional<Double> result = dialog.showAndWait();
 
@@ -680,7 +740,6 @@ public class IconControllerBox extends Stage
         moveShapesImage.setFitWidth(IMAGE_WIDTH);
         moveShapesButton.setGraphic(moveShapesImage);
         moveShapesButton.setTooltip(getToolTip("Select and move shapes."));
-        moveShapesButton.setGraphic(moveShapesImage);
         moveShapesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -689,6 +748,23 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
+
+        Button saveStateButton = new Button();
+        //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
+        ImageView saveStateImage = new ImageView("saveState.png");
+        saveStateImage.setFitHeight(IMAGE_HEIGHT);
+        saveStateImage.setFitWidth(IMAGE_WIDTH);
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.setTooltip(getToolTip("Save the state of the Window."));
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.saveSceneState();
+            }
+        });
+        nodes.add(saveStateButton);
         
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
@@ -697,7 +773,6 @@ public class IconControllerBox extends Stage
         lockControllerBoxImage.setFitWidth(IMAGE_WIDTH);
         lockControllerBoxButton.setGraphic(lockControllerBoxImage);
         lockControllerBoxButton.setTooltip(getToolTip("Lock the toolbar to the annotation window"));
-        lockControllerBoxButton.setGraphic(lockControllerBoxImage);
         lockControllerBoxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -707,6 +782,22 @@ public class IconControllerBox extends Stage
         });
         nodes.add(lockControllerBoxButton);
 
+        
+        Button recordInputButton = new Button();
+        //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
+        ImageView recordInputImage = new ImageView("record.png");
+        recordInputImage.setFitHeight(IMAGE_HEIGHT);
+        recordInputImage.setFitWidth(IMAGE_WIDTH);
+        recordInputButton.setGraphic(recordInputImage);
+        recordInputButton.setTooltip(getToolTip("Begin recording all input."));
+        recordInputButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.recordInput();
+            }
+        });
+        nodes.add(recordInputButton);
         
         setIconSizes(medButtonSize);
 
@@ -854,6 +945,26 @@ public class IconControllerBox extends Stage
 			}
 		});
     }
-    
+
+    private void setDialogLocation(Dialog dialog)
+    {
+        Stage pictureStage = at.getPictureStage();
+        if(pictureStage.getX() < 0)
+        {
+            dialog.setX(0);
+        }
+        else
+        {
+            dialog.setX(pictureStage.getX());
+        }
+        if(pictureStage.getY() < 0)
+        {
+            dialog.setY(0);
+        }
+        else
+        {
+            dialog.setY(pictureStage.getY());
+        }
+    }
 }
 

@@ -270,7 +270,6 @@ public class AnnotationToolApplication extends Application {
         
         pictureStage.setAlwaysOnTop(true);
         mouseCatchingStage.setAlwaysOnTop(true);
-        controllerBox.setAlwaysOnTop(true);
     }
 
     public void showTextOptionStage() 

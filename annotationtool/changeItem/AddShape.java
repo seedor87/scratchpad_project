@@ -6,7 +6,6 @@ import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 /**
  * Created by Brennan on 6/13/2017.

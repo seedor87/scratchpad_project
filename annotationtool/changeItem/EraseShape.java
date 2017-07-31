@@ -5,8 +5,6 @@ import javafx.application.Platform;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import sun.security.provider.SHA;
 
 import java.util.ListIterator;
 import java.util.Stack;
