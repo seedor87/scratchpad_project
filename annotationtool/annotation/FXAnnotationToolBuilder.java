@@ -125,7 +125,7 @@ public class FXAnnotationToolBuilder extends Application {
     		if(programRestore != null) {
     			//TODO: Snap into that slim jim
     		} else {
-    			build(false);
+    			build();
     		}
     		return;
     	}
@@ -154,6 +154,11 @@ public class FXAnnotationToolBuilder extends Application {
     	}
     }
     
+    /**
+     * Creates a table of all visible windows to annotate.
+     * 
+     * @param stage A stage to hold the table of windows/
+     */
     private void createWindowList(Stage stage) {
     	final ObservableList<WindowInfo> windows = FXCollections.observableArrayList(this.windows);
     	
@@ -216,6 +221,11 @@ public class FXAnnotationToolBuilder extends Application {
         stage.show();
     }
     
+    /**
+     * Creates a visible box over the region of the screen the user intends to annotate.
+     * 
+     * @param gc
+     */
     private void highlight(GraphicsContext gc) {
     	gc.clearRect(0, 0, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
     	gc.setStroke(new Color(1, 0, 0, 0.5f));
@@ -252,12 +262,12 @@ public class FXAnnotationToolBuilder extends Application {
 			
 			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 				if(event.getButton() == MouseButton.SECONDARY) {
-					build(true);
+					build();
 				}
 				xPos2 = event.getX();
 				yPos2 = event.getY();
 				dragging = false;
-				build(false);
+				build();
 			}
 			
 			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -282,6 +292,11 @@ public class FXAnnotationToolBuilder extends Application {
 		
 	}
 	
+	/**
+	 * Creates an annotation window around a given window.
+	 * 
+	 * @param window The window to annotate.
+	 */
 	private void buildFromInfo(WindowInfo window) {
 		building = true;
 		this.stage.setOpacity(0f);
@@ -305,37 +320,33 @@ public class FXAnnotationToolBuilder extends Application {
 				);
 	}
 	
-	private void build(boolean snapToWindow) {
+	/**
+	 * Creates an annotation tool window over a region of the screen
+	 */
+	private void build() {
 		if(building) {
 			return;
 		}
 		building = true;
+		double x, y, w, h;
 		
-		if(snapToWindow) {
-			
+		x = Double.min(xPos1, xPos2);
+		y = Double.min(yPos1, yPos2);
 		
-		}
-		else {
-			double x, y, w, h;
+		w = Double.max(xPos1, xPos2) - x;
+		h = Double.max(yPos1, yPos2) - y;
+		
+		if(w >= 50 && h >= 50) {
+			String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
 			
-			x = Double.min(xPos1, xPos2);
-			y = Double.min(yPos1, yPos2);
+			Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
+			newStage.setWidth(w);			newSecondaryStage.setWidth(w);
+			newStage.setHeight(h);			newSecondaryStage.setHeight(h);
 			
-			w = Double.max(xPos1, xPos2) - x;
-			h = Double.max(yPos1, yPos2) - y;
+			AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
 			
-			if(w >= 50 && h >= 50) {
-				String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
-				
-				Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
-				newStage.setWidth(w);			newSecondaryStage.setWidth(w);
-				newStage.setHeight(h);			newSecondaryStage.setHeight(h);
-				
-				AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
-				
-			} else if (w < 25 && h < 25) {
-				AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
-			}
+		} else if (w < 25 && h < 25) {
+			AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
 		}
 		
 		Platform.runLater(new Runnable() {
@@ -351,6 +362,9 @@ public class FXAnnotationToolBuilder extends Application {
 		});
 	}
 	
+	/**
+	 * Closes the entire application.
+	 */
 	private void close() {
 		Platform.runLater(new Runnable() {
 		    @Override
@@ -360,6 +374,11 @@ public class FXAnnotationToolBuilder extends Application {
 		});
 	}
 	
+	/**
+	 * Restores the annotation tool to a saved size and position.
+	 * 
+	 * @param args Array containing attributes of the saved window.
+	 */
 	private static void restoreSession(String[] args) {
 		if(args.length > 2) {
 			double width = Double.valueOf(args[0]);
