@@ -109,6 +109,7 @@ public class FXAnnotationToolBuilder extends Application {
 
 	private String promptDialogBox() throws IOException {
 
+
 		String path = getFileName();
 		FileChooser chooser = new FileChooser();
         chooser.setInitialDirectory(new File("."));
@@ -120,14 +121,13 @@ public class FXAnnotationToolBuilder extends Application {
 		ButtonType buttonTypeTwo = new ButtonType("Import Project");
 		ButtonType buttonTypeThree = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 		dialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
-
-		Optional<ButtonType> result = dialog.showAndWait();
+        //Set extension filter
+        chooser.setInitialFileName(path);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        chooser.getExtensionFilters().add(extFilter);
+        Optional<ButtonType> result = dialog.showAndWait();
 		if (result.get() == buttonTypeOne) { //create new project/file
-            // ... user chose "One"
-            chooser.setInitialDirectory(new File("."));
-            //Set extension filter
-            chooser.setInitialFileName(path);
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+
             chooser.getExtensionFilters().add(extFilter);
 
 
