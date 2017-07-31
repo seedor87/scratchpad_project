@@ -16,6 +16,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
@@ -25,8 +26,7 @@ import javafx.stage.StageStyle;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Created by Resea on 6/14/2017.
@@ -51,6 +51,8 @@ public class IconControllerBox extends Stage
     private int location = RIGHT_LOCATION;
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
+    private Set<Button> shapeSelectingNodes = new HashSet<>();
+    private Node shapePickerGraphic;
     
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -126,6 +128,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(arrowButton);
+        shapeSelectingNodes.add(arrowButton);
 
         Button circleButton = new Button();
         Circle circle = new Circle(IMAGE_HEIGHT/2d - 1, Color.TRANSPARENT);
@@ -140,6 +143,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(circleButton);
+        shapeSelectingNodes.add(circleButton);
 
         Button drawButton = new Button();
         ImageView drawImage = new ImageView("pencil-32.png");
@@ -155,6 +159,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(drawButton);
+        shapeSelectingNodes.add(drawButton);
 
         Button textButton = new Button();
         ImageView textImage = new ImageView("TextIcon.png");
@@ -170,6 +175,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(textButton);
+        shapeSelectingNodes.add(textButton);
 
         Button eraseButton = new Button();
         ImageView eraseImage = new ImageView("eraser.png");
@@ -185,6 +191,83 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(eraseButton);
+        shapeSelectingNodes.add(eraseButton);
+
+        Button shapePickerButton = new Button();
+        //Text numberText = new Text("5");    //TODO change this based on selected option.
+        shapePickerGraphic = drawImage;
+        shapePickerButton.setGraphic(drawImage);
+        shapePickerButton.setTooltip(getToolTip("Pick a shape"));
+        shapePickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                shapePickerButton.setGraphic(null);
+                shapePickerButton.graphicProperty().setValue(null);
+                Dialog<Double> dialog = new Dialog<>();
+                dialog.setTitle("Select Shape Tool");
+                dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
+                //TODO this
+
+
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(20, 150, 10, 10));
+                dialog.getDialogPane().setContent(grid);
+
+                grid.add(drawButton,0,0);
+                grid.add(eraseButton,1,0);
+                grid.add(circleButton,2,0);
+                grid.add(textButton,3,0);
+                grid.add(arrowButton,4,0);
+
+                dialog.setResizable(true);
+                dialog.setWidth(300);
+
+                ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+
+                dialog.getDialogPane().getButtonTypes().addAll(okButton);
+
+                dialog.showAndWait();
+                shapePickerButton.setGraphic(shapePickerGraphic);
+                at.resetStages();
+            }
+        });
+        nodes.add(shapePickerButton);
+        /*
+        * Sets up the listeners for changing the graphic of the main button that calls the shape
+        * selecting dialog.
+        * */
+        for(Button button : shapeSelectingNodes)
+        {
+            button.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event)
+                {
+                    shapePickerGraphic = button.getGraphic();
+                    if(shapePickerGraphic instanceof ImageView) {
+                        ImageView imageView = (ImageView) shapePickerGraphic;
+                        ImageView newImageView = new ImageView(imageView.getImage());
+                        newImageView.setFitHeight(imageView.getFitHeight());
+                        newImageView.setFitWidth(imageView.getFitWidth());
+                        shapePickerGraphic = newImageView;
+                    }
+                    else if (shapePickerGraphic instanceof Circle)
+                    {
+                        Circle circle1 = (Circle) shapePickerGraphic;
+                        Circle newCircle = new Circle();
+                        newCircle.setRadius(circle1.getRadius());
+                        newCircle.setStroke(circle1.getStroke());
+                        newCircle.setStrokeWidth(circle1.getStrokeWidth());
+                        newCircle.setFill(circle1.getFill());
+                        shapePickerGraphic = newCircle;
+                    }
+                }
+            });
+        }
+
 
         Button sizePickerButton = new Button();
         Text numberText = new Text("5");
@@ -331,10 +414,12 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+                //TODO use this for reference
                 changeSize = buttonSize;
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Button Size");
                 dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
@@ -621,6 +706,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(lockControllerBoxButton);
+
         
         setIconSizes(medButtonSize);
 
@@ -666,7 +752,7 @@ public class IconControllerBox extends Stage
     }
     
     public void fitScreen() {
-    	int numButtons = nodes.size();
+    	int numButtons = nodes.size() - shapeSelectingNodes.size();
     	double menuLength = numButtons * buttonSize;
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int numSplits = 1;
@@ -706,8 +792,11 @@ public class IconControllerBox extends Stage
 				int i = 0;
 				for(Node node : nodes)
 				{
-					splits[i].getChildren().add(node);
-					i = ++i % numSplits;
+				    if (!shapeSelectingNodes.contains(node))
+				    {
+                        splits[i].getChildren().add(node);
+                        i = ++i % numSplits;
+                    }
 				}
 				
 				root.getChildren().add(trunk);
@@ -728,7 +817,7 @@ public class IconControllerBox extends Stage
 					{
 						setY( Math.max(0, pictureStage.yProperty().get() - buttonSize) );
 						setX( Math.min( Math.max(0, pictureStage.xProperty().get() + pictureStage.getWidth()/2- getWidth()/2), 
-								screenSize.getWidth() - (nodes.size() * buttonSize) / numSplits) );
+								screenSize.getWidth() - ((nodes.size() - shapeSelectingNodes.size()) * buttonSize) / numSplits) );
 					}
 					break;
 				case LEFT_LOCATION:
@@ -740,7 +829,7 @@ public class IconControllerBox extends Stage
 					else
 					{
 						setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - getHeight() /2), 
-								screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+								screenSize.getHeight() - ((nodes.size() - shapeSelectingNodes.size()) * buttonSize) / numSplits) );
 						setX( Math.max(0, pictureStage.xProperty().get() - (buttonSize * numSplits)) );
 					}
 					break;
@@ -754,7 +843,7 @@ public class IconControllerBox extends Stage
 					else
 					{
 						setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - getHeight() /2), 
-								screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+								screenSize.getHeight() - ((nodes.size() - shapeSelectingNodes.size()) * buttonSize) / numSplits) );
 						setX( Math.min(pictureStage.xProperty().get() + pictureStage.getWidth() - getWidth() + (numSplits * buttonSize), 
 								Toolkit.getDefaultToolkit().getScreenSize().getWidth() - (numSplits * buttonSize)) );
 					}
