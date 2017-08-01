@@ -184,6 +184,25 @@ public class FXAnnotationToolBuilder extends Application {
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 0, 0, 20));
         
+        Button restoreSessionButton = new Button();
+        restoreSessionButton.setText("Restore Session on Selected Window");
+        restoreSessionButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
+				if(selectedItem != null) {
+					double x = 200;
+					double y = 150;
+					double width = 600;
+					double height = 450;
+					//TODO: Open JSON with info from previous session.
+					windowAttributes = selectedItem.getDimensions();
+					buildFromInfo(selectedItem);
+					stage.close();
+				}
+			}
+        });
+        
         Button selectWindowButton = new Button();
         selectWindowButton.setText("Annotate Selected Window");
         selectWindowButton.setOnAction(new EventHandler<ActionEvent>() {
