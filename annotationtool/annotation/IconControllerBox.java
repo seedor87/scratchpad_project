@@ -55,7 +55,7 @@ public class IconControllerBox extends Stage
     private int location = RIGHT_LOCATION;
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
-    private Set<Button> shapeSelectingNodes = new HashSet<>();
+    private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
     
     public IconControllerBox(AnnotationToolApplication at)
@@ -199,6 +199,20 @@ public class IconControllerBox extends Stage
         nodes.add(circleButton);
         shapeSelectingNodes.add(circleButton);
 
+        //TODO keep this as oval? change name if so
+        Button outBoundedRectangleButton = new Button();
+        outBoundedRectangleButton.setTooltip(getToolTip("Draw an out-bounded oval"));
+        outBoundedRectangleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setDrawingOutboundedRectangle();
+            }
+        });
+        nodes.add(outBoundedRectangleButton);
+        shapeSelectingNodes.add(outBoundedRectangleButton);
+
+
+
         Button drawButton = new Button();
         ImageView drawImage = new ImageView("pencil-32.png");
         drawImage.setFitHeight(IMAGE_HEIGHT);
@@ -262,7 +276,6 @@ public class IconControllerBox extends Stage
                 dialog.setTitle("Select Shape Tool");
                 dialog.initStyle(StageStyle.UTILITY);
                 dialog.initOwner(IconControllerBox.this);
-                //TODO this
 
 
                 GridPane grid = new GridPane();
@@ -271,11 +284,12 @@ public class IconControllerBox extends Stage
                 grid.setPadding(new Insets(20, 150, 10, 10));
                 dialog.getDialogPane().setContent(grid);
 
-                grid.add(drawButton,0,0);
-                grid.add(eraseButton,1,0);
-                grid.add(circleButton,2,0);
-                grid.add(textButton,3,0);
-                grid.add(arrowButton,4,0);
+                int size = shapeSelectingNodes.size();
+                Iterator<Button> iterator = shapeSelectingNodes.iterator();
+                for(int i = 0; i < size;i++)
+                {
+                    grid.add(iterator.next(),i,0);
+                }
 
                 dialog.setResizable(true);
                 dialog.setWidth(300);
@@ -284,6 +298,7 @@ public class IconControllerBox extends Stage
 
                 dialog.getDialogPane().getButtonTypes().addAll(okButton);
 
+                setDialogLocation(dialog);
                 dialog.showAndWait();
                 shapePickerButton.setGraphic(shapePickerGraphic);
                 at.resetStages();
@@ -472,7 +487,6 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                //TODO use this for reference
                 changeSize = buttonSize;
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Button Size");
@@ -899,7 +913,6 @@ public class IconControllerBox extends Stage
 				case TOP_LOCATION:
 					if(pictureStage.isFullScreen() || pictureStage.isMaximized())
 					{
-						//TODO handle all if statements
 						setX(at.getPictureStage().getX());
 						centerOnScreen();
 						setY(0);

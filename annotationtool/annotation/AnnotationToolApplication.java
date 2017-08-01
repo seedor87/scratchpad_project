@@ -11,6 +11,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Rectangle2D;
@@ -35,14 +36,20 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import util.ProcessRunner;
+import util.GlobalInputListener;
+import util.InputRecord;
+import util.WindowInfo;
+import util.WindowLinkedInputRecord;
 
 import javax.imageio.ImageIO;
 
-import java.awt.AWTException;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
+
 import java.awt.Dimension;
 import java.awt.HeadlessException;
-import java.awt.Robot;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.datatransfer.*;
@@ -51,12 +58,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -110,8 +115,11 @@ public class AnnotationToolApplication extends Application {
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
     private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
     private CircleHandler circleHandler = new CircleHandler();
+    private OutBoundedRectangleHandler outBoundedRectangleHandler = new OutBoundedRectangleHandler();
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
+    private ResizeHandler resizeHandler = new ResizeHandler();
+    private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
     private Path path;
     private Line line;
@@ -129,7 +137,7 @@ public class AnnotationToolApplication extends Application {
     private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
     // Settings
-    private String windowID = "";
+    private WindowInfo windowID;
     private String textFont = "Times New Roman";
     private double strokeWidth = 5d;
     private double textSize = 24d;
@@ -139,29 +147,30 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private boolean clickable = true;
     private boolean makingTextBox = false;
+    private boolean lockedControllerBox = true;
+    private boolean recording = false;
 
     //================================================================================
     // Constructors/Starts
     //================================================================================
-    private boolean lockedControllerBox = true;
 
     public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
         start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID) {
         this.windowID = windowID;
-		start(primaryStage, secondaryStage, x, y, sizedWindow);
+        start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
 
     public void start(Stage primaryStage) {
-    	start(primaryStage, new Stage(), 0, 0, false);
+        start(primaryStage, new Stage(), 0, 0, false);
     }
 
     //================================================================================
     // Mutators
     //================================================================================
-    
+
     /**
      * The code starts here.
      * @param primaryStage
@@ -172,16 +181,16 @@ public class AnnotationToolApplication extends Application {
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
         if(!sizedWindow) {
-        	//this.mouseCatchingStage.setFullScreen(true);
-        	//this.mouseCatchingStage.setMaximized(true);
+            //this.mouseCatchingStage.setFullScreen(true);
+            //this.mouseCatchingStage.setMaximized(true);
             this.mouseCatchingStage.setY(0);
             this.mouseCatchingStage.setX(0);
             this.mouseCatchingStage.setHeight(primScreenBounds.getHeight());
             this.mouseCatchingStage.setWidth(primScreenBounds.getWidth());
         }
         else {
-        	this.mouseCatchingStage.setX(x);
-        	this.mouseCatchingStage.setY(y);
+            this.mouseCatchingStage.setX(x);
+            this.mouseCatchingStage.setY(y);
         }
         this.mouseCatchingStage.setOpacity(0.004);
         this.mouseCatchingStage.initStyle(StageStyle.UNDECORATED);
@@ -202,7 +211,7 @@ public class AnnotationToolApplication extends Application {
         pictureStage.setScene(drawingScene);
         if(!sizedWindow) {
             //pictureStage.setMaximized(true);
-        	//pictureStage.setFullScreen(true);
+            //pictureStage.setFullScreen(true);
             pictureStage.setX(0);
             pictureStage.setY(0);
             this.pictureStage.setHeight(primScreenBounds.getHeight());
@@ -255,87 +264,77 @@ public class AnnotationToolApplication extends Application {
         borderShape.setFill(clearPaint);
         root.getChildren().add(borderShape);
 
-        if(windowID != "") {
-        	ScheduledExecutorService windowChecker = Executors.newScheduledThreadPool(1);
-        	Runnable task = () -> resnapToWindow(windowID, windowChecker);
-
-        	int initialDelay = 0;
-        	int period = 10;
-
-        	windowChecker.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
-        }
-
         mouseCatchingStage.show();
         pictureStage.show();
-        
-        pictureStage.setAlwaysOnTop(true);
-        mouseCatchingStage.setAlwaysOnTop(true);
+
+        resetStages();
     }
 
-    public void showTextOptionStage() 
-    {
-    	if(makingTextBox) {
-    		if(textOptionStage == null) {
-    			textOptionStage = new Stage();
-    			HBox textOptions = new HBox();
 
-    			Label fontSizeLabel = new Label("Font Size:");
-    			textOptions.getChildren().add(fontSizeLabel);
+    public void showTextOptionStage()
+    {
+        if(makingTextBox) {
+            if(textOptionStage == null) {
+                textOptionStage = new Stage();
+                HBox textOptions = new HBox();
+
+                Label fontSizeLabel = new Label("Font Size:");
+                textOptions.getChildren().add(fontSizeLabel);
     			/*
     			List of all possible font sizes
     			 */
-    			ObservableList<Double> fontSizeList = 
-    					FXCollections.observableArrayList(5d, 6d, 8d, 10d, 12d, 14d, 16d, 18d, 20d, 24d, 28d, 32d, 36d, 40d, 44d, 48d, 52d, 56d, 60d, 64d, 80d, 100d);
-    			ComboBox<Double> fontSizes = new ComboBox<>(fontSizeList);
-    			fontSizes.valueProperty().addListener(new ChangeListener<Double>() {
-    				@Override
-    				public void changed(ObservableValue<? extends Double> observableValue, Double oldSize, Double newSize) {
-    					setTextSize(newSize);
-    				}
-    			});
-    			fontSizes.setValue(textSize);
-    			textOptions.getChildren().add(fontSizes);
-    			
-    			Label fontStyleLabel = new Label("Font: ");
-    			textOptions.getChildren().add(fontStyleLabel);
-    			ObservableList<String> fontStyleList =
-    					FXCollections.observableArrayList(Font.getFamilies());
-    			ComboBox<String> fontStyles = new ComboBox<>(fontStyleList);
-    			fontStyles.valueProperty().addListener(new ChangeListener<String>() {
-    				@Override
-    				public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont)
+                ObservableList<Double> fontSizeList =
+                        FXCollections.observableArrayList(5d, 6d, 8d, 10d, 12d, 14d, 16d, 18d, 20d, 24d, 28d, 32d, 36d, 40d, 44d, 48d, 52d, 56d, 60d, 64d, 80d, 100d);
+                ComboBox<Double> fontSizes = new ComboBox<>(fontSizeList);
+                fontSizes.valueProperty().addListener(new ChangeListener<Double>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Double> observableValue, Double oldSize, Double newSize) {
+                        setTextSize(newSize);
+                    }
+                });
+                fontSizes.setValue(textSize);
+                textOptions.getChildren().add(fontSizes);
+
+                Label fontStyleLabel = new Label("Font: ");
+                textOptions.getChildren().add(fontStyleLabel);
+                ObservableList<String> fontStyleList =
+                        FXCollections.observableArrayList(Font.getFamilies());
+                ComboBox<String> fontStyles = new ComboBox<>(fontStyleList);
+                fontStyles.valueProperty().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont)
                     {
-    					setTextFont(newFont);
-    				}
-    			});
-    			fontStyles.setValue(textFont);
-    			textOptions.getChildren().add(fontStyles);
-    			
-    			Label fontColorLabel = new Label("Color: ");
-    			textOptions.getChildren().add(fontColorLabel);
-    			ColorPicker fontColorPicker = new ColorPicker(textColor);
-    			fontColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
-    				@Override
-    				public void changed(ObservableValue<? extends Color> observableValue, Color oldColor, Color newColor) {
-    					setTextColor(newColor);
-    				}
-    			});
-    			textOptions.getChildren().add(fontColorPicker);
-    			
-    			
-    			Scene textOptionScene = new Scene(textOptions);
-    			textOptionStage.setScene(textOptionScene);
-    			textOptionStage.setTitle("Text and Font Options");
-    			textOptionStage.setX( Math.max(0, mouseCatchingStage.getX() + .1 * mouseCatchingStage.getWidth()));
-    			textOptionStage.setY( Math.max(0, mouseCatchingStage.getY() + .1 * mouseCatchingStage.getHeight()));
-    			textOptionStage.setAlwaysOnTop(true);
-    		}
-    		textOptionStage.show();
-    	}
-    	else if(textOptionStage != null)
-    	{
-    		textOptionStage.hide();
-    	}
+                        setTextFont(newFont);
+                    }
+                });
+                fontStyles.setValue(textFont);
+                textOptions.getChildren().add(fontStyles);
+
+                Label fontColorLabel = new Label("Color: ");
+                textOptions.getChildren().add(fontColorLabel);
+                ColorPicker fontColorPicker = new ColorPicker(textColor);
+                fontColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Color> observableValue, Color oldColor, Color newColor) {
+                        setTextColor(newColor);
+                    }
+                });
+                textOptions.getChildren().add(fontColorPicker);
+
+
+                Scene textOptionScene = new Scene(textOptions);
+                textOptionStage.setScene(textOptionScene);
+                textOptionStage.setTitle("Text and Font Options");
+                textOptionStage.setX( Math.max(0, mouseCatchingStage.getX() + .1 * mouseCatchingStage.getWidth()));
+                textOptionStage.setY( Math.max(0, mouseCatchingStage.getY() + .1 * mouseCatchingStage.getHeight()));
+                textOptionStage.setAlwaysOnTop(true);
+            }
+            textOptionStage.show();
+        }
+        else if(textOptionStage != null)
+        {
+            textOptionStage.hide();
+        }
     }
 
     /**
@@ -511,29 +510,29 @@ public class AnnotationToolApplication extends Application {
                 public void run()
                 {
                     pictureStage.setAlwaysOnTop(false);
-                	mouseCatchingStage.setAlwaysOnTop(false);
+                    mouseCatchingStage.setAlwaysOnTop(false);
                     mouseCatchingStage.setOpacity(0.004);
                 }
             });
             this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         }
         else
+        {
+            mouseCatchingScene.setFill(clearPaint);
+            Platform.runLater(new Runnable()
             {
-                mouseCatchingScene.setFill(clearPaint);
-                Platform.runLater(new Runnable()
+                @Override
+                public void run()
                 {
-                      @Override
-                    public void run()
-                    {
-                          pictureStage.setAlwaysOnTop(true);
-                    	  mouseCatchingStage.setAlwaysOnTop(true);
-                    	  mouseCatchingStage.setOpacity(0.0);
-                    	  controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
-                    	  controllerBox.setAlwaysOnTop(true);
+                    pictureStage.setAlwaysOnTop(true);
+                    mouseCatchingStage.setAlwaysOnTop(true);
+                    mouseCatchingStage.setOpacity(0.0);
+                    controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
+                    controllerBox.setAlwaysOnTop(true);
 
-                    }
-                });
-            }
+                }
+            });
+        }
     }
 
     /**
@@ -559,14 +558,26 @@ public class AnnotationToolApplication extends Application {
      */
     private void setupListeners()
     {
+        try {
+            GlobalScreen.registerNativeHook();
+        }
+        catch (NativeHookException ex) {
+            System.err.println("There was a problem registering the native hook.");
+            System.err.println(ex.getMessage());
+
+            System.exit(1);
+        }
+        GlobalScreen.addNativeKeyListener(globalInputListener);
+        GlobalScreen.addNativeMouseListener(globalInputListener);
+        GlobalScreen.addNativeMouseWheelListener(globalInputListener);
+        GlobalScreen.addNativeMouseMotionListener(globalInputListener);
+        GlobalScreen.addNativeMouseListener(resizeHandler);
+
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-        //mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
-        //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
-        //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -582,6 +593,18 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
         //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedRectangleHandler));
+    }
+
+    public void recordInput()
+    {
+        if(!recording) {
+            recording = true;
+            globalInputListener.record();
+        } else {
+            recording = false;
+            globalInputListener.saveInputEvents();
+        }
     }
 
     private void unMaximize()
@@ -631,7 +654,7 @@ public class AnnotationToolApplication extends Application {
             {
                 pictureStage.setX(mouseCatchingStage.getX());
                 if(lockedControllerBox) {
-                	controllerBox.fitScreen();
+                    controllerBox.fitScreen();
                 }
                 saveState();
             }
@@ -643,7 +666,7 @@ public class AnnotationToolApplication extends Application {
             {
                 pictureStage.setY(mouseCatchingStage.getY());
                 if(lockedControllerBox) {
-                	controllerBox.fitScreen();
+                    controllerBox.fitScreen();
                 }
                 saveState();
             }
@@ -658,10 +681,10 @@ public class AnnotationToolApplication extends Application {
      * @param changeY
      */
     private void moveAnnotationWindow(double changeX, double changeY) {
-    	double stageXPos = mouseCatchingStage.getX();
-    	double stageYPos = mouseCatchingStage.getY();
-    	mouseCatchingStage.setX(stageXPos + changeX);
-		mouseCatchingStage.setY(stageYPos + changeY);
+        double stageXPos = mouseCatchingStage.getX();
+        double stageYPos = mouseCatchingStage.getY();
+        mouseCatchingStage.setX(stageXPos + changeX);
+        mouseCatchingStage.setY(stageYPos + changeY);
     }
 
     /**
@@ -683,38 +706,34 @@ public class AnnotationToolApplication extends Application {
     /**
      * Resizes the mouseCatching stage so long as the resize would not make it smaller than
      * 100x100 and not larger than the screen size.
-     * @param changeX
-     * @param changeY
+     * @param changeX The change (positive or negative) in the width of the stage.
+     * @param changeY The change (positive or negative) in the height of the stage.
      */
-    private void resizeAnnotationWindow(double changeX, double changeY) {
-    	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    	double screenWidth = screenSize.getWidth();
-    	double screenHeight = screenSize.getHeight();
-    	double stageWidth = mouseCatchingStage.getWidth();
-    	double stageHeight = mouseCatchingStage.getHeight();
-    	
-    	mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
-    	mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
+    private void adjustAnnotationWindowSize(double changeX, double changeY) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double screenWidth = screenSize.getWidth();
+        double screenHeight = screenSize.getHeight();
+        double stageWidth = mouseCatchingStage.getWidth();
+        double stageHeight = mouseCatchingStage.getHeight();
+
+        mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
+        mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
     }
-    
+
     /**
      * Gets the coordinates of the window associated with the given windowID and ensures the annotationtool window remains snapped to it.
      * If the given window closes, stops the scheduled executor service calling the method.
-     * 
+     *
      * @param windowID The window to snap to.
-     * @param executor The Scheduled Executor Service calling this method.
-     */
-    private void resnapToWindow(String windowID, ScheduledExecutorService executor) {
-    	Process proc = null;
-    	Double[] windowInfo = ProcessRunner.getWindowInfoByID(windowID, proc);
-    	if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
-    		resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
-    		mouseCatchingStage.setX(windowInfo[2]);
-    		mouseCatchingStage.setY(windowInfo[3]);
-    	}
-    	else {
-    		executor.shutdownNow();
-    	}
+     * /@param executor The Scheduled Executor Service calling this method.
+     *///TODO add the param back if desired
+    public void resnapToWindow(WindowInfo windowID) {
+        int[] windowInfo = windowID.getDimensions();
+        if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
+            resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
+            mouseCatchingStage.setX(windowInfo[2]);
+            mouseCatchingStage.setY(windowInfo[3]);
+        }
     }
 
 
@@ -733,7 +752,7 @@ public class AnnotationToolApplication extends Application {
     }
 
 
-    
+
     /**
      * Hides the box when not being used.
      */
@@ -884,40 +903,95 @@ public class AnnotationToolApplication extends Application {
      * Saves a screenshot of the current window as well as anything behind the window
      * and anything that may be drawn on the window.
      */
+//    public void doSave()
+//    {
+//        try
+//        {
+//            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
+//            defaultHeadlessField.setAccessible(true);
+//            defaultHeadlessField.set(null,Boolean.TRUE);
+//            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
+//            headlessField.setAccessible(true);
+//            headlessField.set(null,Boolean.FALSE);
+//        }
+//        catch (IllegalAccessException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (NoSuchFieldException e)
+//        {
+//            e.printStackTrace();
+//            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
+//        }
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run()
+//            {
+//                Robot robot;
+//                try
+//                {
+//                    robot = new Robot();
+//                }
+//                catch (AWTException e)
+//                {
+//                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+//                }
+//                File outFile;
+//                String fname;
+//                do
+//                {
+//                    fname = String.format("image-%06d.png", saveImageIndex++);
+//                    System.out.println("Trying " + fname);
+//                    outFile = new File(fname);
+//                }
+//                while (outFile.exists());
+//
+//                String imageTag = "<img src='" + fname +"'>";
+//                robot.keyPress(154);
+//                robot.keyRelease(154);
+//
+//                final Clipboard clipboard = Clipboard.getSystemClipboard();
+//                if(clipboard.hasContent(DataFormat.IMAGE)) {
+//                	BufferedImage screenGrab = SwingFXUtils.fromFXImage(clipboard.getImage(), null);
+//                	BufferedImage croppedScreenGrab = screenGrab.getSubimage((int)mouseCatchingStage.getX(), (int)mouseCatchingStage.getY(),
+//                									  						 (int)mouseCatchingStage.getWidth(), (int)mouseCatchingStage.getHeight());
+//                try
+//                {
+//                	if(textOptionStage != null) {
+//                  		textOptionStage.hide();
+//                  	}
+//                      ImageIO.write(croppedScreenGrab, "png", outFile);
+//                }
+//                  catch (HeadlessException e)
+//                  {
+//                      e.printStackTrace();
+//                  }
+//                  catch (IOException e)
+//                  {
+//                      e.printStackTrace();
+//                  }
+//                  finally {
+//                  	controllerBox.show();
+//                  	if(makingTextBox)
+//                  		textOptionStage.show();
+//                  }
+//                }
+//            }
+//        });
+//    }
+
+    /**
+     * Saves a screenshot of the current window as well as anything behind the window
+     * and anything that may be drawn on the window.
+     */
     public void doSave()
     {
-    	
-        try
-        {
-            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
-            defaultHeadlessField.setAccessible(true);
-            defaultHeadlessField.set(null,Boolean.TRUE);
-            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
-            headlessField.setAccessible(true);
-            headlessField.set(null,Boolean.FALSE);
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (NoSuchFieldException e)
-        {
-            e.printStackTrace();
-            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
-        }
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
         Platform.runLater(new Runnable() {
             @Override
             public void run()
             {
-                Robot robot;
-                try
-                {
-                    robot = new Robot();
-                }
-                catch (AWTException e)
-                {
-                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
-                }
+
                 File outFile;
                 String fname;
                 do
@@ -929,20 +1003,36 @@ public class AnnotationToolApplication extends Application {
                 while (outFile.exists());
 
                 String imageTag = "<img src='" + fname +"'>";
-                Clipboard clip = Clipboard.getSystemClipboard();//this.getToolkit().getSystemClipboard();
-                clip.setContent(new HashMap<DataFormat, Object>());
                 System.out.println(imageTag);
+
+                if(textOptionStage != null) {
+                    textOptionStage.hide();
+                }
 
                 try
                 {
-                	if(textOptionStage != null) {
-                		textOptionStage.hide();
-                	}
-                	controllerBox.hide();
-                    java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)mouseCatchingStage.getX() /*+ borderThickness*/, (int)mouseCatchingStage.getY() /* + borderThickness*/,
-                            (int)mouseCatchingStage.getWidth()/* - (2 * borderThickness)*/, (int)mouseCatchingStage.getHeight()/* - (2 * borderThickness)*/);
-                    BufferedImage outImg = robot.createScreenCapture(screenGrabArea);
-                    ImageIO.write(outImg, "png", outFile);
+                    int i = 0;
+                    while(!clipboard.hasContent(DataFormat.IMAGE)) {
+                        i++;
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if(i > 50) {
+                            break;
+                        }
+                    }
+                    if(clipboard.hasContent(DataFormat.IMAGE)) {
+                        clipboard.getImage();
+                        BufferedImage screenGrab = SwingFXUtils.fromFXImage(clipboard.getImage(), null);
+                        BufferedImage croppedScreenGrab = screenGrab.getSubimage((int)mouseCatchingStage.getX(), (int)mouseCatchingStage.getY(),
+                                (int)mouseCatchingStage.getWidth(), (int)mouseCatchingStage.getHeight());
+                        ImageIO.write(croppedScreenGrab, "png", outFile);
+                        System.out.println("Successful screenshot");
+                    } else {
+                        System.out.println("No image to edit");
+                    }
                 }
                 catch (HeadlessException e)
                 {
@@ -953,9 +1043,11 @@ public class AnnotationToolApplication extends Application {
                     e.printStackTrace();
                 }
                 finally {
-                	controllerBox.show();
-                	if(makingTextBox)
-                		textOptionStage.show();
+                    controllerBox.show();
+                    if(makingTextBox) {
+                        textOptionStage.show();
+                    }
+
                 }
             }
         });
@@ -986,9 +1078,9 @@ public class AnnotationToolApplication extends Application {
             public void run() {
                 mouseCatchingStage.toFront();
                 pictureStage.toFront();
-            	mouseCatchingStage.setIconified(false);
-            	controllerBox.setAlwaysOnTop(false);
-            	controllerBox.setAlwaysOnTop(true);
+                mouseCatchingStage.setIconified(false);
+                controllerBox.setAlwaysOnTop(false);
+                controllerBox.setAlwaysOnTop(true);
             }
         });
     }
@@ -1003,25 +1095,61 @@ public class AnnotationToolApplication extends Application {
             public void run() {
 //                mouseCatchingStage.toBack();
 //                pictureStage.toBack();
-            	mouseCatchingStage.setIconified(true);
+                mouseCatchingStage.setIconified(true);
             }
         });
     }
-    
-    
+
+    public void saveSceneState()
+    {
+
+    }
+
+
     private void saveState()
     {
-    	try(  PrintWriter out = new PrintWriter( "state.txt" )  ){
-    	    out.println( 
-    	    		String.valueOf(mouseCatchingStage.getWidth()) + " " +
-    	    		String.valueOf(mouseCatchingStage.getHeight()) + " " +
-    	    		String.valueOf(mouseCatchingStage.getX()) + " " +
-    	    		String.valueOf(mouseCatchingStage.getY()) );
-    	} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} 
+        try(  PrintWriter out = new PrintWriter( "state.txt" )  ){
+            out.println(
+                    String.valueOf(mouseCatchingStage.getWidth()) + " " +
+                            String.valueOf(mouseCatchingStage.getHeight()) + " " +
+                            String.valueOf(mouseCatchingStage.getX()) + " " +
+                            String.valueOf(mouseCatchingStage.getY()) );
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
-    
+
+    public void setBorderVisibility(boolean borderVisibility)
+    {
+        borderShape.setVisible(borderVisibility);
+    }
+
+    public boolean mouseInWindowBounds(int mouseX, int mouseY)
+    {
+        if(mouseX > mouseCatchingStage.getX() && mouseX < mouseCatchingStage.getWidth() + mouseCatchingStage.getX() &&
+                mouseY > mouseCatchingStage.getY() && mouseY < mouseCatchingStage.getHeight() + mouseCatchingStage.getY()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public InputRecord createWindowLinkedInputRecord(InputRecord record) {
+        if(windowID != null && mouseInWindowBounds(record.getxPos(), record.getyPos())) {
+            return new WindowLinkedInputRecord(record, mouseCatchingStage.getX(), mouseCatchingStage.getY(), mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
+        } else {
+            if(windowID == null)
+            {
+                System.out.println("Why isn't this working? - the window is null");
+            }
+            else
+            {
+                System.out.println("Why isn't this working?");
+            }
+            return record;
+        }
+    }
+
     /*private CirclePopupMenu initializeShapeMenu() {
     	StackPane popupPane = new StackPane();
     	popupPane.setMinSize(mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
@@ -1033,30 +1161,30 @@ public class AnnotationToolApplication extends Application {
     	shapeMenu.getItems().add(testItem2);
     	MenuItem testItem3 = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
     	shapeMenu.getItems().add(testItem3);
-    	
+
     	return new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
     }*/
-    
+
     //================================================================================
     // Getters/Setters
     //================================================================================
-    
+
 
     public Stage getPictureStage()
     {
         return this.pictureStage;
     }
-    
-    public Stage getMouseCatchingStage() 
+
+    public Stage getMouseCatchingStage()
     {
-    	return this.mouseCatchingStage;
+        return this.mouseCatchingStage;
     }
 
     public Double getStrokeWidth()
     {
         return  strokeWidth;
     }
-    
+
     public void setAlwaysOnTop(boolean alwaysOnTop)
     {
         Platform.runLater(new Runnable() {
@@ -1072,16 +1200,16 @@ public class AnnotationToolApplication extends Application {
     {
         this.textSize = (double) textSize;
         if(text != null)
-        	text.setFont(new Font(this.textFont, this.textSize));
+            text.setFont(new Font(this.textFont, this.textSize));
         mouseCatchingStage.requestFocus();
     }
-    
-    public void setTextSize(Double textSize) 
+
+    public void setTextSize(Double textSize)
     {
-    	this.textSize = textSize;
-    	if(text != null)
-    		text.setFont(new Font(this.textFont, this.textSize));
-    	mouseCatchingStage.requestFocus();
+        this.textSize = textSize;
+        if(text != null)
+            text.setFont(new Font(this.textFont, this.textSize));
+        mouseCatchingStage.requestFocus();
     }
 
     public void setTextColor(java.awt.Color textColor)
@@ -1092,25 +1220,25 @@ public class AnnotationToolApplication extends Application {
                 textColor.getBlue()/255d,
                 textColor.getAlpha()/255d);
         if(text != null)
-        	text.setFill(this.textColor);
+            text.setFill(this.textColor);
         mouseCatchingStage.requestFocus();
     }
-    
+
     public void setTextColor(Color textColor)
     {
-    	this.textColor = textColor;
-    	if(text != null)
-    		text.setFill(this.textColor);
-    	mouseCatchingStage.requestFocus();
+        this.textColor = textColor;
+        if(text != null)
+            text.setFill(this.textColor);
+        mouseCatchingStage.requestFocus();
     }
-    
+
     public void setTextFont(String textFont) {
-    	this.textFont = textFont;
-    	if(text != null)
-    		text.setFont(new Font(this.textFont, this.textSize));
-    	mouseCatchingStage.requestFocus();
+        this.textFont = textFont;
+        if(text != null)
+            text.setFont(new Font(this.textFont, this.textSize));
+        mouseCatchingStage.requestFocus();
     }
-    
+
     public Stack<ChangeItem> getUndoStack()
     {
         return undoStack;
@@ -1143,23 +1271,33 @@ public class AnnotationToolApplication extends Application {
 
     public void setMakingText() {
         this.makingTextBox = true;
-            this.resetHandlers();
-            this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
-            this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
-            mouseCatchingScene.setCursor(textCursor);
-        }
+        this.resetHandlers();
+        this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
+        this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
+        mouseCatchingScene.setCursor(textCursor);
+    }
 
 
     /**
      * Sets the state of the program so that you are drawing.
      */
     public void setDrawingText()
-        {
-        	this.makingTextBox = false;
-            this.resetHandlers();
-            this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-            textBoxText.delete(0,textBoxText.length());
-        }
+    {
+        this.makingTextBox = false;
+        this.resetHandlers();
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
+        textBoxText.delete(0,textBoxText.length());
+    }
+
+    /**
+     *
+     */
+    public void setDrawingOutboundedRectangle()
+    {
+        this.resetHandlers();
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, outBoundedRectangleHandler);
+    }
 
 
     public Group getRoot()
@@ -1177,17 +1315,17 @@ public class AnnotationToolApplication extends Application {
      * @return
      */
     public boolean toggleLockedControllerBox() {
-    	lockedControllerBox = !lockedControllerBox;
-    	if(lockedControllerBox) {
-    		controllerBox.fitScreen();
-    	}
-    	return lockedControllerBox;
+        lockedControllerBox = !lockedControllerBox;
+        if(lockedControllerBox) {
+            controllerBox.fitScreen();
+        }
+        return lockedControllerBox;
     }
 
     //================================================================================
     // Inner Classes
     //================================================================================
-    
+
     /*    private class EraseShape extends Path
     {
         Path eraseArea;
@@ -1224,7 +1362,7 @@ public class AnnotationToolApplication extends Application {
         controllerBox.toFront();
         AddShape.movingShapes = true;
     }
-    
+
     /**
      * Creates arrows. should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
@@ -1263,6 +1401,60 @@ public class AnnotationToolApplication extends Application {
                     redoStack.clear();
                 }
 
+            }
+        }
+    }
+
+    private class OutBoundedRectangleHandler implements EventHandler<MouseEvent>
+    {
+        double top;
+        double bottom;
+        double left;
+        double right;
+
+        @Override
+        public void handle(MouseEvent event) {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                top = event.getY();
+                bottom = event.getY();
+                left = event.getX();
+                right = event.getX();
+            }
+            if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                if(event.getY() < top)
+                {
+                    top = event.getY();
+                }
+                if(event.getY() > bottom)
+                {
+                    bottom = event.getY();
+                }
+                if(event.getX() < left)
+                {
+                    left = event.getX();
+                }
+                if(event.getX() > right)
+                {
+                    right = event.getX();
+                }
+            }
+            if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                Rectangle rectangle = new Rectangle(left, top, right - left, bottom - top);
+                rectangle.setFill(null);
+                rectangle.setStroke(paint);
+                rectangle.setStrokeWidth(strokeWidth);
+                /*
+                Oval code
+                 */
+                rectangle.setArcWidth(right - left);
+                rectangle.setArcHeight(bottom - top);
+
+                undo();
+                commitChange(new AddShape(rectangle));
+                redoStack.clear();
             }
         }
     }
@@ -1327,20 +1519,20 @@ public class AnnotationToolApplication extends Application {
                     path.getElements().add(moveTo);
                     //root.getChildren().add(path);
                     commitChange(new AddShape(path));
-                path.setStroke(paint);
+                    path.setStroke(paint);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                LineTo moveTo = new LineTo(event.getX(), event.getY());
-                path.getElements().add(moveTo);
+                    LineTo moveTo = new LineTo(event.getX(), event.getY());
+                    path.getElements().add(moveTo);
                 }
                 else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
-                //path.setFillRule(FillRule.EVEN_ODD);
-                //path.setFill(paint);
-                //root.getChildren().add(path);
-                //undoStack.push(new AddShape(path));
-                path = null;
-                redoStack.clear();
+                    //path.setFillRule(FillRule.EVEN_ODD);
+                    //path.setFill(paint);
+                    //root.getChildren().add(path);
+                    //undoStack.push(new AddShape(path));
+                    path = null;
+                    redoStack.clear();
                 }
 
             }
@@ -1444,6 +1636,36 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    private class ResizeHandler implements NativeMouseInputListener
+    {
+
+        public ResizeHandler() {
+            // Get the logger for "org.jnativehook" and set the level to warning.
+            Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+            logger.setLevel(Level.WARNING);
+
+            // Don't forget to disable the parent handlers.
+            logger.setUseParentHandlers(false);
+
+        }
+
+        @Override
+        public void nativeMouseReleased(NativeMouseEvent nativeEvent) {
+            if(windowID != null) {
+                resnapToWindow(windowID);
+            }
+        }
+
+        @Override
+        public void nativeMouseClicked(NativeMouseEvent nativeEvent) {}
+        @Override
+        public void nativeMousePressed(NativeMouseEvent nativeEvent) {}
+        @Override
+        public void nativeMouseDragged(NativeMouseEvent nativeEvent) {}
+        @Override
+        public void nativeMouseMoved(NativeMouseEvent nativeEvent) {}
+    }
+
     /**
      * Handles if the user presses the escape button.
      * If the user is in a text box, it closes the text box. It returns you to
@@ -1453,23 +1675,23 @@ public class AnnotationToolApplication extends Application {
      */
     private class ShortcutHandler implements EventHandler<KeyEvent>
     {
-    	public void handle(KeyEvent event)
-    	{
-    		if(event.getCode() == KeyCode.ESCAPE) {
-    			if(makingTextBox) {
+        public void handle(KeyEvent event)
+        {
+            if(event.getCode() == KeyCode.ESCAPE) {
+                if(makingTextBox) {
                     setDrawingText();
                 } else {
                     Platform.runLater(new Runnable() {
-    				    @Override
-    				    public void run() {
-    				    	System.exit(0);
-    				    }
-    				});
-    			}
-    		}
-    	}
+                        @Override
+                        public void run() {
+                            System.exit(0);
+                        }
+                    });
+                }
+            }
+        }
     }
-    
+
 
     /**
      * Triggers toggleClickable when triggered. Should be implemented with ZoomEvent.ANY
@@ -1632,65 +1854,65 @@ public class AnnotationToolApplication extends Application {
         TouchPoint secondPoint;
         private double[] primaryTouchCoords = {-1d, -1d};
         private double[] secondaryTouchCoords = {-1d, -1d};
-    	private double[] touchDist = {0, 0};
-    	private double resizeTolerance = 6;
+        private double[] touchDist = {0, 0};
+        private double resizeTolerance = 6;
 
-		@Override
-		public void handle(TouchEvent event)
+        @Override
+        public void handle(TouchEvent event)
         {
             if(event.getEventType() == TouchEvent.TOUCH_PRESSED && event.getTouchCount() == 2)
             {
                 firstPoint = event.getTouchPoints().get(0);
                 secondPoint = event.getTouchPoints().get(1);
             }
-			if(event.getTouchCount() == 2) {
-				TouchPoint primaryTouch = event.getTouchPoints().get(0);
-				TouchPoint secondaryTouch = event.getTouchPoints().get(1);
-				
-				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
-					setPoints(primaryTouch, secondaryTouch);
-				}
-				
-				if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
-					if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
-						setPoints(primaryTouch, secondaryTouch);
-					} else {
-						double[] newPrimaryCoords = {primaryTouch.getScreenX(), primaryTouch.getScreenY()};
-						double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
-						double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
-						if(pythagorize(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
-							resizeAnnotationWindow(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
-						} else {
-							moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
-						}
-						primaryTouchCoords = newPrimaryCoords;
-						secondaryTouchCoords = newSecondaryCoords;
-						touchDist = newTouchDist;
-					}
-				}
-			}
-			
-			if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
-				clickable = true;
-				primaryTouchCoords[0] = -1;
-				primaryTouchCoords[1] = -1;
-				secondaryTouchCoords[0] = -1;
-				secondaryTouchCoords[1] = -1;
-				touchDist[0] = 0;
-				touchDist[1] = 0;
-			}
-		}
-		
-		private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
-			clickable = false;
-			primaryTouchCoords[0] = primaryTouch.getScreenX();
-			primaryTouchCoords[1] = primaryTouch.getScreenY();
-			secondaryTouchCoords[0] = secondaryTouch.getScreenX();
-			secondaryTouchCoords[1] = secondaryTouch.getScreenY();
-			touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
-			touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
-		}
-    	
+            if(event.getTouchCount() == 2) {
+                TouchPoint primaryTouch = event.getTouchPoints().get(0);
+                TouchPoint secondaryTouch = event.getTouchPoints().get(1);
+
+                if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
+                    setPoints(primaryTouch, secondaryTouch);
+                }
+
+                if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
+                    if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
+                        setPoints(primaryTouch, secondaryTouch);
+                    } else {
+                        double[] newPrimaryCoords = {primaryTouch.getScreenX(), primaryTouch.getScreenY()};
+                        double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
+                        double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
+                        if(pythagorize(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
+                            adjustAnnotationWindowSize(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
+                        } else {
+                            moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
+                        }
+                        primaryTouchCoords = newPrimaryCoords;
+                        secondaryTouchCoords = newSecondaryCoords;
+                        touchDist = newTouchDist;
+                    }
+                }
+            }
+
+            if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
+                clickable = true;
+                primaryTouchCoords[0] = -1;
+                primaryTouchCoords[1] = -1;
+                secondaryTouchCoords[0] = -1;
+                secondaryTouchCoords[1] = -1;
+                touchDist[0] = 0;
+                touchDist[1] = 0;
+            }
+        }
+
+        private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
+            clickable = false;
+            primaryTouchCoords[0] = primaryTouch.getScreenX();
+            primaryTouchCoords[1] = primaryTouch.getScreenY();
+            secondaryTouchCoords[0] = secondaryTouch.getScreenX();
+            secondaryTouchCoords[1] = secondaryTouch.getScreenY();
+            touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
+            touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
+        }
+
     }
 
     /**
@@ -1745,6 +1967,6 @@ public class AnnotationToolApplication extends Application {
             }
         }
     }
-    
-    
+
+
 }
