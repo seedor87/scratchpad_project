@@ -199,13 +199,24 @@ public class IconControllerBox extends Stage
         nodes.add(circleButton);
         shapeSelectingNodes.add(circleButton);
 
+        Button rectangleButton = new Button();
+        rectangleButton.setTooltip(getToolTip("Make a rectangle"));
+        rectangleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setMakingRectangles();
+            }
+        });
+        nodes.add(rectangleButton);
+        shapeSelectingNodes.add(rectangleButton);
+
         //TODO keep this as oval? change name if so
         Button outBoundedRectangleButton = new Button();
         outBoundedRectangleButton.setTooltip(getToolTip("Draw an out-bounded oval"));
         outBoundedRectangleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                at.setDrawingOutboundedRectangle();
+                at.setDrawingOutboundedOval();
             }
         });
         nodes.add(outBoundedRectangleButton);

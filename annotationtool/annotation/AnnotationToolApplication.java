@@ -115,10 +115,11 @@ public class AnnotationToolApplication extends Application {
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
     private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
     private CircleHandler circleHandler = new CircleHandler();
-    private OutBoundedRectangleHandler outBoundedRectangleHandler = new OutBoundedRectangleHandler();
+    private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler();
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
     private ResizeHandler resizeHandler = new ResizeHandler();
+    private RectangleHandler rectangleHandler = new RectangleHandler();
     private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
     private Path path;
@@ -593,7 +594,9 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
         //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
-        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedRectangleHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedOvalHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
+
     }
 
     public void recordInput()
@@ -1277,6 +1280,13 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.setCursor(textCursor);
     }
 
+    public void setMakingRectangles()
+    {
+        this.resetHandlers();
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectangleHandler);
+
+    }
+
 
     /**
      * Sets the state of the program so that you are drawing.
@@ -1292,11 +1302,11 @@ public class AnnotationToolApplication extends Application {
     /**
      *
      */
-    public void setDrawingOutboundedRectangle()
+    public void setDrawingOutboundedOval()
     {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, outBoundedRectangleHandler);
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, outBoundedOvalHandler);
     }
 
 
@@ -1363,6 +1373,33 @@ public class AnnotationToolApplication extends Application {
         AddShape.movingShapes = true;
     }
 
+    private class RectangleHandler implements EventHandler<MouseEvent>
+    {
+        Rectangle rectangle;
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                rectangle = new Rectangle(event.getX(), event.getY(), 0,0);
+                rectangle.setStrokeWidth(strokeWidth);
+                rectangle.setStroke(paint);
+                rectangle.setFill(null);
+                commitChange(new AddShape(rectangle));
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                rectangle.setWidth(event.getX() - rectangle.getX());
+                rectangle.setHeight(event.getY() - rectangle.getY());
+            }
+            if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                rectangle = null;
+            }
+        }
+    }
+
     /**
      * Creates arrows. should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
@@ -1400,12 +1437,11 @@ public class AnnotationToolApplication extends Application {
                     line = null;
                     redoStack.clear();
                 }
-
             }
         }
     }
 
-    private class OutBoundedRectangleHandler implements EventHandler<MouseEvent>
+    private class OutBoundedOvalHandler implements EventHandler<MouseEvent>
     {
         double top;
         double bottom;
