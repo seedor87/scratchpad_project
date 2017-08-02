@@ -36,6 +36,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import rectify.AnnotatePoint;
+import rectify.Broken;
+import rectify.Devdata;
+import rectify.Point;
 import util.GlobalInputListener;
 import util.InputRecord;
 import util.WindowInfo;
@@ -120,6 +124,7 @@ public class AnnotationToolApplication extends Application {
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
     private ResizeHandler resizeHandler = new ResizeHandler();
     private RectangleHandler rectangleHandler = new RectangleHandler();
+    private RectificationHandler rectificationHandler = new RectificationHandler();
     private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
     private Path path;
@@ -596,6 +601,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedOvalHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectificationHandler));
 
     }
 
@@ -1603,6 +1609,83 @@ public class AnnotationToolApplication extends Application {
             textBoxText.delete(0,textBoxText.length());
             redoStack.clear();
         }
+    }
+
+    public void setRectifying()
+    {
+        resetHandlers();
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectificationHandler);
+    }
+    private class RectificationHandler implements EventHandler<MouseEvent>
+    {
+        private int index = 0;
+        private Point[] arr = new Point[100000];
+        private ArrayList<AnnotatePoint> points = new ArrayList<>();
+        private static final int RECTIFY_THICKNESS_FACTOR = 5;
+        private static final boolean DEBUG = true;
+        private Devdata devdata = new Devdata(DEBUG, new ArrayList<AnnotatePoint>());;
+        private Broken broken = new Broken();
+        private static final double OUTLINE_STROKE_WIDTH = 5;
+        private Path outLinePath;
+
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                arr[index] = new Point(event.getX(), event.getY());
+                points = new ArrayList<AnnotatePoint>();
+                points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
+                index++;
+                outLinePath = new Path();
+                root.getChildren().add(outLinePath);
+                outLinePath.getElements().add(new MoveTo(event.getX(), event.getY()));
+                outLinePath.setStrokeWidth(OUTLINE_STROKE_WIDTH);
+                outLinePath.setStroke(paint);
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                arr[index] = new Point(event.getX(), event.getY());
+                points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
+                index++;
+                outLinePath.getElements().add(new LineTo(event.getX(), event.getY()));
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                /*
+        Tests conclude that the brush thickness be no more than 5 * pixel width and the annotate thickness be about 5 * brush_thickness
+         */
+                rectify(points, true);
+                drawFromList(devdata.getCoord_list());
+                root.getChildren().remove(outLinePath);
+
+                arr = new Point[100000];
+                index = 0;
+            }
+
+
+        }
+        /* Rectify the line. */
+        void rectify(ArrayList<AnnotatePoint> coord_list, boolean closed_path) {
+
+            double tollerance = RECTIFY_THICKNESS_FACTOR * strokeWidth;
+            ArrayList<AnnotatePoint> broken_list = broken.broken(coord_list, closed_path, true, tollerance);
+            devdata.setCoord_list(broken_list);
+        }
+        private void drawFromList(ArrayList<AnnotatePoint> points)
+        {
+            Polygon polygon = new Polygon();
+            for(AnnotatePoint point : points)
+            {
+                polygon.getPoints().addAll(point.getX(), point.getY());
+            }
+            polygon.setStroke(paint);
+            polygon.setStrokeWidth(strokeWidth);
+            polygon.setFill(null);
+            commitChange(new AddShape(polygon));
+        }
+
     }
 
     /**
