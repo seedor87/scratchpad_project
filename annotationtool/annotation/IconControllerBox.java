@@ -210,6 +210,17 @@ public class IconControllerBox extends Stage
         nodes.add(rectificationButton);
         shapeSelectingNodes.add(rectificationButton);
 
+        Button lineButton = new Button();
+        lineButton.setTooltip(getToolTip("Make lines"));
+        lineButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setMakingLines();
+            }
+        });
+        nodes.add(lineButton);
+        shapeSelectingNodes.add(lineButton);
+
         Button rectangleButton = new Button();
         ImageView rectangleImage = new ImageView("rectangle.png");
         rectangleImage.setFitHeight(IMAGE_HEIGHT);

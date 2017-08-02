@@ -125,6 +125,7 @@ public class AnnotationToolApplication extends Application {
     private ResizeHandler resizeHandler = new ResizeHandler();
     private RectangleHandler rectangleHandler = new RectangleHandler();
     private RectificationHandler rectificationHandler = new RectificationHandler();
+    private LineHandler lineHandler = new LineHandler();
     private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
     private Path path;
@@ -602,7 +603,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedOvalHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectificationHandler));
-
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, lineHandler));
     }
 
     public void recordInput()
@@ -1637,6 +1638,7 @@ public class AnnotationToolApplication extends Application {
                 arr[index] = new Point(event.getX(), event.getY());
                 points = new ArrayList<AnnotatePoint>();
                 points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
+                points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
                 index++;
                 outLinePath = new Path();
                 root.getChildren().add(outLinePath);
@@ -1686,6 +1688,39 @@ public class AnnotationToolApplication extends Application {
             commitChange(new AddShape(polygon));
         }
 
+    }
+
+    public void setMakingLines()
+    {
+        resetHandlers();
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, lineHandler);
+    }
+
+    private class LineHandler implements EventHandler<MouseEvent>
+    {
+        Line line;
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                line = new Line(event.getX(),event.getY(),event.getX(),event.getY());
+                line.setStrokeWidth(strokeWidth);
+                line.setStroke(paint);
+                commitChange(new AddShape(line));
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                line.setEndX(event.getX());
+                line.setEndY(event.getY());
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                redoStack.clear();
+            }
+
+        }
     }
 
     /**
