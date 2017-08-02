@@ -3,7 +3,14 @@ package annotation;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -13,6 +20,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
+import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -21,10 +30,6 @@ import javafx.scene.text.Font;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -32,8 +37,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import util.ProcessRunner;
 import util.WindowInfo;
 import util.X11InfoGatherer;
+
+import javax.swing.*;
+
+import static javax.swing.UIManager.get;
 
 /**
  * Both the main class as well as the builder for the application. Using this you can create a maximized window, a window of a specific size
@@ -50,7 +60,7 @@ public class FXAnnotationToolBuilder extends Application {
 	
 	private ArrayList<WindowInfo> windows;
 	private int[] windowAttributes;
-	
+
 	private static String programRestore;
     
     private double xPos1;
@@ -63,9 +73,10 @@ public class FXAnnotationToolBuilder extends Application {
     private static double heightRestore = -1;
     private static double xRestore = -1;
     private static double yRestore = -1;
-    
+
     private boolean dragging;
     private boolean building;
+	private static String workingPath;
 
     public static void main(String[] args) {
     	if(args.length > 0) {
@@ -110,13 +121,16 @@ public class FXAnnotationToolBuilder extends Application {
     			}
 
     		}
-    	} 
-    	
+    	}
+
 		launch(args);
     }
 
     @Override
     public void start(Stage stage) throws Exception {
+        workingPath = promptDialogBox();
+        System.out.println("from start" + workingPath);
+
     	if(widthRestore > 0) {
     		xPos1 = xRestore;
     		xPos2 = xPos1 + widthRestore;
@@ -129,6 +143,8 @@ public class FXAnnotationToolBuilder extends Application {
     		}
     		return;
     	}
+
+
     	this.stage = stage;
     	this.stage.initStyle(StageStyle.UNDECORATED);
     	this.stage.setOpacity(0.2d);
@@ -154,12 +170,64 @@ public class FXAnnotationToolBuilder extends Application {
     		createWindowList(tableStage);
     	}
     }
-    
+
+
+    private String promptDialogBox() throws IOException {
+
+
+        String path = getFileName();
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File("."));
+        Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+        dialog.setTitle("Scratchpad.exe");
+        dialog.setHeaderText("Welcome to Scratchpad");
+        dialog.setContentText("");
+        ButtonType buttonTypeOne = new ButtonType("Create New Project");
+        ButtonType buttonTypeTwo = new ButtonType("Import Project");
+        ButtonType buttonTypeThree = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
+        //Set extension filter
+        chooser.setInitialFileName(path);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        chooser.getExtensionFilters().add(extFilter);
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.get() == buttonTypeOne) { //create new project/file
+
+            chooser.getExtensionFilters().add(extFilter);
+
+
+            //Show save file dialog
+            File file = chooser.showSaveDialog(stage);
+            path = file.getAbsoluteFile().toString();
+
+
+
+        } else if (result.get() == buttonTypeTwo) { //import from file
+            // ... user chose "Two"
+            path = chooser.showOpenDialog(null).getPath();
+        } else {
+            // ... user chose CANCEL or closed the dialog
+            System.exit(0);
+        }
+
+        System.out.println(path);
+        return path;
+    }
+
     /**
-     * Creates a table of all visible windows to annotate.
-     * 
-     * @param stage A stage to hold the table of windows/
+     * Generates a file name based on date and time
+     *
+     * @return File name as a string.
      */
+    public String getFileName() {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        timeStamp += ".json";
+        //return timeStamp;
+        return timeStamp;
+    }
+
+
+    
     private void createWindowList(Stage stage) {
     	final ObservableList<WindowInfo> windows = FXCollections.observableArrayList(this.windows);
     	
@@ -212,7 +280,11 @@ public class FXAnnotationToolBuilder extends Application {
 				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
 				if(selectedItem != null) {
 					windowAttributes = selectedItem.getDimensions();
-					buildFromInfo(selectedItem);
+					try {
+						buildFromInfo(selectedItem);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					stage.close();
 				}
 			}
@@ -243,7 +315,7 @@ public class FXAnnotationToolBuilder extends Application {
     
     /**
      * Creates a visible box over the region of the screen the user intends to annotate.
-     * 
+     *
      * @param gc
      */
     private void highlight(GraphicsContext gc) {
@@ -282,24 +354,32 @@ public class FXAnnotationToolBuilder extends Application {
 			
 			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 				if(event.getButton() == MouseButton.SECONDARY) {
-					build();
+					try {
+						build();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 				xPos2 = event.getX();
 				yPos2 = event.getY();
 				dragging = false;
-				build();
+				try {
+					build();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-			
+
 			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
 				xPosCurr = event.getX();
 				yPosCurr = event.getY();
 				highlight(gc);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private class BuilderKeyHandler implements javafx.event.EventHandler<KeyEvent>
 	{
 
@@ -309,15 +389,15 @@ public class FXAnnotationToolBuilder extends Application {
 				close();
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Creates an annotation window around a given window.
-	 * 
+	 *
 	 * @param window The window to annotate.
 	 */
-	private void buildFromInfo(WindowInfo window) {
+	private void buildFromInfo(WindowInfo window) throws IOException {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
@@ -336,37 +416,38 @@ public class FXAnnotationToolBuilder extends Application {
 				x, 
 				y, 
 				true,
-				window
+				window,
+				workingPath
 				);
 	}
 	
 	/**
 	 * Creates an annotation tool window over a region of the screen
 	 */
-	private void build() {
+	private void build() throws IOException {
 		if(building) {
 			return;
 		}
 		building = true;
 		double x, y, w, h;
-		
+
 		x = Double.min(xPos1, xPos2);
 		y = Double.min(yPos1, yPos2);
-		
+
 		w = Double.max(xPos1, xPos2) - x;
 		h = Double.max(yPos1, yPos2) - y;
-		
+
 		if(w >= 50 && h >= 50) {
 			String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
-			
+
 			Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
 			newStage.setWidth(w);			newSecondaryStage.setWidth(w);
 			newStage.setHeight(h);			newSecondaryStage.setHeight(h);
-			
-			AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
-			
+
+			AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true,workingPath);
+
 		} else if (w < 25 && h < 25) {
-			AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
+			AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false,workingPath);
 		}
 		
 		Platform.runLater(new Runnable() {
@@ -393,40 +474,40 @@ public class FXAnnotationToolBuilder extends Application {
 		    }
 		});
 	}
-	
+
 	/**
 	 * Restores the annotation tool to a saved size and position.
-	 * 
+	 *
 	 * @param args Array containing attributes of the saved window.
 	 */
-	private static void restoreSession(String[] args) {
+	private static void restoreSession(String[] args) throws IOException {
 		if(args.length > 2) {
 			double width = Double.valueOf(args[0]);
 			double height = Double.valueOf(args[1]);
 			double x = Double.valueOf(args[2]);
 			double y = Double.valueOf(args[3]);
-			Stage newStage = new Stage(); 		
+			Stage newStage = new Stage();
 			Stage newSecondaryStage = new Stage();
-			newStage.setWidth(width);			
+			newStage.setWidth(width);
 			newSecondaryStage.setWidth(width);
-			newStage.setHeight(height);			
+			newStage.setHeight(height);
 			newSecondaryStage.setHeight(height);
-			
+
 			if(args.length > 3) {
 				//TODO: Launch program whose name is listed here.
 			} else {
 				AnnotationToolApplication app = new AnnotationToolApplication(
-						newStage, 
-						newSecondaryStage, 
-						x, 
-						y, 
-						true
-						);
+						newStage,
+						newSecondaryStage,
+						x,
+						y,
+						true,
+						workingPath);
 			}
-			
+
 		} else {
 			launch(args);
 		}
-		
+
 	}
 }
