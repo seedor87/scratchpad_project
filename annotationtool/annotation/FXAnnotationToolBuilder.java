@@ -30,6 +30,10 @@ import javafx.scene.text.Font;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;								   
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -227,13 +231,17 @@ public class FXAnnotationToolBuilder extends Application {
     }
 
 
-    
+    /**
+     * Creates a table of all visible windows to annotate.
+     * 
+     * @param stage A stage to hold the table of windows/
+     */
     private void createWindowList(Stage stage) {
     	final ObservableList<WindowInfo> windows = FXCollections.observableArrayList(this.windows);
     	
     	Scene scene = new Scene(new Group());
         stage.setTitle("Windows");
-        stage.setWidth(500);
+        stage.setWidth(600);
         stage.setHeight(500);
  
         final Label label = new Label("Windows");
@@ -254,19 +262,37 @@ public class FXAnnotationToolBuilder extends Application {
         vbox.setPadding(new Insets(10, 0, 0, 20));
         
         Button restoreSessionButton = new Button();
-        restoreSessionButton.setText("Restore Session on Selected Window");
+        restoreSessionButton.setText("Restore Previous Session");
         restoreSessionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				double x = 200;
+				double y = 150;
+				double width = 900;
+				double height = 750;
+				//TODO: Open JSON with info from prev. session, update annotation window size variables.
+				Process proc = null;
 				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
 				if(selectedItem != null) {
-					double x = 200;
-					double y = 150;
-					double width = 600;
-					double height = 450;
-					//TODO: Open JSON with info from previous session.
+					ProcessRunner.focusWindow(selectedItem.getTitle(), proc);
+					ProcessRunner.resizeWindow(selectedItem.getTitle(), x, y, width, height, proc);
+						
+						 
+													   
 					windowAttributes = selectedItem.getDimensions();
-					buildFromInfo(selectedItem);
+		  
+					try {
+						buildFromInfo(selectedItem);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					stage.close();
+				} else {
+					try {
+						restoreSession(new String[] {String.valueOf(width), String.valueOf(height), String.valueOf(x), String.valueOf(y)});
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					stage.close();
 				}
 			}
@@ -280,15 +306,20 @@ public class FXAnnotationToolBuilder extends Application {
 				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
 				if(selectedItem != null) {
 					windowAttributes = selectedItem.getDimensions();
+		  
 					try {
 						buildFromInfo(selectedItem);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+							  
+						  
+	  
 					stage.close();
 				}
 			}
 		});
+        
         Button annotateDesktopButton = new Button();
         annotateDesktopButton.setText("Annotate Entire Screen");
         annotateDesktopButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -300,7 +331,7 @@ public class FXAnnotationToolBuilder extends Application {
         
         HBox hbox = new HBox();
         hbox.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        hbox.getChildren().addAll(selectWindowButton, annotateDesktopButton);
+        hbox.getChildren().addAll(restoreSessionButton, selectWindowButton, annotateDesktopButton);
         
         vbox.getChildren().addAll(table, hbox);
  
