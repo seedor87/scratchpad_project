@@ -200,6 +200,12 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(circleButton);
 
         Button rectangleButton = new Button();
+
+        ImageView rectangleImage = new ImageView("rectangle.png");
+        rectangleImage.setFitHeight(IMAGE_HEIGHT);
+        rectangleImage.setFitWidth(IMAGE_WIDTH);
+        rectangleButton.setGraphic(rectangleImage);
+
         rectangleButton.setTooltip(getToolTip("Make a rectangle"));
         rectangleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -210,17 +216,20 @@ public class IconControllerBox extends Stage
         nodes.add(rectangleButton);
         shapeSelectingNodes.add(rectangleButton);
 
-        //TODO keep this as oval? change name if so
-        Button outBoundedRectangleButton = new Button();
-        outBoundedRectangleButton.setTooltip(getToolTip("Draw an out-bounded oval"));
-        outBoundedRectangleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+        Button outBoundedOvalButton = new Button();
+        ImageView ovalImage = new ImageView("oval.png");
+        ovalImage.setFitHeight(IMAGE_HEIGHT);
+        ovalImage.setFitWidth(IMAGE_WIDTH);
+        outBoundedOvalButton.setGraphic(ovalImage);
+        outBoundedOvalButton.setTooltip(getToolTip("Draw an out-bounded oval"));
+        outBoundedOvalButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 at.setDrawingOutboundedOval();
             }
         });
-        nodes.add(outBoundedRectangleButton);
-        shapeSelectingNodes.add(outBoundedRectangleButton);
+        nodes.add(outBoundedOvalButton);
+        shapeSelectingNodes.add(outBoundedOvalButton);
 
 
 
