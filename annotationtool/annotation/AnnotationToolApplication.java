@@ -39,6 +39,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
 import rectify.AnnotatePoint;
 import rectify.Broken;
 import rectify.Devdata;
@@ -50,19 +54,8 @@ import util.WindowLinkedInputRecord;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.TypeReference;
-import util.ProcessRunner;
-
 import javax.imageio.ImageIO;
-import javax.print.DocFlavor;
-
-import org.jnativehook.GlobalScreen;
-import org.jnativehook.NativeHookException;
-import org.jnativehook.mouse.NativeMouseEvent;
-import org.jnativehook.mouse.NativeMouseInputListener;
-
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Stroke;
@@ -70,7 +63,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
@@ -81,13 +73,8 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.logging.Logger;;
 import java.util.UUID;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -202,7 +189,7 @@ public class AnnotationToolApplication extends Application {
 
     }
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID, String json_fileName) throws IOException {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID, String json_fileName) throws IOException {
         this.windowID = windowID;
         this.json_fileName = json_fileName;
         remakeFromJSON();
@@ -497,9 +484,9 @@ public class AnnotationToolApplication extends Application {
                 commitChange(eraseShape);
             }
         });
-        ArrayList<Point> pathElements = new ArrayList<>();
-        pathElements.add(new Point(0 +"",h/2 +""));
-        pathElements.add(new Point(w + "", h/2 + ""));
+        ArrayList<TransferableShapes.Point> pathElements = new ArrayList<>();
+        pathElements.add(new TransferableShapes.Point(0 +"",h/2 +""));
+        pathElements.add(new TransferableShapes.Point(w + "", h/2 + ""));
         try
         {
             uuid = UUID.randomUUID();
@@ -1603,7 +1590,7 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
-                    addArrowToEndOfLine(event);
+                    addArrowToEndOfLine(event, uuid);
                     //undoStack.push(path);
                     line = null;
                     redoStack.clear();
@@ -1696,56 +1683,6 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-    /**
-     * Creates arrows. should be implemented with MouseEvent.ANY when you add the
-     * handler to the mousecatchingscene.
-     */
-    private class ArrowHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent event) {
-            if(clickable)
-            {
-                if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
-                {
-                    line = new Line(event.getX(), event.getY(), event.getX(), event.getY());
-                    line.setStroke(paint);
-                    line.setStrokeWidth(strokeWidth);
-                    commitChange(new AddShape(line));
-                }
-                else if (line != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED)
-                {
-                    line.setEndX(event.getX());
-                    line.setEndY(event.getY());
-                }
-                else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
-                {
-                    uuid = UUID.randomUUID();
-                    addArrowToEndOfLine(event, uuid);
-
-                    try {
-                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, (Color)paint, String.valueOf(strokeWidth), new Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())), new Point(String.valueOf(line.getEndX()), String.valueOf(line.getEndY())));
-
-                        // holder.add(shape);
-                        writeJSON(shape);
-
-                    } catch (JsonParseException e) {
-                        e.printStackTrace();
-                    } catch (JsonMappingException e) {
-                        e.printStackTrace();
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-
-
-                    line = null;
-                    redoStack.clear();
-                }
-
-            }
-        }
-    }
 
     /**
      * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
@@ -1911,7 +1848,7 @@ public class AnnotationToolApplication extends Application {
      */
     private class DrawingHandler implements EventHandler<MouseEvent> {
         //TODO arraylist or linked?
-        ArrayList<Point> pathElements;
+        ArrayList<TransferableShapes.Point> pathElements;
 
         @Override
         public void handle(MouseEvent event) {
@@ -1923,14 +1860,14 @@ public class AnnotationToolApplication extends Application {
                     MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                     LineTo lineTo = new LineTo(event.getX(), event.getY());
                     pathElements = new ArrayList<>();
-                    pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                    pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                     path.getElements().add(moveTo);
                     //root.getChildren().add(path);
                     commitChange(new AddShape(path));
                     path.setStroke(paint);
                 } else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                     LineTo moveTo = new LineTo(event.getX(), event.getY());
-                    pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                    pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                     path.getElements().add(moveTo);
                 } else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 
@@ -1970,7 +1907,7 @@ public class AnnotationToolApplication extends Application {
      */
     private class EraseHandler implements EventHandler<MouseEvent> {
         //TODO probably linkedlist is better.
-        ArrayList<Point> pathElements;
+        ArrayList<TransferableShapes.Point> pathElements;
         Color eraserColor = new Color(0,0,0,.1);
 
         @Override
@@ -1981,13 +1918,13 @@ public class AnnotationToolApplication extends Application {
                 eraserPath.setStrokeWidth(strokeWidth);
                 eraserPath.setSmooth(true);
                 MoveTo moveTo = new MoveTo(event.getX(), event.getY());
-                pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 eraserPath.getElements().add(moveTo);
                 root.getChildren().add(eraserPath);
                 eraserPath.setStroke(eraserColor);
             } else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
-                pathElements.add(new Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 eraserPath.getElements().add(moveTo);
             } else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
                 root.getChildren().remove(eraserPath);
@@ -2310,7 +2247,7 @@ public class AnnotationToolApplication extends Application {
                 try {
                     uuid = UUID.randomUUID();
                     Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.CIRCLE_STRING);
-                    shape.setLocation(new Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
+                    shape.setLocation(new TransferableShapes.Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
                     shape.setColorString((paint.toString()));
                     shape.setStrokeWidth(String.valueOf(strokeWidth));
                     shape.setRadius(String.valueOf(circle.getRadius()));

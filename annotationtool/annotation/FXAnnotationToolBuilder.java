@@ -38,7 +38,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import util.ProcessRunner;
-import util.Window;
+import util.WindowInfo;
+import util.X11InfoGatherer;
 
 import javax.swing.*;
 
@@ -75,7 +76,7 @@ public class FXAnnotationToolBuilder extends Application {
 
     private boolean dragging;
     private boolean building;
-	private String workingPath;
+	private static String workingPath;
 
     public static void main(String[] args) {
     	if(args.length > 0) {
@@ -228,7 +229,7 @@ public class FXAnnotationToolBuilder extends Application {
 
     
     private void createWindowList(Stage stage) {
-    	final ObservableList<Window> windows = FXCollections.observableArrayList(this.windows);
+    	final ObservableList<WindowInfo> windows = FXCollections.observableArrayList(this.windows);
     	
     	Scene scene = new Scene(new Group());
         stage.setTitle("Windows");
@@ -260,7 +261,11 @@ public class FXAnnotationToolBuilder extends Application {
 				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
 				if(selectedItem != null) {
 					windowAttributes = selectedItem.getDimensions();
-					buildFromInfo(selectedItem);
+					try {
+						buildFromInfo(selectedItem);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					stage.close();
 				}
 			}
@@ -330,12 +335,20 @@ public class FXAnnotationToolBuilder extends Application {
 			
 			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 				if(event.getButton() == MouseButton.SECONDARY) {
-					build();
+					try {
+						build();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 				xPos2 = event.getX();
 				yPos2 = event.getY();
 				dragging = false;
-				build();
+				try {
+					build();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 
 			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -365,7 +378,7 @@ public class FXAnnotationToolBuilder extends Application {
 	 *
 	 * @param window The window to annotate.
 	 */
-	private void buildFromInfo(WindowInfo window) {
+	private void buildFromInfo(WindowInfo window) throws IOException {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
@@ -384,14 +397,15 @@ public class FXAnnotationToolBuilder extends Application {
 				x, 
 				y, 
 				true,
-				window
+				window,
+				workingPath
 				);
 	}
 	
 	/**
 	 * Creates an annotation tool window over a region of the screen
 	 */
-	private void build() {
+	private void build() throws IOException {
 		if(building) {
 			return;
 		}
@@ -447,7 +461,7 @@ public class FXAnnotationToolBuilder extends Application {
 	 *
 	 * @param args Array containing attributes of the saved window.
 	 */
-	private static void restoreSession(String[] args) {
+	private static void restoreSession(String[] args) throws IOException {
 		if(args.length > 2) {
 			double width = Double.valueOf(args[0]);
 			double height = Double.valueOf(args[1]);
@@ -469,7 +483,7 @@ public class FXAnnotationToolBuilder extends Application {
 						x,
 						y,
 						true,
-                        workingPath);
+						workingPath);
 			}
 
 		} else {
