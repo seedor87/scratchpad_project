@@ -20,6 +20,12 @@ public class EditText implements ChangeItem
     private EditTextKeyHandler editTextKeyHandler = new EditTextKeyHandler();
     private static EditText lastEditText;
 
+    public Text getText()
+    {
+        return text;
+    }
+
+
     public EditText(Text text, AnnotationToolApplication annotationToolApplication)
     {
         if(lastEditText != null)
@@ -33,6 +39,12 @@ public class EditText implements ChangeItem
         annotationToolApplication.getPictureStage().addEventHandler(KeyEvent.KEY_TYPED, editTextKeyHandler);
         annotationToolApplication.getPictureStage().requestFocus();
         lastEditText = this;
+    }
+    public EditText(Text text, String newString)
+    {
+        oldString = text.getText();
+        this.text = text;
+        this.newString = new StringBuilder(newString);
     }
     public void reset(AnnotationToolApplication annotationToolApplication)
     {

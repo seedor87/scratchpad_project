@@ -1,6 +1,7 @@
 package annotation;
 
 
+import TransferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -57,7 +58,7 @@ public class IconControllerBox extends Stage
     private LinkedList<Button> nodes = new LinkedList<>();
     private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
-    
+
     public IconControllerBox(AnnotationToolApplication at)
     {
         this.setTitle("Tools");
@@ -69,6 +70,10 @@ public class IconControllerBox extends Stage
         this.setScene(scene);
         
         double dotsPerInch = Screen.getPrimary().getDpi();
+        if(dotsPerInch == 0)//fixes dual duplicate screen issue.
+        {
+            dotsPerInch = Toolkit.getDefaultToolkit().getScreenResolution();
+        }
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
@@ -99,6 +104,11 @@ public class IconControllerBox extends Stage
 
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
+                    try {
+                        at.writer.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     System.exit(0);
                 }
             }
@@ -131,7 +141,7 @@ public class IconControllerBox extends Stage
                 	clipString = clipboard.getString();
                 }
                 clipboard.clear();
-                
+
                 Robot robot;
                 try
                 {
@@ -152,10 +162,10 @@ public class IconControllerBox extends Stage
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-                
+
                 at.doSave();
                 at.setBorderVisibility(true);
-                
+
                 ClipboardContent clipContent = new ClipboardContent();
             	if(clipImage != null) {
             		clipContent.putImage(clipImage);
@@ -498,6 +508,14 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.undo();
+                try
+                {
+                    at.writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING));
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
         });
         nodes.add(undoButton);
@@ -513,6 +531,14 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.redo();
+                try
+                {
+                    at.writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING));
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
         });
         nodes.add(redoButton);
@@ -795,6 +821,7 @@ public class IconControllerBox extends Stage
         moveShapesImage.setFitWidth(IMAGE_WIDTH);
         moveShapesButton.setGraphic(moveShapesImage);
         moveShapesButton.setTooltip(getToolTip("Select and move shapes."));
+        moveShapesButton.setGraphic(moveShapesImage);
         moveShapesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -820,7 +847,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(saveStateButton);
-        
+
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
         ImageView lockControllerBoxImage = new ImageView("padlock.png");
@@ -828,6 +855,7 @@ public class IconControllerBox extends Stage
         lockControllerBoxImage.setFitWidth(IMAGE_WIDTH);
         lockControllerBoxButton.setGraphic(lockControllerBoxImage);
         lockControllerBoxButton.setTooltip(getToolTip("Lock the toolbar to the annotation window"));
+        lockControllerBoxButton.setGraphic(lockControllerBoxImage);
         lockControllerBoxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
@@ -837,7 +865,7 @@ public class IconControllerBox extends Stage
         });
         nodes.add(lockControllerBoxButton);
 
-        
+
         Button recordInputButton = new Button();
         //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
         ImageView recordInputImage = new ImageView("record.png");
@@ -853,7 +881,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(recordInputButton);
-        
+
         setIconSizes(medButtonSize);
 
         this.show();
