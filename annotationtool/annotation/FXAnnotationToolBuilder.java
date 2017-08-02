@@ -41,7 +41,7 @@ import util.X11InfoGatherer;
  */
 public class FXAnnotationToolBuilder extends Application {
 	
-	private X11InfoGatherer gatherer = X11InfoGatherer.getX11InfoGatherer();
+	private X11InfoGatherer gatherer;// = X11InfoGatherer.getX11InfoGatherer();
 	private Stage stage;
 	private Stage tableStage;
 	private GraphicsContext gc;
@@ -148,6 +148,7 @@ public class FXAnnotationToolBuilder extends Application {
     	gc.setLineWidth(4);
     	
     	if(System.getProperty("os.name").equals("Linux")) {
+    		gatherer = X11InfoGatherer.getX11InfoGatherer();
     		windows = gatherer.getAllWindows();
     		tableStage = new Stage();
     		createWindowList(tableStage);
