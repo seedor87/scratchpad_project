@@ -1553,6 +1553,15 @@ public class AnnotationToolApplication extends Application {
             }
             if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
+                uuid = UUID.randomUUID();
+                Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.RECTANGLE_STRING,
+                        new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
+                        paint, rectangle.getWidth(), rectangle.getHeight(), strokeWidth);
+                try {
+                    writeJSON(custom_shape);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 rectangle = null;
             }
         }
@@ -1647,6 +1656,15 @@ public class AnnotationToolApplication extends Application {
                 rectangle.setArcHeight(bottom - top);
 
                 undo();
+                uuid = UUID.randomUUID();
+                Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.OVAL_STRING,
+                        new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
+                        paint, rectangle.getWidth(), rectangle.getHeight(), strokeWidth);
+                try {
+                    writeJSON(custom_shape);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 commitChange(new AddShape(rectangle));
                 redoStack.clear();
             }
@@ -1779,6 +1797,20 @@ public class AnnotationToolApplication extends Application {
             polygon.setStrokeWidth(strokeWidth);
             polygon.setFill(null);
             commitChange(new AddShape(polygon));
+            uuid = UUID.randomUUID();
+            ArrayList<TransferableShapes.Point> transferablePoints = new ArrayList<>();
+            for(AnnotatePoint annotatePoint : points)
+            {
+                transferablePoints.add(new TransferableShapes.Point(String .valueOf(annotatePoint.getX()),String.valueOf(annotatePoint.getY())));
+            }
+            Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.RECTIFICATION_STRING,
+                                                        new TransferableShapes.Point(String.valueOf(polygon.getLayoutX()), String.valueOf(polygon.getLayoutY())),
+                                                        (Color) paint, String .valueOf(strokeWidth), transferablePoints);
+            try {
+                writeJSON(custom_shape);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }

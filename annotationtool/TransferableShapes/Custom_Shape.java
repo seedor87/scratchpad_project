@@ -31,6 +31,9 @@ public class Custom_Shape {
     public static final String UNDO_STRING = "undo";
     public static final String MOVE_SHAPE_STRING = "move shape";
     public static final String EDIT_TEXT_STRING = "edit text";
+    public static final String RECTIFICATION_STRING = "rectified shape";
+    public static final String RECTANGLE_STRING = "rectangle";
+    public static final String OVAL_STRING = "oval";
     private static HashMap<UUID, Shape> addedShapes = new HashMap<>();
     private static Map<Shape, UUID> shapesToUUIDMap = new HashMap<>();
     private String timestamp = "";
@@ -46,6 +49,8 @@ public class Custom_Shape {
     private String font = "";
     private String textSize = "";
     private String colorString = "";
+    private String widthString = "";
+    private String heightString = "";
 
 
     //    public Shape toShape() // TODO throws some custom exception if can not be made into a shape.
@@ -79,8 +84,18 @@ public class Custom_Shape {
         this.uuid = uuid;
         this.type = type;
     }
+    //rectangle, oval
+    public Custom_Shape(UUID uuid, String type, Point location, Paint color, double width, double height, double strokeWidth)
+    {
+        this(uuid, type);
+        this.location = location;
+        colorString = color.toString();
+        this.widthString = String.valueOf(width);
+        this.heightString = String.valueOf(height);
+        this.strokeWidth = String .valueOf(strokeWidth);
+    }
 
-    //path
+    //path, rectified shape
     public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
         this(uuid, type);
         this.location = location;
@@ -258,10 +273,58 @@ public class Custom_Shape {
                 return toMoveShape();
             case EDIT_TEXT_STRING:
                 return toEditText();
+            case RECTIFICATION_STRING:
+                return toPolygon();
+            case RECTANGLE_STRING:
+                return toRectangle();
+            case OVAL_STRING:
+                return toOval();
             default:
                 return null;    //TODO change this to throw a custom exception
         }
     }
+
+    private ChangeItem toOval()
+    {
+        Rectangle rectangle = new Rectangle(Double.valueOf(location.getX()), Double.valueOf(location.getY()),
+                Double.valueOf(widthString), Double.valueOf(heightString));
+        rectangle.setFill(null);
+        rectangle.setStroke(Color.valueOf(colorString));
+        rectangle.setStrokeWidth(Double.valueOf(strokeWidth));
+        rectangle.setArcHeight(rectangle.getHeight());
+        rectangle.setArcWidth(rectangle.getWidth());
+        setUpUUIDMaps(rectangle,uuid);
+        return new AddShape(rectangle);
+    }
+
+    private ChangeItem toRectangle()
+    {
+        Rectangle rectangle = new Rectangle(Double.valueOf(location.getX()), Double.valueOf(location.getY()),
+                                Double.valueOf(widthString), Double.valueOf(heightString));
+        rectangle.setFill(null);
+        rectangle.setStroke(Color.valueOf(colorString));
+        rectangle.setStrokeWidth(Double.valueOf(strokeWidth));
+        setUpUUIDMaps(rectangle,uuid);
+        return new AddShape(rectangle);
+    }
+
+    private ChangeItem toPolygon()
+    {
+        Polygon polygon = new Polygon();
+        for(Point point : points)
+        {
+            polygon.getPoints().addAll(Double.valueOf(point.getX()), Double.valueOf(point.getY()));
+        }
+        polygon.setStrokeWidth(Double.valueOf(strokeWidth));
+        polygon.setStroke(Color.valueOf(colorString));
+        polygon.setFill(null);
+        setUpUUIDMaps(polygon, uuid);
+        return new AddShape(polygon);
+        //TODO test
+    }
+//    setUpUUIDMaps(newCircle, uuid);
+//        return newCircle;
+
     private MoveShape toMoveShape()
     {
         Shape movedShape = addedShapes.get(uuid);
@@ -363,6 +426,23 @@ public class Custom_Shape {
 //    public void setColor(Color color) {
 //        colorString = color.toString();
 //    }
+
+    public String getWidthString()
+    {
+        return widthString;
+    }
+    public void setWidthString(String widthString)
+    {
+        this.widthString = widthString;
+    }
+    public String getHeightString()
+    {
+        return heightString;
+    }
+    public void setHeightString(String heightString)
+    {
+        this.heightString = heightString;
+    }
 
     public String getStrokeWidth() {
         return strokeWidth;
