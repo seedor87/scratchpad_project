@@ -30,6 +30,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
@@ -1415,7 +1416,6 @@ public class AnnotationToolApplication extends Application {
     public void setDrawingOutboundedOval()
     {
         this.resetHandlers();
-        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, outBoundedOvalHandler);
     }
 
@@ -1614,6 +1614,7 @@ public class AnnotationToolApplication extends Application {
         double bottom;
         double left;
         double right;
+        Path tempPath;
 
         @Override
         public void handle(MouseEvent event) {
@@ -1623,6 +1624,11 @@ public class AnnotationToolApplication extends Application {
                 bottom = event.getY();
                 left = event.getX();
                 right = event.getX();
+                tempPath = new Path();
+                tempPath.getElements().add(new MoveTo(event.getX(), event.getY()));
+                tempPath.setStroke(paint);
+                tempPath.setStrokeWidth(5);
+                root.getChildren().add(tempPath);
             }
             if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
             {
@@ -1642,6 +1648,7 @@ public class AnnotationToolApplication extends Application {
                 {
                     right = event.getX();
                 }
+                tempPath.getElements().add(new LineTo(event.getX(), event.getY()));
             }
             if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
@@ -1666,6 +1673,7 @@ public class AnnotationToolApplication extends Application {
                     e.printStackTrace();
                 }
                 commitChange(new AddShape(rectangle));
+                root.getChildren().remove(tempPath);
                 redoStack.clear();
             }
         }
