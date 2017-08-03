@@ -211,6 +211,11 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(circleButton);
 
         Button rectificationButton = new Button();
+        ImageView rectificationImage = new ImageView("star.png");
+        rectificationImage.setFitHeight(IMAGE_HEIGHT);
+        rectificationImage.setFitWidth(IMAGE_WIDTH);
+        rectificationButton.setGraphic(rectificationImage);
+
         rectificationButton.setTooltip(getToolTip("Make a rectified shape"));
         rectificationButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -222,6 +227,10 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(rectificationButton);
 
         Button lineButton = new Button();
+        ImageView lineImage = new ImageView("line.png");
+        lineImage.setFitHeight(IMAGE_HEIGHT);
+        lineImage.setFitWidth(IMAGE_WIDTH);
+        lineButton.setGraphic(lineImage);
         lineButton.setTooltip(getToolTip("Make lines"));
         lineButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
