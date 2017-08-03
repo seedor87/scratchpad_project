@@ -1256,14 +1256,6 @@ public class AnnotationToolApplication extends Application {
         if(windowID != null && mouseInWindowBounds(record.getxPos(), record.getyPos())) {
             return new WindowLinkedInputRecord(record, mouseCatchingStage.getX(), mouseCatchingStage.getY(), mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
         } else {
-            if(windowID == null)
-            {
-                System.out.println("Why isn't this working? - the window is null");
-            }
-            else
-            {
-                System.out.println("Why isn't this working?");
-            }
             return record;
         }
     }
