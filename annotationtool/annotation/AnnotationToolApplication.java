@@ -1554,6 +1554,7 @@ public class AnnotationToolApplication extends Application {
             if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
                 uuid = UUID.randomUUID();
+                Custom_Shape.setUpUUIDMaps(rectangle, uuid);
                 Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.RECTANGLE_STRING,
                         new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
                         paint, rectangle.getWidth(), rectangle.getHeight(), strokeWidth);
@@ -1662,8 +1663,8 @@ public class AnnotationToolApplication extends Application {
                 rectangle.setArcWidth(right - left);
                 rectangle.setArcHeight(bottom - top);
 
-                undo();
                 uuid = UUID.randomUUID();
+                Custom_Shape.setUpUUIDMaps(rectangle, uuid);
                 Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.OVAL_STRING,
                         new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
                         paint, rectangle.getWidth(), rectangle.getHeight(), strokeWidth);
@@ -1806,6 +1807,7 @@ public class AnnotationToolApplication extends Application {
             polygon.setFill(null);
             commitChange(new AddShape(polygon));
             uuid = UUID.randomUUID();
+            Custom_Shape.setUpUUIDMaps(polygon, uuid);
             ArrayList<TransferableShapes.Point> transferablePoints = new ArrayList<>();
             for(AnnotatePoint annotatePoint : points)
             {
@@ -1850,6 +1852,16 @@ public class AnnotationToolApplication extends Application {
             }
             else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
+                uuid = UUID.randomUUID();
+                Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.LINE_STRING, (Color) paint, String.valueOf(strokeWidth)
+                                , new TransferableShapes.Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())),
+                                new TransferableShapes.Point(String.valueOf(event.getX()), String.valueOf(event.getY())));
+                try {
+                    writeJSON(custom_shape);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Custom_Shape.setUpUUIDMaps(line, uuid);
                 redoStack.clear();
             }
 

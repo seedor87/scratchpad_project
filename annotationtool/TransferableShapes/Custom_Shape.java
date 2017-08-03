@@ -34,6 +34,7 @@ public class Custom_Shape {
     public static final String RECTIFICATION_STRING = "rectified shape";
     public static final String RECTANGLE_STRING = "rectangle";
     public static final String OVAL_STRING = "oval";
+    public static final String LINE_STRING = "line";
     private static HashMap<UUID, Shape> addedShapes = new HashMap<>();
     private static Map<Shape, UUID> shapesToUUIDMap = new HashMap<>();
     private String timestamp = "";
@@ -119,7 +120,7 @@ public class Custom_Shape {
         }
     }
 
-    //Arrow
+    //Arrow, line
     public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
         this(uuid, type);
 
@@ -279,9 +280,21 @@ public class Custom_Shape {
                 return toRectangle();
             case OVAL_STRING:
                 return toOval();
+            case LINE_STRING:
+                return toLine();
             default:
                 return null;    //TODO change this to throw a custom exception
         }
+    }
+
+    private ChangeItem toLine()
+    {
+        Line line = new Line(Double.valueOf(start.getX()), Double.valueOf(start.getY()),
+                            Double.valueOf(end.getX()), Double.valueOf(end.getY()));
+        line.setStroke(Color.valueOf(colorString));
+        line.setStrokeWidth(Double.valueOf(strokeWidth));
+        setUpUUIDMaps(line,uuid);
+        return new AddShape(line);
     }
 
     private ChangeItem toOval()
