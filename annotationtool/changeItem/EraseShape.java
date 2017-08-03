@@ -1,12 +1,11 @@
 package changeItem;
 
+import TransferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import sun.security.provider.SHA;
 
 import java.util.ListIterator;
 import java.util.Stack;
@@ -64,8 +63,10 @@ public class EraseShape implements ChangeItem
                     newShape.setFill(oldShape.getFill());
                     if (oldShape.getFill() == null) {
                         newShape.setFill(oldShape.getStroke());
+
                     }
                     shapesPartiallyErased.add(oldItem);
+                    Custom_Shape.changeShape(((AddShape) oldItem).getShape(), newShape);
                     iterator.set(new AddShape(newShape));
                 }
             }

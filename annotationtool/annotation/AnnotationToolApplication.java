@@ -4,13 +4,17 @@ package annotation;
  */
 
 import changeItem.*;
+import TransferableShapes.*;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonStreamParser;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Rectangle2D;
@@ -26,6 +30,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
@@ -35,26 +40,44 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import util.ProcessRunner;
-
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
+import rectify.AnnotatePoint;
+import rectify.Broken;
+import rectify.Devdata;
+import rectify.Point;
+import util.GlobalInputListener;
+import util.InputRecord;
+import util.WindowInfo;
+import util.WindowLinkedInputRecord;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import javax.imageio.ImageIO;
-
-import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
-import java.awt.Robot;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.UUID;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
 /**
@@ -62,8 +85,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AnnotationToolApplication extends Application {
 
-    static
-    {
+    static {
         System.setProperty("java.awt.headless", "false");
         //https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically
         //TODO that link might help with getting images in ubuntu.
@@ -83,6 +105,13 @@ public class AnnotationToolApplication extends Application {
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private final double[] minStageSize = {100, 100};
+    public static FileWriter writer = null;
+    //record keeping
+    UUID uuid;
+    private Gson gson = new Gson();
+    private String json_fileName;
+    private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
+
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -108,8 +137,14 @@ public class AnnotationToolApplication extends Application {
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
     private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
     private CircleHandler circleHandler = new CircleHandler();
+    private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler();
     private EraseHandler eraseHandler = new EraseHandler();
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
+    private ResizeHandler resizeHandler = new ResizeHandler();
+    private RectangleHandler rectangleHandler = new RectangleHandler();
+    private RectificationHandler rectificationHandler = new RectificationHandler();
+    private LineHandler lineHandler = new LineHandler();
+    private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
     private Path path;
     private Line line;
@@ -127,7 +162,7 @@ public class AnnotationToolApplication extends Application {
     private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
     private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
     // Settings
-    private String windowID = "";
+    private WindowInfo windowID;
     private String textFont = "Times New Roman";
     private double strokeWidth = 5d;
     private double textSize = 24d;
@@ -137,41 +172,51 @@ public class AnnotationToolApplication extends Application {
     private boolean mouseTransparent = false;
     private boolean clickable = true;
     private boolean makingTextBox = false;
+    private boolean lockedControllerBox = true;
+    private boolean recording = false;
+    private boolean saveTextBox = false;
+    private boolean saveEditText = false;
+    private EditText editTextToSave;
 
     //================================================================================
     // Constructors/Starts
     //================================================================================
-    private boolean lockedControllerBox = true;
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String json_fileName) throws IOException {
+        start(primaryStage, secondaryStage, x, y, sizedWindow);
+        this.json_fileName = json_fileName;
+        System.out.println("From init" + json_fileName);
+        remakeFromJSON();
+
+    }
+
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID, String json_fileName) throws IOException {
+        this.windowID = windowID;
+        this.json_fileName = json_fileName;
+        remakeFromJSON();
+
         start(primaryStage, secondaryStage, x, y, sizedWindow);
     }
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String windowID) {
-        this.windowID = windowID;
-		start(primaryStage, secondaryStage, x, y, sizedWindow);
-    }
-
-    public void start(Stage primaryStage) {
-    	start(primaryStage, new Stage(), 0, 0, false);
+    public void start(Stage primaryStage) throws IOException {
+        start(primaryStage, new Stage(), 0, 0, false);
     }
 
     //================================================================================
     // Mutators
     //================================================================================
-    
+
     /**
      * The code starts here.
      * @param primaryStage
      */
-    public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow)
-    {
+    public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) throws IOException {
         Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
         if(!sizedWindow) {
-        	//this.mouseCatchingStage.setFullScreen(true);
-        	//this.mouseCatchingStage.setMaximized(true);
+            //this.mouseCatchingStage.setFullScreen(true);
+            //this.mouseCatchingStage.setMaximized(true);
             this.mouseCatchingStage.setY(0);
             this.mouseCatchingStage.setX(0);
             this.mouseCatchingStage.setHeight(primScreenBounds.getHeight());
@@ -223,29 +268,10 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingScene.setCursor(pencilCursor);
 
-
-/*        ImageView backgroundImage = new ImageView("eraser.png");
-        if(this.pictureStage.isFullScreen() || this.pictureStage.isMaximized())
-        {
-            Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-            backgroundImage.setFitWidth(primScreenBounds.getWidth());
-            backgroundImage.setFitHeight(primScreenBounds.getHeight());
-        }
-        else
-        {
-            backgroundImage.setFitHeight(getDrawingStage().getHeight());
-            backgroundImage.setFitWidth(getDrawingStage().getWidth());
-        }
-
-        root.getChildren().add(backgroundImage);*/
-
-        if(pictureStage.isFullScreen() || pictureStage.isMaximized())
-        {
+        if(pictureStage.isFullScreen() || pictureStage.isMaximized()) {
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             borderShape = new Rectangle(screenSize.getWidth(), screenSize.getHeight());
-        }
-        else
-        {
+        } else {
             borderShape = new Rectangle( pictureStage.getWidth(), pictureStage.getHeight());
         }
         borderShape.setStroke(borderColor);
@@ -253,94 +279,188 @@ public class AnnotationToolApplication extends Application {
         borderShape.setFill(clearPaint);
         root.getChildren().add(borderShape);
 
-        if(windowID != "") {
-        	ScheduledExecutorService windowChecker = Executors.newScheduledThreadPool(1);
-        	Runnable task = () -> resnapToWindow(windowID, windowChecker);
-
-        	int initialDelay = 0;
-        	int period = 10;
-
-        	windowChecker.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
-        }
-
         mouseCatchingStage.show();
         pictureStage.show();
-        
-        pictureStage.setAlwaysOnTop(true);
-        mouseCatchingStage.setAlwaysOnTop(true);
+
+        resetStages();
     }
 
-    public void showTextOptionStage() 
-    {
-    	if(makingTextBox) {
-    		if(textOptionStage == null) {
-    			textOptionStage = new Stage();
-    			HBox textOptions = new HBox();
+    private void remakeFromJSON() throws IOException {
 
-    			Label fontSizeLabel = new Label("Font Size:");
-    			textOptions.getChildren().add(fontSizeLabel);
+
+        try {
+            InputStream is = new FileInputStream(new File(json_fileName));
+            Reader r = new InputStreamReader(is, "UTF-8");
+            Gson gson = new GsonBuilder().create();
+            JsonStreamParser p = new JsonStreamParser(r);
+            while (p.hasNext()) {
+                JsonElement e;
+                try {
+                    e = p.next();
+                } catch (Exception ex) {
+                    /* break case for malformed json exception */
+                    break;
+                }
+                if (e.isJsonObject()) {
+                    Custom_Shape c = gson.fromJson(e, Custom_Shape.class);
+                    switch (c.getType()) {
+                        case "undo":
+                            undo();
+                            break;
+                        case "redo":
+                            redo();
+                            break;
+                        default:
+                            commitChange(c.toChangeItem());
+                            break;
+                    }
+
+                    prev_shapes.add(c);
+                    System.out.println("reading: " + c);
+
+                }
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
+
+
+        try {
+            writer = new FileWriter(json_fileName);
+        } catch (FileNotFoundException fileNotFound) {
+            System.out.println("ERROR: While Creating or Opening the File " + json_fileName);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        for (Object prev_shape : prev_shapes) {
+            writeJSON((Custom_Shape) prev_shape);
+        }
+
+    }
+
+
+    private void saveTextBox()
+    {
+        uuid = UUID.randomUUID();
+        Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
+        custom_shape.setTextSize(text.getFont().getSize() + "");
+        custom_shape.setColorString(paint.toString());
+        custom_shape.setLocation(new TransferableShapes.Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
+        try{
+            writeJSON(custom_shape);
+            Custom_Shape.setUpUUIDMaps(text, uuid);
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
+    }
+    private class SaveTextBoxHandler implements EventHandler<MouseEvent>
+    {
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(saveTextBox)
+            {
+                saveTextBox();
+                saveTextBox = false;
+            }
+        }
+    }
+    private void saveEditText()
+    {
+        Custom_Shape custom_shape = new Custom_Shape(editTextToSave);
+        try
+        {
+            writeJSON(custom_shape);
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
+    }
+    private class SaveEditTextHandler implements EventHandler<MouseEvent>
+    {
+        //TODO, add this to the stages that it needs to be added to
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(saveEditText)
+            {
+                saveEditText();
+                saveEditText = false;
+            }
+
+        }
+    }
+
+    public void showTextOptionStage() {
+        if(makingTextBox) {
+            if(textOptionStage == null) {
+                textOptionStage = new Stage();
+                HBox textOptions = new HBox();
+
+                Label fontSizeLabel = new Label("Font Size:");
+                textOptions.getChildren().add(fontSizeLabel);
     			/*
     			List of all possible font sizes
     			 */
-    			ObservableList<Double> fontSizeList = 
-    					FXCollections.observableArrayList(5d, 6d, 8d, 10d, 12d, 14d, 16d, 18d, 20d, 24d, 28d, 32d, 36d, 40d, 44d, 48d, 52d, 56d, 60d, 64d, 80d, 100d);
-    			ComboBox<Double> fontSizes = new ComboBox<>(fontSizeList);
-    			fontSizes.valueProperty().addListener(new ChangeListener<Double>() {
-    				@Override
-    				public void changed(ObservableValue<? extends Double> observableValue, Double oldSize, Double newSize) {
-    					setTextSize(newSize);
-    				}
-    			});
-    			fontSizes.setValue(textSize);
-    			textOptions.getChildren().add(fontSizes);
-    			
-    			Label fontStyleLabel = new Label("Font: ");
-    			textOptions.getChildren().add(fontStyleLabel);
-    			ObservableList<String> fontStyleList =
-    					FXCollections.observableArrayList(Font.getFamilies());
-    			ComboBox<String> fontStyles = new ComboBox<>(fontStyleList);
-    			fontStyles.valueProperty().addListener(new ChangeListener<String>() {
-    				@Override
-    				public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont)
-                    {
-    					setTextFont(newFont);
-    				}
-    			});
-    			fontStyles.setValue(textFont);
-    			textOptions.getChildren().add(fontStyles);
-    			
-    			Label fontColorLabel = new Label("Color: ");
-    			textOptions.getChildren().add(fontColorLabel);
-    			ColorPicker fontColorPicker = new ColorPicker(textColor);
-    			fontColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
-    				@Override
-    				public void changed(ObservableValue<? extends Color> observableValue, Color oldColor, Color newColor) {
-    					setTextColor(newColor);
-    				}
-    			});
-    			textOptions.getChildren().add(fontColorPicker);
-    			
-    			
-    			Scene textOptionScene = new Scene(textOptions);
-    			textOptionStage.setScene(textOptionScene);
-    			textOptionStage.setTitle("Text and Font Options");
-    			textOptionStage.setX( Math.max(0, mouseCatchingStage.getX() + .1 * mouseCatchingStage.getWidth()));
-    			textOptionStage.setY( Math.max(0, mouseCatchingStage.getY() + .1 * mouseCatchingStage.getHeight()));
-    			textOptionStage.setAlwaysOnTop(true);
-    		}
-    		textOptionStage.show();
-    	}
-    	else if(textOptionStage != null)
-    	{
-    		textOptionStage.hide();
-    	}
+                ObservableList<Double> fontSizeList =
+                        FXCollections.observableArrayList(5d, 6d, 8d, 10d, 12d, 14d, 16d, 18d, 20d, 24d, 28d, 32d, 36d, 40d, 44d, 48d, 52d, 56d, 60d, 64d, 80d, 100d);
+                ComboBox<Double> fontSizes = new ComboBox<>(fontSizeList);
+                fontSizes.valueProperty().addListener(new ChangeListener<Double>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Double> observableValue, Double oldSize, Double newSize) {
+                        setTextSize(newSize);
+                    }
+                });
+                fontSizes.setValue(textSize);
+                textOptions.getChildren().add(fontSizes);
+
+                Label fontStyleLabel = new Label("Font: ");
+                textOptions.getChildren().add(fontStyleLabel);
+                ObservableList<String> fontStyleList =
+                        FXCollections.observableArrayList(Font.getFamilies());
+                ComboBox<String> fontStyles = new ComboBox<>(fontStyleList);
+                fontStyles.valueProperty().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observableValue, String oldFont, String newFont) {
+                        setTextFont(newFont);
+                    }
+                });
+                fontStyles.setValue(textFont);
+                textOptions.getChildren().add(fontStyles);
+
+                Label fontColorLabel = new Label("Color: ");
+                textOptions.getChildren().add(fontColorLabel);
+                ColorPicker fontColorPicker = new ColorPicker(textColor);
+                fontColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Color> observableValue, Color oldColor, Color newColor) {
+                        setTextColor(newColor);
+                    }
+                });
+                textOptions.getChildren().add(fontColorPicker);
+
+
+                Scene textOptionScene = new Scene(textOptions);
+                textOptionStage.setScene(textOptionScene);
+                textOptionStage.setTitle("Text and Font Options");
+                textOptionStage.setX( Math.max(0, mouseCatchingStage.getX() + .1 * mouseCatchingStage.getWidth()));
+                textOptionStage.setY( Math.max(0, mouseCatchingStage.getY() + .1 * mouseCatchingStage.getHeight()));
+                textOptionStage.setAlwaysOnTop(true);
+            }
+            textOptionStage.show();
+        } else if(textOptionStage != null) {
+            textOptionStage.hide();
+        }
     }
 
     /**
      * Clears the current stage. Can be undone (unlike clear history)
      */
-    public void doClear()
-    {
+    public void doClear() {
         doClear(clickablyClearPaint);
     }
 
@@ -350,8 +470,7 @@ public class AnnotationToolApplication extends Application {
      * If implemented, move the code up to doClear() and then do that.
      * @param color
      */
-    public void doClear(Color color)
-    {
+    public void doClear(Color color) {
         double h = mouseCatchingStage.getHeight();
         double w = mouseCatchingStage.getWidth();
         Path blockOutShape = new Path();
@@ -362,11 +481,27 @@ public class AnnotationToolApplication extends Application {
         EraseShape eraseShape = new EraseShape(blockOutShape);
         Platform.runLater(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 commitChange(eraseShape);
             }
         });
+        ArrayList<TransferableShapes.Point> pathElements = new ArrayList<>();
+        pathElements.add(new TransferableShapes.Point(0 +"",h/2 +""));
+        pathElements.add(new TransferableShapes.Point(w + "", h/2 + ""));
+        try
+        {
+            uuid = UUID.randomUUID();
+            Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
+            shape.setStrokeWidth(String.valueOf(h));
+
+            writeJSON(shape);
+
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace(); }
         redoStack.clear();
     }
 
@@ -374,8 +509,7 @@ public class AnnotationToolApplication extends Application {
      * commits a change item to the undostack and adds the changes it makes to the main window.
      * @param changeItem
      */
-    public void commitChange(ChangeItem changeItem)
-    {
+    public void commitChange(ChangeItem changeItem) {
         changeItem.addChangeToStage(this);
         undoStack.push(changeItem);
 
@@ -395,8 +529,7 @@ public class AnnotationToolApplication extends Application {
      */
     public void redo()
     {
-        if(redoStack.size() > 0)
-        {
+        if(redoStack.size() > 0) {
             ChangeItem temp = redoStack.pop();
             temp.redoChangeToStage(this);
             undoStack.push(temp);
@@ -404,7 +537,7 @@ public class AnnotationToolApplication extends Application {
         /*
         if (redoStack.size() > 0)
         {
-            Shape temp = redoStack.pop();
+            Shp temp = redoStack.pop();
             Platform.runLater(new Runnable() {
                 @Override
                 public void run()
@@ -418,17 +551,15 @@ public class AnnotationToolApplication extends Application {
     /**
      * Undoes the top item on the undo stack, pushes it onto the redo stack.
      */
-    public void undo()
-    {
-        if(undoStack.size() > 0)
-        {
+    public void undo() {
+        if(undoStack.size() > 0) {
             ChangeItem temp = undoStack.pop();
             temp.undoChangeToStage(this);
             redoStack.push(temp);
         }
 /*        if (undoStack.size() > 0)
         {
-            Shape temp = undoStack.pop();
+            Shp temp = undoStack.pop();
             if(temp instanceof EraseShape)
             {
                 undoAnEraseShape((EraseShape) temp);
@@ -469,25 +600,30 @@ public class AnnotationToolApplication extends Application {
     /**
      * clears the undo and redo stack and all changes from them.
      */
-    public void clearHistory()
-    {
+    public void clearHistory() {
         Platform.runLater(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 root.getChildren().clear();
                 root.getChildren().add(borderShape);
             }
         });
         undoStack.clear();
         redoStack.clear();
+        try
+        {
+            Files.write(new File(json_fileName).toPath(), Arrays.asList(""), StandardOpenOption.TRUNCATE_EXISTING);
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
     }
 
     /**
      * Sets the state of the program so that it is making circles.
      */
-    public void makeCircles()
-    {
+    public void makeCircles() {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, circleHandler);
     }
@@ -496,20 +632,16 @@ public class AnnotationToolApplication extends Application {
      * Makes it so that the mousecatching stage stops catching mouse events when toggled to unclickable.
      * Calling the method again restores it so that the stage starts catching the events again.
      */
-    public void toggleClickable()
-    {
+    public void toggleClickable() {
         clickable = !clickable;
         this.resetHandlers();
-        if (clickable)
-        {
+        if (clickable) {
             mouseCatchingScene.setFill(clickablyClearPaint);
-            Platform.runLater(new Runnable()
-            {
+            Platform.runLater(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     pictureStage.setAlwaysOnTop(false);
-                	mouseCatchingStage.setAlwaysOnTop(false);
+                    mouseCatchingStage.setAlwaysOnTop(false);
                     mouseCatchingStage.setOpacity(0.004);
                 }
             });
@@ -544,6 +676,11 @@ public class AnnotationToolApplication extends Application {
         {
             this.mouseCatchingScene.removeEventHandler(h.eventType,h.handler);
         }
+//        if(this.makingTextBox)
+//        {
+//            saveTextBox();
+//        }
+        this.makingTextBox = false;
         AddShape.movingShapes = false;
         resetStages();
         mouseCatchingScene.setCursor(pencilCursor);
@@ -557,6 +694,21 @@ public class AnnotationToolApplication extends Application {
      */
     private void setupListeners()
     {
+        try {
+            GlobalScreen.registerNativeHook();
+        }
+        catch (NativeHookException ex) {
+            System.err.println("There was a problem registering the native hook.");
+            System.err.println(ex.getMessage());
+
+            System.exit(1);
+        }
+        GlobalScreen.addNativeKeyListener(globalInputListener);
+        GlobalScreen.addNativeMouseListener(globalInputListener);
+        GlobalScreen.addNativeMouseWheelListener(globalInputListener);
+        GlobalScreen.addNativeMouseMotionListener(globalInputListener);
+        GlobalScreen.addNativeMouseListener(resizeHandler);
+
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
@@ -565,6 +717,10 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
         //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
+        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
+        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
+        mouseCatchingStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
+        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
 
 
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
@@ -574,16 +730,30 @@ public class AnnotationToolApplication extends Application {
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
-        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_CLICKED, textBoxHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.MOUSE_RELEASED, textBoxHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
         //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedOvalHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectificationHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, lineHandler));
     }
 
-    private void unMaximize()
+    public void recordInput()
     {
+        if(!recording) {
+            recording = true;
+            globalInputListener.record();
+        } else {
+            recording = false;
+            globalInputListener.saveInputEvents();
+        }
+    }
+
+    private void unMaximize() {
         pictureStage.setMaximized(false);
         pictureStage.setFullScreen(false);
         mouseCatchingStage.setMaximized(false);
@@ -594,52 +764,50 @@ public class AnnotationToolApplication extends Application {
     /**
      * Sets up the two stages so that they move and resize with each other.
      */
-    private void setUpMoveListeners(Stage pictureStage)
-    {
-        mouseCatchingStage.widthProperty().addListener(new ChangeListener<Number>()
-        {
+    private void setUpMoveListeners(Stage pictureStage) {
+        mouseCatchingStage.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 pictureStage.setWidth(mouseCatchingStage.getWidth());
                 borderShape.setWidth(mouseCatchingStage.getWidth());
                 if(lockedControllerBox) {
                     controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
         mouseCatchingStage.heightProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 pictureStage.setHeight(mouseCatchingStage.getHeight());
                 borderShape.setHeight(mouseCatchingStage.getHeight());
                 if(lockedControllerBox) {
                     controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
         mouseCatchingStage.xProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 pictureStage.setX(mouseCatchingStage.getX());
                 if(lockedControllerBox) {
                 	controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
         mouseCatchingStage.yProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 pictureStage.setY(mouseCatchingStage.getY());
                 if(lockedControllerBox) {
-                	controllerBox.fitScreen();
+                    controllerBox.fitScreen();
                 }
+                saveState();
             }
         });
 
@@ -680,35 +848,31 @@ public class AnnotationToolApplication extends Application {
      * @param changeX
      * @param changeY
      */
-    private void resizeAnnotationWindow(double changeX, double changeY) {
-    	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    	double screenWidth = screenSize.getWidth();
-    	double screenHeight = screenSize.getHeight();
-    	double stageWidth = mouseCatchingStage.getWidth();
-    	double stageHeight = mouseCatchingStage.getHeight();
-    	
-    	mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
-    	mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
+    private void adjustAnnotationWindowSize(double changeX, double changeY) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double screenWidth = screenSize.getWidth();
+        double screenHeight = screenSize.getHeight();
+        double stageWidth = mouseCatchingStage.getWidth();
+        double stageHeight = mouseCatchingStage.getHeight();
+
+        mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
+        mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
     }
-    
+
     /**
      * Gets the coordinates of the window associated with the given windowID and ensures the annotationtool window remains snapped to it.
      * If the given window closes, stops the scheduled executor service calling the method.
      * 
      * @param windowID The window to snap to.
-     * @param executor The Scheduled Executor Service calling this method.
-     */
-    private void resnapToWindow(String windowID, ScheduledExecutorService executor) {
-    	Process proc = null;
-    	Double[] windowInfo = ProcessRunner.getWindowInfoByID(windowID, proc);
-    	if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
-    		resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
-    		mouseCatchingStage.setX(windowInfo[2]);
-    		mouseCatchingStage.setY(windowInfo[3]);
-    	}
-    	else {
-    		executor.shutdownNow();
-    	}
+     * /@param executor The Scheduled Executor Service calling this method.
+     *///TODO add the param back if desired
+    public void resnapToWindow(WindowInfo windowID) {
+        int[] windowInfo = windowID.getDimensions();
+        if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
+            resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
+            mouseCatchingStage.setX(windowInfo[2]);
+            mouseCatchingStage.setY(windowInfo[3]);
+        }
     }
 
 
@@ -753,19 +917,15 @@ public class AnnotationToolApplication extends Application {
      *  adds a triangle to the most recent straight line drawn to make it an arrow.
      * @param mouseEvent
      */
-    private void addArrowToEndOfLine(MouseEvent mouseEvent)
-    {
+    private void addArrowToEndOfLine(MouseEvent mouseEvent, UUID uuid) {
         final double halfBaseDistance = 2;
         final double heightDistance = 4;
         double slope;
         double xDistance = line.getEndX() - line.getStartX();
         double yDistance = line.getEndY() - line.getStartY();
-        if(line.getEndY() == line.getStartY())
-        {
+        if(line.getEndY() == line.getStartY()) {
             slope = Double.POSITIVE_INFINITY;
-        }
-        else
-        {
+        } else {
             slope =  xDistance - yDistance;
         }
         Polygon triangle = new Polygon();
@@ -775,9 +935,7 @@ public class AnnotationToolApplication extends Application {
             triangle.getPoints().addAll( (mouseEvent.getX() - halfBaseDistance*strokeWidth), mouseEvent.getY());
             triangle.getPoints().addAll( (mouseEvent.getX() + halfBaseDistance*strokeWidth), mouseEvent.getY());
             triangle.getPoints().addAll( mouseEvent.getX(), (mouseEvent.getY() - heightDistance*strokeWidth));
-        }
-        else
-        {
+        } else {
             //point 1
             triangle.getPoints().
                     addAll( (line.getEndX() - (halfBaseDistance*strokeWidth * Math.sin(Math.atan2(yDistance, xDistance)))),
@@ -797,6 +955,7 @@ public class AnnotationToolApplication extends Application {
             newShape.setFill(line.getStroke());
             undo();
             commitChange(new AddShape(newShape));
+            Custom_Shape.setUpUUIDMaps(newShape, uuid);
         }
 
     }
@@ -804,8 +963,7 @@ public class AnnotationToolApplication extends Application {
     /**
      * Sets the state of the program so that the user can draw arrows.
      */
-    public void makeLines()
-    {
+    public void makeLines() {
         this.resetHandlers();
         this.mouseCatchingScene.setCursor(arrowCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, arrowHandler);
@@ -817,15 +975,15 @@ public class AnnotationToolApplication extends Application {
      */
 /*    private void eraseShapes(EraseShape eraseShape)
     {
-        Shape oldShape;
-        Shape newShape;
+        Shp oldShape;
+        Shp newShape;
         ListIterator<ChangeItem> iterator = undoStack.listIterator(undoStack.size());        //list iterator starting from top of stack.
         while(iterator.hasPrevious())
         {
             oldShape = iterator.previous();
             if(!(oldShape instanceof EraseShape))                                       //not instance of eraseshape
             {
-                newShape = Shape.subtract(oldShape, eraseShape.eraseArea);
+                newShape = Shp.subtract(oldShape, eraseShape.eraseArea);
                 newShape.setFill(oldShape.getFill());
                 if(oldShape.getFill() == null)
                 {
@@ -851,12 +1009,10 @@ public class AnnotationToolApplication extends Application {
     /**
      * clears the main window and then repaints it from scratch.
      */
-    public void paintFromUndoStack()
-    {
+    public void paintFromUndoStack() {
         root.getChildren().clear();
         root.getChildren().add(borderShape);
-        for(ChangeItem changeItem : undoStack)
-        {
+        for(ChangeItem changeItem : undoStack) {
             if(!(changeItem instanceof changeItem.EraseShape))          // infinite callse to paintFromUndoStack() if it is an EraseShape
             {
                 changeItem.addChangeToStage(this);
@@ -867,8 +1023,7 @@ public class AnnotationToolApplication extends Application {
     /**
      * changes the state of the program so that the user is erasing.
      */
-    public void turnOnErasing()
-    {
+    public void turnOnErasing() {
         this.resetHandlers();
         this.mouseCatchingScene.setCursor(eraserCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, eraseHandler);
@@ -878,40 +1033,95 @@ public class AnnotationToolApplication extends Application {
      * Saves a screenshot of the current window as well as anything behind the window
      * and anything that may be drawn on the window.
      */
+//    public void doSave()
+//    {
+//        try
+//        {
+//            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
+//            defaultHeadlessField.setAccessible(true);
+//            defaultHeadlessField.set(null,Boolean.TRUE);
+//            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
+//            headlessField.setAccessible(true);
+//            headlessField.set(null,Boolean.FALSE);
+//        }
+//        catch (IllegalAccessException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (NoSuchFieldException e)
+//        {
+//            e.printStackTrace();
+//            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
+//        }
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run()
+//            {
+//                Robot robot;
+//                try
+//                {
+//                    robot = new Robot();
+//                }
+//                catch (AWTException e)
+//                {
+//                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+//                }
+//                File outFile;
+//                String fname;
+//                do
+//                {
+//                    fname = String.format("image-%06d.png", saveImageIndex++);
+//                    System.out.println("Trying " + fname);
+//                    outFile = new File(fname);
+//                }
+//                while (outFile.exists());
+//
+//                String imageTag = "<img src='" + fname +"'>";
+//                robot.keyPress(154);
+//                robot.keyRelease(154);
+//
+//                final Clipboard clipboard = Clipboard.getSystemClipboard();
+//                if(clipboard.hasContent(DataFormat.IMAGE)) {
+//                	BufferedImage screenGrab = SwingFXUtils.fromFXImage(clipboard.getImage(), null);
+//                	BufferedImage croppedScreenGrab = screenGrab.getSubimage((int)mouseCatchingStage.getX(), (int)mouseCatchingStage.getY(),
+//                									  						 (int)mouseCatchingStage.getWidth(), (int)mouseCatchingStage.getHeight());
+//                try
+//                {
+//                	if(textOptionStage != null) {
+//                  		textOptionStage.hide();
+//                  	}
+//                      ImageIO.write(croppedScreenGrab, "png", outFile);
+//                }
+//                  catch (HeadlessException e)
+//                  {
+//                      e.printStackTrace();
+//                  }
+//                  catch (IOException e)
+//                  {
+//                      e.printStackTrace();
+//                  }
+//                  finally {
+//                  	controllerBox.show();
+//                  	if(makingTextBox)
+//                  		textOptionStage.show();
+//                  }
+//                }
+//            }
+//        });
+//    }
+
+    /**
+     * Saves a screenshot of the current window as well as anything behind the window
+     * and anything that may be drawn on the window.
+     */
     public void doSave()
     {
-    	
-        try
-        {
-            Field defaultHeadlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("defaultHeadless");
-            defaultHeadlessField.setAccessible(true);
-            defaultHeadlessField.set(null,Boolean.TRUE);
-            Field headlessField = java.awt.GraphicsEnvironment.class.getDeclaredField("headless");
-            headlessField.setAccessible(true);
-            headlessField.set(null,Boolean.FALSE);
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (NoSuchFieldException e)
-        {
-            e.printStackTrace();
-            //see https://stackoverflow.com/questions/2552371/setting-java-awt-headless-true-programmatically for some more stuff on this code. Changed the code, but may work?
-        }
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
         Platform.runLater(new Runnable() {
             @Override
             public void run()
             {
-                Robot robot;
-                try
-                {
-                    robot = new Robot();
-                }
-                catch (AWTException e)
-                {
-                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
-                }
+
                 File outFile;
                 String fname;
                 do
@@ -923,18 +1133,36 @@ public class AnnotationToolApplication extends Application {
                 while (outFile.exists());
 
                 String imageTag = "<img src='" + fname +"'>";
-                Clipboard clip = Clipboard.getSystemClipboard();//this.getToolkit().getSystemClipboard();
-                clip.setContent(new HashMap<DataFormat, Object>());
                 System.out.println(imageTag);
+
+                if(textOptionStage != null) {
+                    textOptionStage.hide();
+                }
 
                 try
                 {
-                	textOptionStage.hide();
-                	controllerBox.hide();
-                    java.awt.Rectangle screenGrabArea = new java.awt.Rectangle((int)mouseCatchingStage.getX() /*+ borderThickness*/, (int)mouseCatchingStage.getY() /* + borderThickness*/,
-                            (int)mouseCatchingStage.getWidth()/* - (2 * borderThickness)*/, (int)mouseCatchingStage.getHeight()/* - (2 * borderThickness)*/);
-                    BufferedImage outImg = robot.createScreenCapture(screenGrabArea);
-                    ImageIO.write(outImg, "png", outFile);
+                    int i = 0;
+                    while(!clipboard.hasContent(DataFormat.IMAGE)) {
+                        i++;
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if(i > 50) {
+                            break;
+                        }
+                    }
+                    if(clipboard.hasContent(DataFormat.IMAGE)) {
+                        clipboard.getImage();
+                        BufferedImage screenGrab = SwingFXUtils.fromFXImage(clipboard.getImage(), null);
+                        BufferedImage croppedScreenGrab = screenGrab.getSubimage((int)mouseCatchingStage.getX(), (int)mouseCatchingStage.getY(),
+                                (int)mouseCatchingStage.getWidth(), (int)mouseCatchingStage.getHeight());
+                        ImageIO.write(croppedScreenGrab, "png", outFile);
+                        System.out.println("Successful screenshot");
+                    } else {
+                        System.out.println("No image to edit");
+                    }
                 }
                 catch (HeadlessException e)
                 {
@@ -945,9 +1173,11 @@ public class AnnotationToolApplication extends Application {
                     e.printStackTrace();
                 }
                 finally {
-                	controllerBox.show();
-                	if(makingTextBox)
-                		textOptionStage.show();
+                    controllerBox.show();
+                    if(makingTextBox) {
+                        textOptionStage.show();
+                    }
+
                 }
             }
         });
@@ -961,8 +1191,7 @@ public class AnnotationToolApplication extends Application {
      * Above that: mousecatchingstage
      * On top: controllerbox
      */
-    public void resetStages()
-    {
+    public void resetStages() {
         pictureStage.toFront();
         mouseCatchingStage.toFront();
         controllerBox.toFront();
@@ -971,16 +1200,15 @@ public class AnnotationToolApplication extends Application {
     /**
      * Brings stages that were sent to the back by toBack back to the front
      */
-    public void toFront()
-    {
+    public void toFront() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 mouseCatchingStage.toFront();
                 pictureStage.toFront();
-            	mouseCatchingStage.setIconified(false);
-            	controllerBox.setAlwaysOnTop(false);
-            	controllerBox.setAlwaysOnTop(true);
+                mouseCatchingStage.setIconified(false);
+                controllerBox.setAlwaysOnTop(false);
+                controllerBox.setAlwaysOnTop(true);
             }
         });
     }
@@ -988,22 +1216,71 @@ public class AnnotationToolApplication extends Application {
     /**
      * Sends the main stages (not the controllerbox to the back)
      */
-    public void toBack()
-    {
+    public void toBack() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
 //                mouseCatchingStage.toBack();
 //                pictureStage.toBack();
-            	mouseCatchingStage.setIconified(true);
+                mouseCatchingStage.setIconified(true);
             }
         });
     }
-    
+
+    public void saveSceneState()
+    {
+
+    }
+
+
+    private void saveState()
+    {
+        try(  PrintWriter out = new PrintWriter( "state.txt" )  ){
+            out.println(
+                    String.valueOf(mouseCatchingStage.getWidth()) + " " +
+                            String.valueOf(mouseCatchingStage.getHeight()) + " " +
+                            String.valueOf(mouseCatchingStage.getX()) + " " +
+                            String.valueOf(mouseCatchingStage.getY()) );
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setBorderVisibility(boolean borderVisibility)
+    {
+        borderShape.setVisible(borderVisibility);
+    }
+
+    public boolean mouseInWindowBounds(int mouseX, int mouseY)
+    {
+        if(mouseX > mouseCatchingStage.getX() && mouseX < mouseCatchingStage.getWidth() + mouseCatchingStage.getX() &&
+                mouseY > mouseCatchingStage.getY() && mouseY < mouseCatchingStage.getHeight() + mouseCatchingStage.getY()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public InputRecord createWindowLinkedInputRecord(InputRecord record) {
+        if(windowID != null && mouseInWindowBounds(record.getxPos(), record.getyPos())) {
+            return new WindowLinkedInputRecord(record, mouseCatchingStage.getX(), mouseCatchingStage.getY(), mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
+        } else {
+            if(windowID == null)
+            {
+                System.out.println("Why isn't this working? - the window is null");
+            }
+            else
+            {
+                System.out.println("Why isn't this working?");
+            }
+            return record;
+        }
+    }
+
     /*private CirclePopupMenu initializeShapeMenu() {
-    	StackPane popupPane = new StackPane();
+        StackPane popupPane = new StackPane();
     	popupPane.setMinSize(mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
-    	notRoot.getChildren().add(popupPane);
+    	notRoot.getChildren().add(popupPane);ƒ
     	CirclePopupMenu shapeMenu = new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
     	MenuItem testItem = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
     	shapeMenu.getItems().add(testItem);
@@ -1011,17 +1288,16 @@ public class AnnotationToolApplication extends Application {
     	shapeMenu.getItems().add(testItem2);
     	MenuItem testItem3 = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
     	shapeMenu.getItems().add(testItem3);
-    	
+
     	return new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
     }*/
-    
+
     //================================================================================
     // Getters/Setters
     //================================================================================
-    
 
-    public Stage getPictureStage()
-    {
+
+    public Stage getPictureStage() {
         return this.pictureStage;
     }
     
@@ -1030,75 +1306,66 @@ public class AnnotationToolApplication extends Application {
     	return this.mouseCatchingStage;
     }
 
-    public Double getStrokeWidth()
-    {
+    public Double getStrokeWidth() {
         return  strokeWidth;
     }
-    
-    public void setAlwaysOnTop(boolean alwaysOnTop)
-    {
+
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
         Platform.runLater(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 mouseCatchingStage.setAlwaysOnTop(alwaysOnTop);
             }
         });
     }
 
-    public void setTextSize(Integer textSize)
-    {
+    public void setTextSize(Integer textSize) {
         this.textSize = (double) textSize;
         if(text != null)
-        	text.setFont(new Font(this.textFont, this.textSize));
+            text.setFont(new Font(this.textFont, this.textSize));
         mouseCatchingStage.requestFocus();
     }
-    
-    public void setTextSize(Double textSize) 
-    {
-    	this.textSize = textSize;
-    	if(text != null)
-    		text.setFont(new Font(this.textFont, this.textSize));
-    	mouseCatchingStage.requestFocus();
+
+    public void setTextSize(Double textSize) {
+        this.textSize = textSize;
+        if(text != null)
+            text.setFont(new Font(this.textFont, this.textSize));
+        mouseCatchingStage.requestFocus();
     }
 
-    public void setTextColor(java.awt.Color textColor)
-    {
+    public void setTextColor(java.awt.Color textColor) {
         this.textColor = new javafx.scene.paint.Color(
                 textColor.getRed()/255d,
                 textColor.getGreen()/255d,
                 textColor.getBlue()/255d,
                 textColor.getAlpha()/255d);
         if(text != null)
-        	text.setFill(this.textColor);
+            text.setFill(this.textColor);
         mouseCatchingStage.requestFocus();
     }
-    
-    public void setTextColor(Color textColor)
-    {
-    	this.textColor = textColor;
-    	if(text != null)
-    		text.setFill(this.textColor);
-    	mouseCatchingStage.requestFocus();
+
+    public void setTextColor(Color textColor) {
+        this.textColor = textColor;
+        if(text != null)
+            text.setFill(this.textColor);
+        mouseCatchingStage.requestFocus();
     }
-    
+
     public void setTextFont(String textFont) {
-    	this.textFont = textFont;
-    	if(text != null)
-    		text.setFont(new Font(this.textFont, this.textSize));
-    	mouseCatchingStage.requestFocus();
+        this.textFont = textFont;
+        if(text != null)
+            text.setFont(new Font(this.textFont, this.textSize));
+        mouseCatchingStage.requestFocus();
     }
-    
-    public Stack<ChangeItem> getUndoStack()
-    {
+
+    public Stack<ChangeItem> getUndoStack() {
         return undoStack;
     }
 
     /**
      * Sets the state of the program so that the user is able to move the window around.
      */
-    public void setMovingHandler()
-    {
+    public void setMovingHandler() {
         this.resetHandlers();
         mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
@@ -1109,8 +1376,7 @@ public class AnnotationToolApplication extends Application {
      * Sets the paint color based on a java.awt color object.
      * @param paintColor The color to convert to a javafx color object.
      */
-    public void setPaint(Color paintColor)
-    {
+    public void setPaint(Color paintColor) {
         this.paint = paintColor;
     /*	        this.paint = new javafx.scene.paint.Color(
                 paintColor.getRed() / 255d,
@@ -1121,32 +1387,44 @@ public class AnnotationToolApplication extends Application {
 
     public void setMakingText() {
         this.makingTextBox = true;
-            this.resetHandlers();
-            this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_CLICKED, textBoxHandler);
-            this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
-            mouseCatchingScene.setCursor(textCursor);
-        }
+        this.resetHandlers();
+        this.mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_RELEASED, textBoxHandler);
+        this.mouseCatchingScene.addEventHandler(KeyEvent.KEY_TYPED, textBoxKeyHandler);
+        mouseCatchingScene.setCursor(textCursor);
+    }
+
+    public void setMakingRectangles()
+    {
+        this.resetHandlers();
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectangleHandler);
+
+    }
 
 
     /**
      * Sets the state of the program so that you are drawing.
      */
-    public void setDrawingText()
-        {
-        	this.makingTextBox = false;
-            this.resetHandlers();
-            this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-            textBoxText.delete(0,textBoxText.length());
-        }
+    public void setDrawingText() {
+        this.resetHandlers();
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
+        textBoxText.delete(0,textBoxText.length());
+    }
 
-
-    public Group getRoot()
+    /**
+     *
+     */
+    public void setDrawingOutboundedOval()
     {
+        this.resetHandlers();
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, outBoundedOvalHandler);
+    }
+
+
+    public Group getRoot() {
         return this.root;
     }
 
-    public void setStroke(double strokeWidth)
-    {
+    public void setStroke(double strokeWidth) {
         this.strokeWidth = strokeWidth;
     }
 
@@ -1155,45 +1433,95 @@ public class AnnotationToolApplication extends Application {
      * @return
      */
     public boolean toggleLockedControllerBox() {
-    	lockedControllerBox = !lockedControllerBox;
-    	if(lockedControllerBox) {
-    		controllerBox.fitScreen();
-    	}
-    	return lockedControllerBox;
+        lockedControllerBox = !lockedControllerBox;
+        if(lockedControllerBox) {
+            controllerBox.fitScreen();
+        }
+        return lockedControllerBox;
     }
 
     //================================================================================
     // Inner Classes
     //================================================================================
-    
+
     /*    private class EraseShape extends Path
     {
         Path eraseArea;
-        Stack<Shape> shapesPartiallyErased = new Stack<>();
+        Stack<Shp> shapesPartiallyErased = new Stack<>();
         EraseShape(Path eraseArea)
         {
             this.eraseArea = eraseArea;
         }
     }*/
 
+
+
+    /**
+     * Sets the state of the program so that the user is editing text
+     *
+     * @param text The text that is to be edited.
+     */
+    public void setEditingText(Text text)
+    {
+        this.resetHandlers();
+        editTextToSave = new EditText(text, this);
+        commitChange(editTextToSave);
+        saveEditText = true;
+    }
+
+    public ArrayList<Custom_Shape> readJSON() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Custom_Shape> readShapes = mapper.reader().withType(new TypeReference<ArrayList<Custom_Shape>>() {
+        }).readValue(new File(json_fileName));
+        System.out.println(readShapes);
+        return readShapes;
+    }
+
+    public void writeJSON(Custom_Shape shape) throws IOException {
+
+
+        System.out.println(gson.toJson(shape));
+        gson.toJson(shape, writer);
+
+
+
+        /*ObjectMapper mapper = new ObjectMapper();
+        holder.add(shape);
+
+        String json = mapper.writeValueAsString(holder);
+        System.out.println(json);
+        FileWriter writer = new FileWriter(json_fileName);
+        writer.write(json);
+        writer.close();*/
+    }
+
+
     /**
      * Small class to provide struct functionality.
      * The event type what type should be used when adding the handler to the
      * mouseCatchingScene.
      */
-    private class HandlerGroup
-    {
+    private class HandlerGroup {
         EventType eventType;
         EventHandler handler;
-        HandlerGroup(EventType eventType, EventHandler handler)
-        {
+
+        HandlerGroup(EventType eventType, EventHandler handler) {
             this.eventType = eventType;
             this.handler = handler;
         }
     }
 
+
+    public String getFileName() {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        timeStamp += ".json";
+        //return timeStamp;
+        return "shape.json";
+    }
     /**
-     * Sets the state of the program so that the user can move shapes that are on the screen.
+     * Generates a file name based on date and time
+     *
+     * @return File name as a string.
      */
     public void setSelectAndMoveHandler()
     {
@@ -1202,7 +1530,44 @@ public class AnnotationToolApplication extends Application {
         controllerBox.toFront();
         AddShape.movingShapes = true;
     }
-    
+
+    private class RectangleHandler implements EventHandler<MouseEvent>
+    {
+        Rectangle rectangle;
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                rectangle = new Rectangle(event.getX(), event.getY(), 0,0);
+                rectangle.setStrokeWidth(strokeWidth);
+                rectangle.setStroke(paint);
+                rectangle.setFill(null);
+                commitChange(new AddShape(rectangle));
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                rectangle.setWidth(event.getX() - rectangle.getX());
+                rectangle.setHeight(event.getY() - rectangle.getY());
+            }
+            if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                uuid = UUID.randomUUID();
+                Custom_Shape.setUpUUIDMaps(rectangle, uuid);
+                Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.RECTANGLE_STRING,
+                        new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
+                        paint, rectangle.getWidth(), rectangle.getHeight(), strokeWidth);
+                try {
+                    writeJSON(custom_shape);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                rectangle = null;
+            }
+        }
+    }
+
     /**
      * Creates arrows. should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
@@ -1235,12 +1600,82 @@ public class AnnotationToolApplication extends Application {
                 }
                 else if (line != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
-                    addArrowToEndOfLine(event);
+                    addArrowToEndOfLine(event, uuid);
                     //undoStack.push(path);
                     line = null;
                     redoStack.clear();
                 }
+            }
+        }
+    }
 
+    private class OutBoundedOvalHandler implements EventHandler<MouseEvent>
+    {
+        double top;
+        double bottom;
+        double left;
+        double right;
+        Path tempPath;
+
+        @Override
+        public void handle(MouseEvent event) {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                top = event.getY();
+                bottom = event.getY();
+                left = event.getX();
+                right = event.getX();
+                tempPath = new Path();
+                tempPath.getElements().add(new MoveTo(event.getX(), event.getY()));
+                tempPath.setStroke(paint);
+                tempPath.setStrokeWidth(5);
+                root.getChildren().add(tempPath);
+            }
+            if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                if(event.getY() < top)
+                {
+                    top = event.getY();
+                }
+                if(event.getY() > bottom)
+                {
+                    bottom = event.getY();
+                }
+                if(event.getX() < left)
+                {
+                    left = event.getX();
+                }
+                if(event.getX() > right)
+                {
+                    right = event.getX();
+                }
+                tempPath.getElements().add(new LineTo(event.getX(), event.getY()));
+            }
+            if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                Rectangle rectangle = new Rectangle(left, top, right - left, bottom - top);
+                rectangle.setFill(null);
+                rectangle.setStroke(paint);
+                rectangle.setStrokeWidth(strokeWidth);
+                /*
+                Oval code
+                 */
+                rectangle.setArcWidth(right - left);
+                rectangle.setArcHeight(bottom - top);
+
+                uuid = UUID.randomUUID();
+                Custom_Shape.setUpUUIDMaps(rectangle, uuid);
+                Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.OVAL_STRING,
+                        new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
+                        paint, rectangle.getWidth(), rectangle.getHeight(), strokeWidth);
+                try {
+                    writeJSON(custom_shape);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                commitChange(new AddShape(rectangle));
+                root.getChildren().remove(tempPath);
+                redoStack.clear();
             }
         }
     }
@@ -1249,35 +1684,209 @@ public class AnnotationToolApplication extends Application {
      * Handler for moving the stage. should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
      */
-    private class MovingHandler implements EventHandler<MouseEvent>
-    {
+    private class MovingHandler implements EventHandler<MouseEvent> {
         double originalX = -1;
         double originalY;
         double originalStageX;
         double originalStageY;
 
         @Override
-        public void handle(MouseEvent event)
-        {
-            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
-            {
+        public void handle(MouseEvent event) {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
                 originalX = event.getScreenX();
                 originalY = event.getScreenY();
                 originalStageX = mouseCatchingStage.getX();
                 originalStageY = mouseCatchingStage.getY();
                 mouseCatchingScene.setCursor(new ImageCursor(new Image("grab.png")));
-            }
-            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
-            {
+            } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 double changeX = event.getScreenX() - originalX;
                 double changeY = event.getScreenY() - originalY;
                 mouseCatchingStage.setX(originalStageX + changeX);
                 mouseCatchingStage.setY(originalStageY + changeY);
+            } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+                originalX = -1;
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+            }
+        }
+    }
+
+
+    /**
+     * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
+     * TextBoxKeyHandler changes the text in the box if needed.
+     */
+    private class TextBoxHandler implements EventHandler<MouseEvent> {
+        @Override
+        public void handle(MouseEvent event) {
+            String defaultText = "Text";
+            text = new Text(event.getX(), event.getY(), defaultText);
+            text.setFont(new Font(textFont, textSize));
+            text.setFill(textColor);
+            //undoStack.push(new AddShape(text));
+            commitChange(new AddShape(text));
+            root.getChildren().add(text);
+            textBoxText.delete(0, textBoxText.length());
+            saveTextBox = true;
+
+            redoStack.clear();
+        }
+    }
+
+    public void setRectifying()
+    {
+        resetHandlers();
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectificationHandler);
+    }
+    private class RectificationHandler implements EventHandler<MouseEvent>
+    {
+        private int index = 0;
+        private Point[] arr = new Point[100000];
+        private ArrayList<AnnotatePoint> points = new ArrayList<>();
+        private static final int RECTIFY_THICKNESS_FACTOR = 5;
+        private static final boolean DEBUG = true;
+        private Devdata devdata = new Devdata(DEBUG, new ArrayList<AnnotatePoint>());;
+        private Broken broken = new Broken();
+        private static final double OUTLINE_STROKE_WIDTH = 5;
+        private Path outLinePath;
+
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                arr[index] = new Point(event.getX(), event.getY());
+                points = new ArrayList<AnnotatePoint>();
+                points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
+                points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
+                index++;
+                outLinePath = new Path();
+                root.getChildren().add(outLinePath);
+                outLinePath.getElements().add(new MoveTo(event.getX(), event.getY()));
+                outLinePath.setStrokeWidth(OUTLINE_STROKE_WIDTH);
+                outLinePath.setStroke(paint);
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                arr[index] = new Point(event.getX(), event.getY());
+                points.add(new AnnotatePoint(event.getX(), event.getY(), strokeWidth, 1));
+                index++;
+                outLinePath.getElements().add(new LineTo(event.getX(), event.getY()));
             }
             else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
             {
-                originalX = -1;
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+                /*
+        Tests conclude that the brush thickness be no more than 5 * pixel width and the annotate thickness be about 5 * brush_thickness
+         */
+                rectify(points, true);
+                drawFromList(devdata.getCoord_list());
+                root.getChildren().remove(outLinePath);
+
+                arr = new Point[100000];
+                index = 0;
+            }
+
+
+        }
+        /* Rectify the line. */
+        void rectify(ArrayList<AnnotatePoint> coord_list, boolean closed_path) {
+
+            double tollerance = RECTIFY_THICKNESS_FACTOR * strokeWidth;
+            ArrayList<AnnotatePoint> broken_list = broken.broken(coord_list, closed_path, true, tollerance);
+            devdata.setCoord_list(broken_list);
+        }
+        private void drawFromList(ArrayList<AnnotatePoint> points)
+        {
+            Polygon polygon = new Polygon();
+            for(AnnotatePoint point : points)
+            {
+                polygon.getPoints().addAll(point.getX(), point.getY());
+            }
+            polygon.setStroke(paint);
+            polygon.setStrokeWidth(strokeWidth);
+            polygon.setFill(null);
+            commitChange(new AddShape(polygon));
+            uuid = UUID.randomUUID();
+            Custom_Shape.setUpUUIDMaps(polygon, uuid);
+            ArrayList<TransferableShapes.Point> transferablePoints = new ArrayList<>();
+            for(AnnotatePoint annotatePoint : points)
+            {
+                transferablePoints.add(new TransferableShapes.Point(String .valueOf(annotatePoint.getX()),String.valueOf(annotatePoint.getY())));
+            }
+            Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.RECTIFICATION_STRING,
+                                                        new TransferableShapes.Point(String.valueOf(polygon.getLayoutX()), String.valueOf(polygon.getLayoutY())),
+                                                        (Color) paint, String .valueOf(strokeWidth), transferablePoints);
+            try {
+                writeJSON(custom_shape);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public void setMakingLines()
+    {
+        resetHandlers();
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, lineHandler);
+    }
+
+    private class LineHandler implements EventHandler<MouseEvent>
+    {
+        Line line;
+
+        @Override
+        public void handle(MouseEvent event)
+        {
+            if(event.getEventType() == MouseEvent.MOUSE_PRESSED)
+            {
+                line = new Line(event.getX(),event.getY(),event.getX(),event.getY());
+                line.setStrokeWidth(strokeWidth);
+                line.setStroke(paint);
+                commitChange(new AddShape(line));
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
+            {
+                line.setEndX(event.getX());
+                line.setEndY(event.getY());
+            }
+            else if(event.getEventType() == MouseEvent.MOUSE_RELEASED)
+            {
+                uuid = UUID.randomUUID();
+                Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.LINE_STRING, (Color) paint, String.valueOf(strokeWidth)
+                                , new TransferableShapes.Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())),
+                                new TransferableShapes.Point(String.valueOf(event.getX()), String.valueOf(event.getY())));
+                try {
+                    writeJSON(custom_shape);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Custom_Shape.setUpUUIDMaps(line, uuid);
+                redoStack.clear();
+            }
+
+        }
+    }
+
+    /**
+     * Edits the current text box based on key inputs. should be implemented with KeyEvent.KEY_TYPED
+     */
+    private class TextBoxKeyHandler implements EventHandler<KeyEvent> {
+        @Override
+        public void handle(KeyEvent event) {
+            char c = event.getCharacter().charAt(0);
+            System.out.println(c);
+            if (((c > 31) && (c < 127))) {
+                textBoxText.append(c);
+                text.setText(textBoxText.toString());
+            } else if (c == 8) {
+                if (textBoxText.length() > 0) {
+                    textBoxText.deleteCharAt(textBoxText.length() - 1);
+                    text.setText(textBoxText.toString());
+                }
+            } else if (c == 13) {
+                textBoxText.append(System.lineSeparator());
+                text.setText(textBoxText.toString());
             }
         }
     }
@@ -1290,98 +1899,55 @@ public class AnnotationToolApplication extends Application {
      * handler to the mousecatchingscene.
      */
     private class DrawingHandler implements EventHandler<MouseEvent> {
+        //TODO arraylist or linked?
+        ArrayList<TransferableShapes.Point> pathElements;
+
         @Override
-        public void handle(MouseEvent event)
-        {
-            if(clickable)
-            {
-                if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
-                {
+        public void handle(MouseEvent event) {
+            if(clickable) {
+                if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
                     path = new Path();
                     path.setStrokeWidth(strokeWidth);
                     path.setSmooth(true);
                     MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                     LineTo lineTo = new LineTo(event.getX(), event.getY());
+                    pathElements = new ArrayList<>();
+                    pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                     path.getElements().add(moveTo);
                     //root.getChildren().add(path);
                     commitChange(new AddShape(path));
-                path.setStroke(paint);
-                }
-                else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                LineTo moveTo = new LineTo(event.getX(), event.getY());
-                path.getElements().add(moveTo);
-                }
-                else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
-                {
-                //path.setFillRule(FillRule.EVEN_ODD);
-                //path.setFill(paint);
-                //root.getChildren().add(path);
-                //undoStack.push(new AddShape(path));
-                path = null;
-                redoStack.clear();
+                    path.setStroke(paint);
+                } else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+                    LineTo moveTo = new LineTo(event.getX(), event.getY());
+                    pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                    path.getElements().add(moveTo);
+                } else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+
+                    try {
+                        uuid = UUID.randomUUID();
+                        Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.PATH_STRING, pathElements);
+                        shape.setStrokeWidth(String.valueOf(path.getStrokeWidth()));
+                        shape.setColorString(path.getStroke().toString());
+
+                        //holder.add(shape);
+                        writeJSON(shape);
+                        Custom_Shape.setUpUUIDMaps(path, uuid);
+
+
+                    } catch (JsonParseException e) {
+                        e.printStackTrace();
+                    } catch (JsonMappingException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace(); }
+                    //path.setFillRule(FillRule.EVEN_ODD);
+                    //path.setFill(paint);
+                    //root.getChildren().add(path);
+                    //undoStack.push(new AddShape(path));
+                    path = null;
+                    redoStack.clear();
                 }
 
-            }
-        }
-    }
-
-    /**
-     * Sets the state of the program so that the user is editing text
-     * @param text The text that is to be edited.
-     */
-    public void setEditingText(Text text)
-    {
-        System.out.println("Here");
-        System.out.println(textBoxText);
-        this.resetHandlers();
-        commitChange(new EditText(text, this));
-    }
-    /**
-     * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
-     * TextBoxKeyHandler changes the text in the box if needed.
-     */
-    private class TextBoxHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent event) {
-            String defaultText = "Text";
-            text = new Text(event.getX(), event.getY() , defaultText);
-            text.setFont(new Font(textFont, textSize));
-            text.setFill(textColor);
-            //undoStack.push(new AddShape(text));
-            commitChange(new AddShape(text));
-            root.getChildren().add(text);
-            textBoxText.delete(0,textBoxText.length());
-            redoStack.clear();
-        }
-    }
-
-    /**
-     * Edits the current text box based on key inputs. should be implemented with KeyEvent.KEY_TYPED
-     */
-    private class TextBoxKeyHandler implements EventHandler<KeyEvent>
-    {
-        @Override
-        public void handle(KeyEvent event)
-        {
-            char c = event.getCharacter().charAt(0);
-            System.out.println(c);
-            if((( c > 31)&&(c < 127)))
-            {
-                textBoxText.append(c);
-                text.setText(textBoxText.toString());
-            }
-            else if(c == 8)
-            {
-                if(textBoxText.length() > 0)
-                {
-                    textBoxText.deleteCharAt(textBoxText.length()-1);
-                    text.setText(textBoxText.toString());
-                }
-            }
-            else if(c == 13)
-            {
-                textBoxText.append(System.lineSeparator());
-                text.setText(textBoxText.toString());
             }
         }
     }
@@ -1391,35 +1957,82 @@ public class AnnotationToolApplication extends Application {
      * should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
      */
-    private class EraseHandler implements EventHandler<MouseEvent>
-    {
+    private class EraseHandler implements EventHandler<MouseEvent> {
+        //TODO probably linkedlist is better.
+        ArrayList<TransferableShapes.Point> pathElements;
         Color eraserColor = new Color(0,0,0,.1);
+
         @Override
-        public void handle(MouseEvent event)
-        {
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
-            {
+        public void handle(MouseEvent event) {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                pathElements = new ArrayList<>();
                 eraserPath = new Path();
                 eraserPath.setStrokeWidth(strokeWidth);
                 eraserPath.setSmooth(true);
                 MoveTo moveTo = new MoveTo(event.getX(), event.getY());
+                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 eraserPath.getElements().add(moveTo);
                 root.getChildren().add(eraserPath);
                 eraserPath.setStroke(eraserColor);
-            }
-            else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+            } else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
+                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 eraserPath.getElements().add(moveTo);
-            }
-            else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
-            {
+            } else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
                 root.getChildren().remove(eraserPath);
                 changeItem.EraseShape eraseShape = new changeItem.EraseShape(eraserPath);
                 commitChange(eraseShape);
+
+                try {
+                    uuid = UUID.randomUUID();
+                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
+                    shape.setStrokeWidth(String.valueOf(eraserPath.getStrokeWidth()));
+
+                    // holder.add(shape);
+                    writeJSON(shape);
+
+                } catch (JsonParseException e) {
+                    e.printStackTrace();
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace(); }
+
+
                 eraseShape = null;
                 redoStack.clear();
             }
         }
+    }
+
+    private class ResizeHandler implements NativeMouseInputListener
+    {
+
+        public ResizeHandler() {
+            // Get the logger for "org.jnativehook" and set the level to warning.
+            Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+            logger.setLevel(Level.WARNING);
+
+            // Don't forget to disable the parent handlers.
+            logger.setUseParentHandlers(false);
+
+        }
+
+        @Override
+        public void nativeMouseReleased(NativeMouseEvent nativeEvent) {
+            if(windowID != null) {
+                resnapToWindow(windowID);
+            }
+        }
+
+        @Override
+        public void nativeMouseClicked(NativeMouseEvent nativeEvent) {}
+        @Override
+        public void nativeMousePressed(NativeMouseEvent nativeEvent) {}
+        @Override
+        public void nativeMouseDragged(NativeMouseEvent nativeEvent) {}
+        @Override
+        public void nativeMouseMoved(NativeMouseEvent nativeEvent) {}
     }
 
     /**
@@ -1431,45 +2044,40 @@ public class AnnotationToolApplication extends Application {
      */
     private class ShortcutHandler implements EventHandler<KeyEvent>
     {
-    	public void handle(KeyEvent event)
-    	{
-    		if(event.getCode() == KeyCode.ESCAPE) {
-    			if(makingTextBox) {
+        public void handle(KeyEvent event)
+        {
+            if(event.getCode() == KeyCode.ESCAPE) {
+                if(makingTextBox) {
                     setDrawingText();
                 } else {
                     Platform.runLater(new Runnable() {
-    				    @Override
-    				    public void run() {
-    				    	System.exit(0);
-    				    }
-    				});
-    			}
-    		}
-    	}
+                        @Override
+                        public void run() {
+                            System.exit(0);
+                        }
+                    });
+                }
+            }
+        }
     }
-    
+
 
     /**
      * Triggers toggleClickable when triggered. Should be implemented with ZoomEvent.ANY
      * Not being used in the most current version.
      */
-    private class TouchSendToBackHandler implements EventHandler<ZoomEvent>
-    {
+    private class TouchSendToBackHandler implements EventHandler<ZoomEvent> {
         @Override
-        public void handle(ZoomEvent event)
-        {
-            if(event.getEventType() == ZoomEvent.ZOOM_STARTED)
-            {
+        public void handle(ZoomEvent event) {
+            if(event.getEventType() == ZoomEvent.ZOOM_STARTED) {
                 resetHandlers();
             }
-            if(event.getEventType() == ZoomEvent.ZOOM_FINISHED)
-            {
+            if(event.getEventType() == ZoomEvent.ZOOM_FINISHED) {
                 if(event.getTotalZoomFactor() < 1)          // if the user triggers a zoom out event.
                 {
                     Platform.runLater(new Runnable() {
                         @Override
-                        public void run()
-                        {
+                        public void run() {
                             toggleClickable();
                         }
                     });
@@ -1486,8 +2094,7 @@ public class AnnotationToolApplication extends Application {
      * should be implemented with TouchEvent.ANY when you add the
      * handler to the mousecatchingscene.
      */
-    private class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent>
-    {
+    private class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent> {
         boolean using = false;
         int topPointIndex;
         int bottomPointIndex;
@@ -1508,16 +2115,13 @@ public class AnnotationToolApplication extends Application {
         double bottomYChange = 0;
 
         @Override
-        public void handle(TouchEvent event)
-        {
-            if(event.getTouchCount() == 2)
-            {
+        public void handle(TouchEvent event) {
+            if(event.getTouchCount() == 2) {
                 using = true;
                 /*
                 Sets up some variables to keep track of which first point was which.
                  */
-                if(event.getEventType() == TouchEvent.TOUCH_PRESSED)
-                {
+                if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
                     resetHandlers();
                     originalScreenX = mouseCatchingStage.getX();
                     originalScreenY = mouseCatchingStage.getY();
@@ -1530,56 +2134,40 @@ public class AnnotationToolApplication extends Application {
 
                     TouchPoint point1 = event.getTouchPoints().get(0);
                     TouchPoint point2 = event.getTouchPoints().get(1);
-                    if(point1.getY() < point2.getY())
-                    {
+                    if(point1.getY() < point2.getY()) {
                         topPointIndex = 0;
                         bottomPointIndex = 1;
                         topPoint = point1;
                         bottomPoint = point2;
-                    }
-                    else
-                    {
+                    } else {
                         bottomPointIndex = 0;
                         topPointIndex = 1;
                         bottomPoint = point1;
                         topPoint = point2;
                     }
-                    if(point1.getScreenX() > point2.getScreenX())
-                    {
+                    if(point1.getScreenX() > point2.getScreenX()) {
                         rightPointIndex = 0;
                         leftPointIndex = 1;
                         rightPoint = point1;
                         leftPoint = point2;
-                    }
-                    else
-                    {
+                    } else {
                         rightPointIndex = 1;
                         leftPointIndex = 0;
                         rightPoint = point2;
                         leftPoint = point1;
                     }
-                }
-                else if(event.getEventType() == TouchEvent.TOUCH_MOVED && event.getTouchCount() == 2)
-                {
-                    for(TouchPoint touchPoint : event.getTouchPoints())
-                    {
-                        if(touchPoint.getState() != TouchPoint.State.STATIONARY)
-                        {
+                } else if(event.getEventType() == TouchEvent.TOUCH_MOVED && event.getTouchCount() == 2) {
+                    for(TouchPoint touchPoint : event.getTouchPoints()) {
+                        if(touchPoint.getState() != TouchPoint.State.STATIONARY) {
                             int index = event.getTouchPoints().indexOf(touchPoint);
-                            if(index == rightPointIndex)
-                            {
+                            if(index == rightPointIndex) {
                                 rightXChange = touchPoint.getScreenX() - rightPoint.getScreenX();
-                            }
-                            else if(index == leftPointIndex)
-                            {
+                            } else if(index == leftPointIndex) {
                                 leftXChange = leftPoint.getScreenX() - touchPoint.getScreenX();
                             }
-                            if(index == topPointIndex)
-                            {
+                            if(index == topPointIndex) {
                                 topYChange = topPoint.getScreenY() - touchPoint.getScreenY();
-                            }
-                            else if(index == bottomPointIndex)
-                            {
+                            } else if(index == bottomPointIndex) {
                                 bottomYChange = touchPoint.getScreenY() - bottomPoint.getScreenY();
                             }
                             //mouseCatchingStage.setHeight(topYChange + originalScreenHeight + bottomYChange);
@@ -1591,9 +2179,7 @@ public class AnnotationToolApplication extends Application {
                         }
                     }
                 }
-            }
-            else if(event.getEventType() == TouchEvent.TOUCH_RELEASED && using)
-            {
+            } else if(event.getEventType() == TouchEvent.TOUCH_RELEASED && using) {
                 using = false;
                 mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
             }
@@ -1604,86 +2190,82 @@ public class AnnotationToolApplication extends Application {
     /**
      * not being used in current version. Original purpose was similar to TwoTouchChangeSizeAndMoveHandler
      */
-    private class TwoTouchHandler implements EventHandler<TouchEvent>
-    {
+    private class TwoTouchHandler implements EventHandler<TouchEvent> {
         TouchPoint firstPoint;
         TouchPoint secondPoint;
         private double[] primaryTouchCoords = {-1d, -1d};
         private double[] secondaryTouchCoords = {-1d, -1d};
-    	private double[] touchDist = {0, 0};
-    	private double resizeTolerance = 6;
+        private double[] touchDist = {0, 0};
+        private double resizeTolerance = 6;
 
-		@Override
-		public void handle(TouchEvent event)
-        {
-            if(event.getEventType() == TouchEvent.TOUCH_PRESSED && event.getTouchCount() == 2)
-            {
+        @Override
+        public void handle(TouchEvent event) {
+            if(event.getEventType() == TouchEvent.TOUCH_PRESSED && event.getTouchCount() == 2) {
                 firstPoint = event.getTouchPoints().get(0);
                 secondPoint = event.getTouchPoints().get(1);
             }
-			if(event.getTouchCount() == 2) {
-				TouchPoint primaryTouch = event.getTouchPoints().get(0);
-				TouchPoint secondaryTouch = event.getTouchPoints().get(1);
-				
-				if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
-					setPoints(primaryTouch, secondaryTouch);
-				}
-				
-				if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
-					if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
-						setPoints(primaryTouch, secondaryTouch);
-					} else {
-						double[] newPrimaryCoords = {primaryTouch.getScreenX(), primaryTouch.getScreenY()};
-						double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
-						double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
-						if(pythagorize(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
-							resizeAnnotationWindow(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
-						} else {
-							moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
-						}
-						primaryTouchCoords = newPrimaryCoords;
-						secondaryTouchCoords = newSecondaryCoords;
-						touchDist = newTouchDist;
-					}
-				}
-			}
-			
-			if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
-				clickable = true;
-				primaryTouchCoords[0] = -1;
-				primaryTouchCoords[1] = -1;
-				secondaryTouchCoords[0] = -1;
-				secondaryTouchCoords[1] = -1;
-				touchDist[0] = 0;
-				touchDist[1] = 0;
-			}
-		}
-		
-		private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
-			clickable = false;
-			primaryTouchCoords[0] = primaryTouch.getScreenX();
-			primaryTouchCoords[1] = primaryTouch.getScreenY();
-			secondaryTouchCoords[0] = secondaryTouch.getScreenX();
-			secondaryTouchCoords[1] = secondaryTouch.getScreenY();
-			touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
-			touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
-		}
-    	
+            if(event.getTouchCount() == 2) {
+                TouchPoint primaryTouch = event.getTouchPoints().get(0);
+                TouchPoint secondaryTouch = event.getTouchPoints().get(1);
+
+                if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
+                    setPoints(primaryTouch, secondaryTouch);
+                }
+
+                if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
+                    if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
+                        setPoints(primaryTouch, secondaryTouch);
+                    } else {
+                        double[] newPrimaryCoords = {primaryTouch.getScreenX(), primaryTouch.getScreenY()};
+                        double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
+                        double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
+                        if(pythagorize(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
+                            adjustAnnotationWindowSize(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
+                        } else {
+                            moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
+                        }
+                        primaryTouchCoords = newPrimaryCoords;
+                        secondaryTouchCoords = newSecondaryCoords;
+                        touchDist = newTouchDist;
+                    }
+                }
+            }
+
+            if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
+                clickable = true;
+                primaryTouchCoords[0] = -1;
+                primaryTouchCoords[1] = -1;
+                secondaryTouchCoords[0] = -1;
+                secondaryTouchCoords[1] = -1;
+                touchDist[0] = 0;
+                touchDist[1] = 0;
+            }
+        }
+
+        private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
+            clickable = false;
+            primaryTouchCoords[0] = primaryTouch.getScreenX();
+            primaryTouchCoords[1] = primaryTouch.getScreenY();
+            secondaryTouchCoords[0] = secondaryTouch.getScreenX();
+            secondaryTouchCoords[1] = secondaryTouch.getScreenY();
+            touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
+            touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
+        }
+
     }
 
     /**
      * Handler to reset the controllerbox to make sure it is on top
      * in case it is not for whatever reason.
      */
-    private class PutControllerBoxOnTopHandler implements EventHandler<MouseEvent>
-    {
+    private class PutControllerBoxOnTopHandler implements EventHandler<MouseEvent> {
         @Override
-        public void handle(MouseEvent event)
-        {
+        public void handle(MouseEvent event) {
             controllerBox.setAlwaysOnTop(false);
             controllerBox.setAlwaysOnTop(true);
         }
     }
+
 
     /**
      * Adds a circle at the given location of the MouseEvent. should be
@@ -1692,25 +2274,21 @@ public class AnnotationToolApplication extends Application {
      */
     private class CircleHandler implements EventHandler<MouseEvent> {
         @Override
-        public void handle(MouseEvent event)
-        {
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED)
-            {
+        public void handle(MouseEvent event) {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
                 //                circle = new Circle(event.getSceneX(), event.getSceneY(),10, paint);      //just this line for full circle.
                 circle = new Circle(event.getSceneX(), event.getSceneY() ,10, Color.TRANSPARENT);
                 circle.setStroke(paint);
                 circle.setStrokeWidth(strokeWidth);
                 commitChange(new AddShape(circle));
 
-            }
-            else if (circle != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED)
-            {
+
+            } else if (circle != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 double xDistance = event.getX() - circle.getCenterX();
                 double yDistance = event.getY() - circle.getCenterY();
                 circle.setRadius(pythagorize(xDistance,yDistance ));
-            }
-            else if (circle != null && event.getEventType() == MouseEvent.MOUSE_RELEASED)
-            {
+
+            } else if (circle != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
                 undo();
                 circle.setFill(paint);
                 Shape newCircle = Shape.subtract(circle, new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius() - (strokeWidth/2)));
@@ -1718,11 +2296,40 @@ public class AnnotationToolApplication extends Application {
                 AddShape addShape = new AddShape(newCircle);
                 commitChange(addShape);
 
+                try {
+                    uuid = UUID.randomUUID();
+                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.CIRCLE_STRING);
+                    shape.setLocation(new TransferableShapes.Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
+                    shape.setColorString((paint.toString()));
+                    shape.setStrokeWidth(String.valueOf(strokeWidth));
+                    shape.setRadius(String.valueOf(circle.getRadius()));
+
+                    //holder.add(shape);
+                    writeJSON(shape);
+                    Custom_Shape.setUpUUIDMaps(newCircle, uuid);
+
+
+                } catch (JsonParseException e) {
+                    e.printStackTrace();
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace(); }
+
+
                 redoStack.clear();
                 circle = null;
             }
+
+
         }
+
+
     }
-    
-    
+
 }
+
+
+
+
+

@@ -1,12 +1,12 @@
 package changeItem;
 
+import TransferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 /**
  * Created by Brennan on 6/13/2017.
@@ -56,7 +56,7 @@ public class AddShape implements ChangeItem
             @Override
             public void handle(MouseEvent event)
             {
-                System.out.println("Shape clicked");
+                System.out.println("Shp clicked");
                 annotationToolApplication.setClickedShape(shape);
             }
         });*/
@@ -112,7 +112,7 @@ public class AddShape implements ChangeItem
             }
             else if(event.getEventType() == MouseEvent.MOUSE_RELEASED && movingShapes)
             {
-                annotationToolApplication.commitChange(new MoveShape(shape, oldX, oldY));
+                annotationToolApplication.commitChange(new MoveShape(shape, oldX, oldY, annotationToolApplication));
                 if(shape instanceof Text)
                 {
                     annotationToolApplication.setEditingText((Text) shape);

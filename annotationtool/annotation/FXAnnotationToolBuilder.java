@@ -1,6 +1,16 @@
 package annotation;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,6 +20,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
+import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -21,7 +33,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TableView;								   
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -30,7 +42,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import util.ProcessRunner;
-import util.Window;
+import util.WindowInfo;
+import util.X11InfoGatherer;
+
+import javax.swing.*;
+
+import static javax.swing.UIManager.get;
 
 /**
  * Both the main class as well as the builder for the application. Using this you can create a maximized window, a window of a specific size
@@ -38,13 +55,17 @@ import util.Window;
  */
 public class FXAnnotationToolBuilder extends Application {
 	
+	private X11InfoGatherer gatherer;// = X11InfoGatherer.getX11InfoGatherer();
 	private Stage stage;
+	private Stage tableStage;
 	private GraphicsContext gc;
 	private Process proc;
 	private TableView table;
 	
-	private ArrayList<Window> windows = new ArrayList<Window>();
-	private Object[] windowInfo;
+	private ArrayList<WindowInfo> windows;
+	private int[] windowAttributes;
+
+	private static String programRestore;
     
     private double xPos1;
     private double yPos1;
@@ -52,16 +73,82 @@ public class FXAnnotationToolBuilder extends Application {
     private double yPos2;
     private double xPosCurr;
     private double yPosCurr;
-    
+    private static double widthRestore = -1;
+    private static double heightRestore = -1;
+    private static double xRestore = -1;
+    private static double yRestore = -1;
+
     private boolean dragging;
     private boolean building;
+	private static String workingPath;
 
     public static void main(String[] args) {
-        launch(args);
+    	if(args.length > 0) {
+    		BufferedReader br = null;
+    		FileReader fr = null;
+
+    		try {
+
+    			fr = new FileReader("state.txt");
+    			br = new BufferedReader(fr);
+
+    			String sCurrentLine;
+
+    			br = new BufferedReader(new FileReader("state.txt"));
+
+    			while ((sCurrentLine = br.readLine()) != null) {
+    				String[] coords = sCurrentLine.split(" ");
+    				widthRestore = Double.valueOf(coords[0]);
+    				heightRestore = Double.valueOf(coords[1]);
+    				xRestore = Double.valueOf(coords[2]);
+    				yRestore = Double.valueOf(coords[3]);
+    			}
+
+    		} catch (IOException e) {
+
+    			e.printStackTrace();
+
+    		} finally {
+
+    			try {
+
+    				if (br != null)
+    					br.close();
+
+    				if (fr != null)
+    					fr.close();
+
+    			} catch (IOException ex) {
+
+    				ex.printStackTrace();
+
+    			}
+
+    		}
+    	}
+
+		launch(args);
     }
 
     @Override
     public void start(Stage stage) throws Exception {
+        workingPath = promptDialogBox();
+        System.out.println("from start" + workingPath);
+
+    	if(widthRestore > 0) {
+    		xPos1 = xRestore;
+    		xPos2 = xPos1 + widthRestore;
+    		yPos1 = yRestore;
+    		yPos2 = yPos1 + heightRestore;
+    		if(programRestore != null) {
+    			//TODO: Snap into that slim jim
+    		} else {
+    			build();
+    		}
+    		return;
+    	}
+
+
     	this.stage = stage;
     	this.stage.initStyle(StageStyle.UNDECORATED);
     	this.stage.setOpacity(0.2d);
@@ -81,25 +168,80 @@ public class FXAnnotationToolBuilder extends Application {
     	gc.setLineWidth(4);
     	
     	if(System.getProperty("os.name").equals("Linux")) {
-    		ArrayList<String> windowIDs = ProcessRunner.getAllWindows(proc);
-
-    		for(String id : windowIDs) {
-    			String windowTitle = ProcessRunner.getWindowTitleByID(id, proc);
-    			String programID = ProcessRunner.getProgramID(id, proc);
-    			String programTitle = ProcessRunner.getProgramName(programID, proc);
-    			windows.add(new Window(id, windowTitle, programID, programTitle));
-    		}
-    		
-    		createWindowList(new Stage());
+    		gatherer = X11InfoGatherer.getX11InfoGatherer();
+    		windows = gatherer.getAllWindows();
+    		tableStage = new Stage();
+    		createWindowList(tableStage);
     	}
     }
-    
+
+
+    private String promptDialogBox() throws IOException {
+
+
+        String path = getFileName();
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File("."));
+        Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+        dialog.setTitle("Scratchpad.exe");
+        dialog.setHeaderText("Welcome to Scratchpad");
+        dialog.setContentText("");
+        ButtonType buttonTypeOne = new ButtonType("Create New Project");
+        ButtonType buttonTypeTwo = new ButtonType("Import Project");
+        ButtonType buttonTypeThree = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
+        //Set extension filter
+        chooser.setInitialFileName(path);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        chooser.getExtensionFilters().add(extFilter);
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.get() == buttonTypeOne) { //create new project/file
+
+            chooser.getExtensionFilters().add(extFilter);
+
+
+            //Show save file dialog
+            File file = chooser.showSaveDialog(stage);
+            path = file.getAbsoluteFile().toString();
+
+
+
+        } else if (result.get() == buttonTypeTwo) { //import from file
+            // ... user chose "Two"
+            path = chooser.showOpenDialog(null).getPath();
+        } else {
+            // ... user chose CANCEL or closed the dialog
+            System.exit(0);
+        }
+
+        System.out.println(path);
+        return path;
+    }
+
+    /**
+     * Generates a file name based on date and time
+     *
+     * @return File name as a string.
+     */
+    public String getFileName() {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        timeStamp += ".json";
+        //return timeStamp;
+        return timeStamp;
+    }
+
+
+    /**
+     * Creates a table of all visible windows to annotate.
+     * 
+     * @param stage A stage to hold the table of windows/
+     */
     private void createWindowList(Stage stage) {
-    	final ObservableList<Window> windows = FXCollections.observableArrayList(this.windows);
+    	final ObservableList<WindowInfo> windows = FXCollections.observableArrayList(this.windows);
     	
     	Scene scene = new Scene(new Group());
         stage.setTitle("Windows");
-        stage.setWidth(500);
+        stage.setWidth(600);
         stage.setHeight(500);
  
         final Label label = new Label("Windows");
@@ -108,32 +250,76 @@ public class FXAnnotationToolBuilder extends Application {
         table = new TableView(); 
         table.setEditable(false);
  
-        TableColumn<Window, String> windowTitles = new TableColumn<>("Window Titles");
-        windowTitles.setCellValueFactory(new PropertyValueFactory<Window, String>("title"));
-        windowTitles.setPrefWidth(220);
-        TableColumn<Window, String> programTitles = new TableColumn<>("Program Names");
-        programTitles.setCellValueFactory(new PropertyValueFactory<Window, String>("programName"));
-        programTitles.setPrefWidth(220);
+        TableColumn<WindowInfo, String> windowTitles = new TableColumn<WindowInfo, String>("Available Windows");
+        windowTitles.setCellValueFactory(new PropertyValueFactory<WindowInfo, String>("Title"));
+        windowTitles.setPrefWidth(500);
         
         table.setItems(windows);
-        table.getColumns().addAll(windowTitles, programTitles);
+        table.getColumns().addAll(windowTitles);
  
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 0, 0, 20));
+        
+        Button restoreSessionButton = new Button();
+        restoreSessionButton.setText("Restore Previous Session");
+        restoreSessionButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				double x = 200;
+				double y = 150;
+				double width = 900;
+				double height = 750;
+				//TODO: Open JSON with info from prev. session, update annotation window size variables.
+				Process proc = null;
+				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
+				if(selectedItem != null) {
+					ProcessRunner.focusWindow(selectedItem.getTitle(), proc);
+					ProcessRunner.resizeWindow(selectedItem.getTitle(), x, y, width, height, proc);
+						
+						 
+													   
+					windowAttributes = selectedItem.getDimensions();
+		  
+					try {
+						buildFromInfo(selectedItem);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					stage.close();
+				} else {
+					try {
+						restoreSession(new String[] {String.valueOf(width), String.valueOf(height), String.valueOf(x), String.valueOf(y)});
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					stage.close();
+				}
+			}
+        });
         
         Button selectWindowButton = new Button();
         selectWindowButton.setText("Annotate Selected Window");
         selectWindowButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				Window selectedWindow = (Window)table.getSelectionModel().getSelectedItem();
-				windowInfo = ProcessRunner.getWindowInfoByID(selectedWindow.getId(), proc);
-				ProcessRunner.focusWindow(selectedWindow.getTitle(), proc);
-				buildFromInfo();
-				stage.close();
+				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
+				if(selectedItem != null) {
+					windowAttributes = selectedItem.getDimensions();
+		  
+					try {
+						buildFromInfo(selectedItem);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+							  
+						  
+	  
+					stage.close();
+				}
 			}
 		});
+        
         Button annotateDesktopButton = new Button();
         annotateDesktopButton.setText("Annotate Entire Screen");
         annotateDesktopButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -145,7 +331,7 @@ public class FXAnnotationToolBuilder extends Application {
         
         HBox hbox = new HBox();
         hbox.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        hbox.getChildren().addAll(selectWindowButton, annotateDesktopButton);
+        hbox.getChildren().addAll(restoreSessionButton, selectWindowButton, annotateDesktopButton);
         
         vbox.getChildren().addAll(table, hbox);
  
@@ -158,6 +344,11 @@ public class FXAnnotationToolBuilder extends Application {
         stage.show();
     }
     
+    /**
+     * Creates a visible box over the region of the screen the user intends to annotate.
+     *
+     * @param gc
+     */
     private void highlight(GraphicsContext gc) {
     	gc.clearRect(0, 0, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
     	gc.setStroke(new Color(1, 0, 0, 0.5f));
@@ -194,24 +385,32 @@ public class FXAnnotationToolBuilder extends Application {
 			
 			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 				if(event.getButton() == MouseButton.SECONDARY) {
-					build(true);
+					try {
+						build();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 				xPos2 = event.getX();
 				yPos2 = event.getY();
 				dragging = false;
-				build(false);
+				try {
+					build();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-			
+
 			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
 				xPosCurr = event.getX();
 				yPosCurr = event.getY();
 				highlight(gc);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private class BuilderKeyHandler implements javafx.event.EventHandler<KeyEvent>
 	{
 
@@ -221,103 +420,83 @@ public class FXAnnotationToolBuilder extends Application {
 				close();
 			}
 		}
-		
+
 	}
-	
-	private void buildFromInfo() {
+
+	/**
+	 * Creates an annotation window around a given window.
+	 *
+	 * @param window The window to annotate.
+	 */
+	private void buildFromInfo(WindowInfo window) throws IOException {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
 		
 		Stage newStage = new Stage();
 		Stage newSecondaryStage = new Stage();
-		newStage.setWidth((Double)windowInfo[0]);
-		newSecondaryStage.setWidth((Double)windowInfo[0]);
-		newStage.setHeight((Double)windowInfo[1]);
-		newSecondaryStage.setHeight((Double)windowInfo[1]);
-		double x = (Double)windowInfo[2];
-		double y = (Double)windowInfo[3];
+		newStage.setWidth(Double.valueOf(windowAttributes[0]));
+		newSecondaryStage.setWidth(Double.valueOf(windowAttributes[0]));
+		newStage.setHeight(Double.valueOf(windowAttributes[1]));
+		newSecondaryStage.setHeight(Double.valueOf(windowAttributes[1]));
+		double x = Double.valueOf(windowAttributes[2]);
+		double y = Double.valueOf(windowAttributes[3]);
 		AnnotationToolApplication app = new AnnotationToolApplication(
 				newStage, 
 				newSecondaryStage, 
 				x, 
 				y, 
-				true, 
-				String.valueOf(windowInfo[0])
+				true,
+				window,
+				workingPath
 				);
 	}
 	
-	private void build(boolean snapToWindow) {
+	/**
+	 * Creates an annotation tool window over a region of the screen
+	 */
+	private void build() throws IOException {
 		if(building) {
 			return;
 		}
 		building = true;
-		
-		if(snapToWindow) {
-			this.stage.setOpacity(0f);
-			this.stage.setIconified(true);
-			
-			Platform.runLater(new Runnable() {
-			    @Override
-			    public void run() {
-			    	windowInfo = ProcessRunner.getWindowInfo(proc);
-			    	if(windowInfo != null) {
-			    		String programID = ProcessRunner.getProgramID((String)windowInfo[0], proc);
-			    		String programName = ProcessRunner.getProgramName(programID, proc);
-			    		System.out.println(programName);
-			    		
-						Stage newStage = new Stage(); 		
-						Stage newSecondaryStage = new Stage();
-						newStage.setWidth((Double)windowInfo[1]);			
-						newSecondaryStage.setWidth((Double)windowInfo[1]);
-						newStage.setHeight((Double)windowInfo[2]);			
-						newSecondaryStage.setHeight((Double)windowInfo[2]);
-						double x = (Double)windowInfo[3];
-						double y = (Double)windowInfo[4];
-						
-						AnnotationToolApplication app = new AnnotationToolApplication(
-														newStage, 
-														newSecondaryStage, 
-														x, 
-														y, 
-														true, 
-														(String)windowInfo[0]
-														);
-			    	}
-			    }
-			});
-		}
-		else {
-			double x, y, w, h;
-			
-			x = Double.min(xPos1, xPos2);
-			y = Double.min(yPos1, yPos2);
-			
-			w = Double.max(xPos1, xPos2) - x;
-			h = Double.max(yPos1, yPos2) - y;
-			
-			if(w >= 50 && h >= 50) {
-				String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
-				
-				Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
-				newStage.setWidth(w);			newSecondaryStage.setWidth(w);
-				newStage.setHeight(h);			newSecondaryStage.setHeight(h);
-				
-				AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true);
-				
-			} else if (w < 25 && h < 25) {
-				AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false);
-			}
+		double x, y, w, h;
+
+		x = Double.min(xPos1, xPos2);
+		y = Double.min(yPos1, yPos2);
+
+		w = Double.max(xPos1, xPos2) - x;
+		h = Double.max(yPos1, yPos2) - y;
+
+		if(w >= 50 && h >= 50) {
+			String[] windowSize = new String[] {String.valueOf(w), String.valueOf(h), String.valueOf(x), String.valueOf(y)};
+
+			Stage newStage = new Stage(); 	Stage newSecondaryStage = new Stage();
+			newStage.setWidth(w);			newSecondaryStage.setWidth(w);
+			newStage.setHeight(h);			newSecondaryStage.setHeight(h);
+
+			AnnotationToolApplication app = new AnnotationToolApplication(newStage, newSecondaryStage, x, y, true,workingPath);
+
+		} else if (w < 25 && h < 25) {
+			AnnotationToolApplication app = new AnnotationToolApplication(new Stage(), new Stage(), 0, 0, false,workingPath);
 		}
 		
 		Platform.runLater(new Runnable() {
 		    @Override
 		    public void run() {
-		        stage.close();
+		    	if(stage != null) {
+		    		stage.close();
+		    	}
+		    	if(tableStage != null) {
+		    		tableStage.close();
+		    	}
 		    }
 		});
 	}
 	
+	/**
+	 * Closes the entire application.
+	 */
 	private void close() {
 		Platform.runLater(new Runnable() {
 		    @Override
@@ -325,5 +504,41 @@ public class FXAnnotationToolBuilder extends Application {
 		    	System.exit(0);
 		    }
 		});
+	}
+
+	/**
+	 * Restores the annotation tool to a saved size and position.
+	 *
+	 * @param args Array containing attributes of the saved window.
+	 */
+	private static void restoreSession(String[] args) throws IOException {
+		if(args.length > 2) {
+			double width = Double.valueOf(args[0]);
+			double height = Double.valueOf(args[1]);
+			double x = Double.valueOf(args[2]);
+			double y = Double.valueOf(args[3]);
+			Stage newStage = new Stage();
+			Stage newSecondaryStage = new Stage();
+			newStage.setWidth(width);
+			newSecondaryStage.setWidth(width);
+			newStage.setHeight(height);
+			newSecondaryStage.setHeight(height);
+
+			if(args.length > 3) {
+				//TODO: Launch program whose name is listed here.
+			} else {
+				AnnotationToolApplication app = new AnnotationToolApplication(
+						newStage,
+						newSecondaryStage,
+						x,
+						y,
+						true,
+						workingPath);
+			}
+
+		} else {
+			launch(args);
+		}
+
 	}
 }

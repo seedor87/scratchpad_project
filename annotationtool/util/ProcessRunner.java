@@ -162,6 +162,22 @@ public class ProcessRunner {
 		}
 	}
 	
+	public static void resizeWindow(String windowTitle, double x, double y, double width, double height, Process proc) {
+		String[] wmCtrlArgs = {"wmctrl", "-r", windowTitle, "-b", "remove,maximized_vert,maximized_horz"};
+		try {
+			BufferedReader br = runProcess(wmCtrlArgs, proc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String dimensions = "0," + String.valueOf((int)x) + "," + String.valueOf((int)y) + "," + String.valueOf((int)width) + "," + String.valueOf((int)height);
+		String[] wmCtrlArgs2 = {"wmctrl", "-r", windowTitle, "-e", dimensions};
+		try {
+			BufferedReader br = runProcess(wmCtrlArgs2, proc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Gets the ID number of the program.
 	 * 

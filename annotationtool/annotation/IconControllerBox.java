@@ -1,6 +1,7 @@
 package annotation;
 
 
+import TransferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -11,22 +12,27 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-
+import java.awt.AWTException;
 import java.awt.Dimension;
+import java.awt.Robot;
 import java.awt.Toolkit;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by Resea on 6/14/2017.
@@ -51,7 +57,9 @@ public class IconControllerBox extends Stage
     private int location = RIGHT_LOCATION;
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
-    
+    private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
+    private Node shapePickerGraphic;
+
     public IconControllerBox(AnnotationToolApplication at)
     {
         this.setTitle("Tools");
@@ -63,6 +71,10 @@ public class IconControllerBox extends Stage
         this.setScene(scene);
         
         double dotsPerInch = Screen.getPrimary().getDpi();
+        if(dotsPerInch == 0)//fixes dual duplicate screen issue.
+        {
+            dotsPerInch = Toolkit.getDefaultToolkit().getScreenResolution();
+        }
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
@@ -89,8 +101,15 @@ public class IconControllerBox extends Stage
 
                 alert.initOwner(IconControllerBox.this);        // this is what causes it to show off screen if it is on the left.
 
+                setDialogLocation(alert);
+
                 if(alert.showAndWait().get() == buttonTypeYes)
                 {
+                    try {
+                        at.writer.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     System.exit(0);
                 }
             }
@@ -107,7 +126,55 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.setBorderVisibility(false);
+            	try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            	final Clipboard clipboard = Clipboard.getSystemClipboard();
+                Image clipImage = null;
+                String clipString = null;
+                if(clipboard.hasImage()) {
+                	clipImage = clipboard.getImage();
+                } else if(clipboard.hasString()) {
+                	clipString = clipboard.getString();
+                }
+                clipboard.clear();
+
+                Robot robot;
+                try
+                {
+                    robot = new Robot();
+                }
+                catch (AWTException e)
+                {
+                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+                }
+
+                try {
+                	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+					Thread.sleep(200);
+					robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+					Thread.sleep(200);
+					robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+					robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
                 at.doSave();
+                at.setBorderVisibility(true);
+
+                ClipboardContent clipContent = new ClipboardContent();
+            	if(clipImage != null) {
+            		clipContent.putImage(clipImage);
+            		clipboard.setContent(clipContent);
+            	} else if(clipString != null) {
+            		clipContent.putString(clipString);
+            		clipboard.setContent(clipContent);
+            	}
             }
         });
         nodes.add(saveImageButton);
@@ -126,6 +193,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(arrowButton);
+        shapeSelectingNodes.add(arrowButton);
 
         Button circleButton = new Button();
         Circle circle = new Circle(IMAGE_HEIGHT/2d - 1, Color.TRANSPARENT);
@@ -140,6 +208,62 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(circleButton);
+        shapeSelectingNodes.add(circleButton);
+
+        Button rectificationButton = new Button();
+        rectificationButton.setTooltip(getToolTip("Make a rectified shape"));
+        rectificationButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setRectifying();
+            }
+        });
+        nodes.add(rectificationButton);
+        shapeSelectingNodes.add(rectificationButton);
+
+        Button lineButton = new Button();
+        lineButton.setTooltip(getToolTip("Make lines"));
+        lineButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setMakingLines();
+            }
+        });
+        nodes.add(lineButton);
+        shapeSelectingNodes.add(lineButton);
+
+        Button rectangleButton = new Button();
+        ImageView rectangleImage = new ImageView("rectangle.png");
+        rectangleImage.setFitHeight(IMAGE_HEIGHT);
+        rectangleImage.setFitWidth(IMAGE_WIDTH);
+        rectangleButton.setGraphic(rectangleImage);
+
+        rectangleButton.setTooltip(getToolTip("Make a rectangle"));
+        rectangleButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setMakingRectangles();
+            }
+        });
+        nodes.add(rectangleButton);
+        shapeSelectingNodes.add(rectangleButton);
+
+        Button outBoundedOvalButton = new Button();
+        ImageView ovalImage = new ImageView("oval.png");
+        ovalImage.setFitHeight(IMAGE_HEIGHT);
+        ovalImage.setFitWidth(IMAGE_WIDTH);
+        outBoundedOvalButton.setGraphic(ovalImage);
+        outBoundedOvalButton.setTooltip(getToolTip("Draw an out-bounded oval"));
+        outBoundedOvalButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                at.setDrawingOutboundedOval();
+            }
+        });
+        nodes.add(outBoundedOvalButton);
+        shapeSelectingNodes.add(outBoundedOvalButton);
+
+
 
         Button drawButton = new Button();
         ImageView drawImage = new ImageView("pencil-32.png");
@@ -155,6 +279,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(drawButton);
+        shapeSelectingNodes.add(drawButton);
 
         Button textButton = new Button();
         ImageView textImage = new ImageView("TextIcon.png");
@@ -170,6 +295,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(textButton);
+        shapeSelectingNodes.add(textButton);
 
         Button eraseButton = new Button();
         ImageView eraseImage = new ImageView("eraser.png");
@@ -185,6 +311,84 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(eraseButton);
+        shapeSelectingNodes.add(eraseButton);
+
+        Button shapePickerButton = new Button();
+        //Text numberText = new Text("5");    //TODO change this based on selected option.
+        shapePickerGraphic = drawImage;
+        shapePickerButton.setGraphic(drawImage);
+        shapePickerButton.setTooltip(getToolTip("Pick a shape"));
+        shapePickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                shapePickerButton.setGraphic(null);
+                shapePickerButton.graphicProperty().setValue(null);
+                Dialog<Double> dialog = new Dialog<>();
+                dialog.setTitle("Select Shape Tool");
+                dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
+
+
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(20, 150, 10, 10));
+                dialog.getDialogPane().setContent(grid);
+
+                int size = shapeSelectingNodes.size();
+                Iterator<Button> iterator = shapeSelectingNodes.iterator();
+                for(int i = 0; i < size;i++)
+                {
+                    grid.add(iterator.next(),i,0);
+                }
+
+                dialog.setResizable(true);
+                dialog.setWidth(300);
+
+                ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+
+                dialog.getDialogPane().getButtonTypes().addAll(okButton);
+
+                setDialogLocation(dialog);
+                dialog.showAndWait();
+                shapePickerButton.setGraphic(shapePickerGraphic);
+                at.resetStages();
+            }
+        });
+        nodes.add(shapePickerButton);
+        /*
+        * Sets up the listeners for changing the graphic of the main button that calls the shape
+        * selecting dialog.
+        * */
+        for(Button button : shapeSelectingNodes)
+        {
+            button.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event)
+                {
+                    shapePickerGraphic = button.getGraphic();
+                    if(shapePickerGraphic instanceof ImageView) {
+                        ImageView imageView = (ImageView) shapePickerGraphic;
+                        ImageView newImageView = new ImageView(imageView.getImage());
+                        newImageView.setFitHeight(imageView.getFitHeight());
+                        newImageView.setFitWidth(imageView.getFitWidth());
+                        shapePickerGraphic = newImageView;
+                    }
+                    else if (shapePickerGraphic instanceof Circle)
+                    {
+                        Circle circle1 = (Circle) shapePickerGraphic;
+                        Circle newCircle = new Circle();
+                        newCircle.setRadius(circle1.getRadius());
+                        newCircle.setStroke(circle1.getStroke());
+                        newCircle.setStrokeWidth(circle1.getStrokeWidth());
+                        newCircle.setFill(circle1.getFill());
+                        shapePickerGraphic = newCircle;
+                    }
+                }
+            });
+        }
+
 
         Button sizePickerButton = new Button();
         Text numberText = new Text("5");
@@ -196,7 +400,8 @@ public class IconControllerBox extends Stage
             {
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Brush and Text Size");
-                dialog.initStyle(StageStyle.UTILITY);
+                //dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
@@ -260,8 +465,11 @@ public class IconControllerBox extends Stage
                         return at.getStrokeWidth();
                     }
                 });
+//                dialog.setX(at.getPictureStage().getX() + at.getPictureStage().getWidth()/2 - dialog.getWidth()/2);
+//                dialog.setY((at.getPictureStage().getY()) + (at.getPictureStage().getHeight()/2));
+                setDialogLocation(dialog);
+
                 Optional<Double> result = dialog.showAndWait();
-                at.resetStages();
 
                 at.setStroke(result.get());
                 at.setTextSize(result.get().intValue());
@@ -301,6 +509,14 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.undo();
+                try
+                {
+                    at.writeJSON(new Custom_Shape(Custom_Shape.UNDO_STRING));
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
         });
         nodes.add(undoButton);
@@ -316,6 +532,14 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.redo();
+                try
+                {
+                    at.writeJSON(new Custom_Shape(Custom_Shape.REDO_STRING));
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
         });
         nodes.add(redoButton);
@@ -335,6 +559,7 @@ public class IconControllerBox extends Stage
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Button Size");
                 dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
 
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
@@ -397,6 +622,8 @@ public class IconControllerBox extends Stage
                         return buttonSize;
                     }
                 });
+
+                setDialogLocation(dialog);
 
                 Optional<Double> result = dialog.showAndWait();
 
@@ -604,7 +831,24 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
-        
+
+        Button saveStateButton = new Button();
+        //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
+        ImageView saveStateImage = new ImageView("saveState.png");
+        saveStateImage.setFitHeight(IMAGE_HEIGHT);
+        saveStateImage.setFitWidth(IMAGE_WIDTH);
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.setTooltip(getToolTip("Save the state of the Window."));
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.saveSceneState();
+            }
+        });
+        nodes.add(saveStateButton);
+
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
         ImageView lockControllerBoxImage = new ImageView("padlock.png");
@@ -621,7 +865,24 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(lockControllerBoxButton);
-        
+
+
+        Button recordInputButton = new Button();
+        //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
+        ImageView recordInputImage = new ImageView("record.png");
+        recordInputImage.setFitHeight(IMAGE_HEIGHT);
+        recordInputImage.setFitWidth(IMAGE_WIDTH);
+        recordInputButton.setGraphic(recordInputImage);
+        recordInputButton.setTooltip(getToolTip("Begin recording all input."));
+        recordInputButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.recordInput();
+            }
+        });
+        nodes.add(recordInputButton);
+
         setIconSizes(medButtonSize);
 
         this.show();
@@ -666,7 +927,7 @@ public class IconControllerBox extends Stage
     }
     
     public void fitScreen() {
-    	int numButtons = nodes.size();
+    	int numButtons = nodes.size() - shapeSelectingNodes.size();
     	double menuLength = numButtons * buttonSize;
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int numSplits = 1;
@@ -706,8 +967,11 @@ public class IconControllerBox extends Stage
 				int i = 0;
 				for(Node node : nodes)
 				{
-					splits[i].getChildren().add(node);
-					i = ++i % numSplits;
+				    if (!shapeSelectingNodes.contains(node))
+				    {
+                        splits[i].getChildren().add(node);
+                        i = ++i % numSplits;
+                    }
 				}
 				
 				root.getChildren().add(trunk);
@@ -719,7 +983,6 @@ public class IconControllerBox extends Stage
 				case TOP_LOCATION:
 					if(pictureStage.isFullScreen() || pictureStage.isMaximized())
 					{
-						//TODO handle all if statements
 						setX(at.getPictureStage().getX());
 						centerOnScreen();
 						setY(0);
@@ -728,7 +991,7 @@ public class IconControllerBox extends Stage
 					{
 						setY( Math.max(0, pictureStage.yProperty().get() - buttonSize) );
 						setX( Math.min( Math.max(0, pictureStage.xProperty().get() + pictureStage.getWidth()/2- getWidth()/2), 
-								screenSize.getWidth() - (nodes.size() * buttonSize) / numSplits) );
+								screenSize.getWidth() - ((nodes.size() - shapeSelectingNodes.size()) * buttonSize) / numSplits) );
 					}
 					break;
 				case LEFT_LOCATION:
@@ -740,7 +1003,7 @@ public class IconControllerBox extends Stage
 					else
 					{
 						setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - getHeight() /2), 
-								screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+								screenSize.getHeight() - ((nodes.size() - shapeSelectingNodes.size()) * buttonSize) / numSplits) );
 						setX( Math.max(0, pictureStage.xProperty().get() - (buttonSize * numSplits)) );
 					}
 					break;
@@ -754,7 +1017,7 @@ public class IconControllerBox extends Stage
 					else
 					{
 						setY( Math.min( Math.max(0, pictureStage.yProperty().get() + pictureStage.getHeight() / 2 - getHeight() /2), 
-								screenSize.getHeight() - (nodes.size() * buttonSize) / numSplits) );
+								screenSize.getHeight() - ((nodes.size() - shapeSelectingNodes.size()) * buttonSize) / numSplits) );
 						setX( Math.min(pictureStage.xProperty().get() + pictureStage.getWidth() - getWidth() + (numSplits * buttonSize), 
 								Toolkit.getDefaultToolkit().getScreenSize().getWidth() - (numSplits * buttonSize)) );
 					}
@@ -765,6 +1028,26 @@ public class IconControllerBox extends Stage
 			}
 		});
     }
-    
+
+    private void setDialogLocation(Dialog dialog)
+    {
+        Stage pictureStage = at.getPictureStage();
+        if(pictureStage.getX() < 0)
+        {
+            dialog.setX(0);
+        }
+        else
+        {
+            dialog.setX(pictureStage.getX());
+        }
+        if(pictureStage.getY() < 0)
+        {
+            dialog.setY(0);
+        }
+        else
+        {
+            dialog.setY(pictureStage.getY());
+        }
+    }
 }
 
