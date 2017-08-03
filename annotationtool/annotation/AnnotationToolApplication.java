@@ -6,8 +6,7 @@ package annotation;
 import changeItem.*;
 import TransferableShapes.*;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonStreamParser;
+import com.google.gson.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -52,10 +51,6 @@ import util.GlobalInputListener;
 import util.InputRecord;
 import util.WindowInfo;
 import util.WindowLinkedInputRecord;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import javax.imageio.ImageIO;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
@@ -76,8 +71,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.UUID;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 
 /**
@@ -498,9 +491,7 @@ public class AnnotationToolApplication extends Application {
 
         } catch (JsonParseException e) {
             e.printStackTrace();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        }  catch (IOException e) {
             e.printStackTrace(); }
         redoStack.clear();
     }
@@ -1469,13 +1460,6 @@ public class AnnotationToolApplication extends Application {
         saveEditText = true;
     }
 
-    public ArrayList<Custom_Shape> readJSON() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Custom_Shape> readShapes = mapper.reader().withType(new TypeReference<ArrayList<Custom_Shape>>() {
-        }).readValue(new File(json_fileName));
-        System.out.println(readShapes);
-        return readShapes;
-    }
 
     public void writeJSON(Custom_Shape shape) throws IOException {
 
@@ -1936,9 +1920,7 @@ public class AnnotationToolApplication extends Application {
 
                     } catch (JsonParseException e) {
                         e.printStackTrace();
-                    } catch (JsonMappingException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
+                    }  catch (IOException e) {
                         e.printStackTrace(); }
                     //path.setFillRule(FillRule.EVEN_ODD);
                     //path.setFill(paint);
@@ -1993,9 +1975,7 @@ public class AnnotationToolApplication extends Application {
 
                 } catch (JsonParseException e) {
                     e.printStackTrace();
-                } catch (JsonMappingException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                }  catch (IOException e) {
                     e.printStackTrace(); }
 
 
@@ -2311,9 +2291,7 @@ public class AnnotationToolApplication extends Application {
 
                 } catch (JsonParseException e) {
                     e.printStackTrace();
-                } catch (JsonMappingException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                }  catch (IOException e) {
                     e.printStackTrace(); }
 
 
