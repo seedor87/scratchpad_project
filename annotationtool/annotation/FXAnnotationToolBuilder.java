@@ -314,7 +314,7 @@ public class FXAnnotationToolBuilder extends Application {
 					}
 							  
 						  
-	  
+	   
 					stage.close();
 				}
 			}
