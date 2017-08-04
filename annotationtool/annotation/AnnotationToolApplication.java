@@ -628,6 +628,7 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         if (clickable) {
             mouseCatchingScene.setFill(clickablyClearPaint);
+            pictureStage.setOpacity(1.0);
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -641,6 +642,7 @@ public class AnnotationToolApplication extends Application {
         else
             {
                 mouseCatchingScene.setFill(clearPaint);
+                pictureStage.setOpacity(0.5);
                 Platform.runLater(new Runnable()
                 {
                       @Override
