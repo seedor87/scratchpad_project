@@ -595,6 +595,7 @@ public class IconControllerBox extends Stage
                     @Override
                     public void handle(MouseEvent event) {
                         changeSize = smallButtonSize;
+                        setIconSizes(changeSize);
                     }
                 });
 
@@ -605,6 +606,7 @@ public class IconControllerBox extends Stage
                     @Override
                     public void handle(MouseEvent event) {
                         changeSize = medButtonSize;
+                        setIconSizes(changeSize);
                     }
                 });
 
@@ -615,8 +617,18 @@ public class IconControllerBox extends Stage
                     @Override
                     public void handle(MouseEvent event) {
                         changeSize = largeButtonSize;
+                        setIconSizes(changeSize);
                     }
                 });
+                EventHandler<MouseEvent> dialogHandler = new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        dialog.close();
+                    }
+                };
+                button1.addEventHandler(MouseEvent.MOUSE_CLICKED, dialogHandler);
+                button2.addEventHandler(MouseEvent.MOUSE_CLICKED, dialogHandler);
+                button3.addEventHandler(MouseEvent.MOUSE_CLICKED, dialogHandler);
 
                 grid.add(button1,0,0);
                 grid.add(button2, 1,0);
