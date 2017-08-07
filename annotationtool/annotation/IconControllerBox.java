@@ -351,6 +351,15 @@ public class IconControllerBox extends Stage
                 {
                     grid.add(iterator.next(),i,0);
                 }
+                for(Button b: shapeSelectingNodes)
+                {
+                    b.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            dialog.close();
+                        }
+                    });
+                }
 
                 dialog.setResizable(true);
                 dialog.setWidth(300);
