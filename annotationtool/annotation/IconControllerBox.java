@@ -61,6 +61,8 @@ public class IconControllerBox extends Stage
     private Node shapePickerGraphic;
     private Button sendToBackButton;
     private Button bringToFrontButton;
+    private Button selectedButton;
+    private Background defaultBackground;
 
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -274,8 +276,6 @@ public class IconControllerBox extends Stage
         nodes.add(outBoundedOvalButton);
         shapeSelectingNodes.add(outBoundedOvalButton);
 
-
-
         Button drawButton = new Button();
         ImageView drawImage = new ImageView("pencil-32.png");
         drawImage.setFitHeight(IMAGE_HEIGHT);
@@ -377,6 +377,9 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(shapePickerButton);
+
+        selectedButton = shapePickerButton;
+
         /*
         * Sets up the listeners for changing the graphic of the main button that calls the shape
         * selecting dialog.
@@ -921,9 +924,24 @@ public class IconControllerBox extends Stage
         });
         nodes.add(bringToFrontButton);
 
-
-
         setIconSizes(medButtonSize);
+
+        defaultBackground = selectedButton.getBackground();
+        selectedButton.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        for(Button node : nodes)
+        {
+            node.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event)
+                {
+                    selectedButton.setBackground(defaultBackground);
+                    selectedButton = node;
+                    defaultBackground = node.getBackground();
+                    selectedButton.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+                }
+            });
+        }
 
         this.show();
         location = TOP_LOCATION;
