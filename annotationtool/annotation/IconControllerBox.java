@@ -58,6 +58,7 @@ public class IconControllerBox extends Stage
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
     private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
+    private LinkedList<Button> saveSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
     private Button sendToBackButton;
     private Button bringToFrontButton;
@@ -379,6 +380,19 @@ public class IconControllerBox extends Stage
         nodes.add(shapePickerButton);
 
         selectedButton = shapePickerButton;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         /*
         * Sets up the listeners for changing the graphic of the main button that calls the shape
@@ -823,6 +837,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
+/*
 
         Button saveStateButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
@@ -837,6 +852,161 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.saveSceneState();
+            }
+        });
+        nodes.add(saveStateButton);
+
+
+*/
+
+
+
+
+
+        Button newButton = new Button();
+        ImageView newImage = new ImageView("new.png");
+        newImage.setFitHeight(IMAGE_HEIGHT);
+        newImage.setFitWidth(IMAGE_WIDTH);
+        newButton.setGraphic(newImage);
+        newButton.setTooltip(getToolTip("New Project"));
+        newButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                //
+                FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
+                try {
+
+                    at.newProject();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(newButton);
+
+
+        Button saveAsButton = new Button();
+        ImageView saveAsImage = new ImageView("saveAs.png");
+        saveAsImage.setFitHeight(IMAGE_HEIGHT);
+        saveAsImage.setFitWidth(IMAGE_WIDTH);
+        saveAsButton.setGraphic(saveAsImage);
+        saveAsButton.setTooltip(getToolTip("Save As"));
+        saveAsButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+
+                    at.saveAsProject();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(saveAsButton);
+
+
+
+        Button openButton = new Button();
+        ImageView openImage = new ImageView("open.png");
+        openImage.setFitHeight(IMAGE_HEIGHT);
+        openImage.setFitWidth(IMAGE_WIDTH);
+        openButton.setGraphic(openImage);
+        openButton.setTooltip(getToolTip("Open Project"));
+        openButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+                    at.openProject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //nodes.add(openButton);
+        saveSelectingNodes.add(openButton);
+
+
+
+        Button closeButton = new Button();
+        ImageView closeImage = new ImageView("close.png");
+        closeImage.setFitHeight(IMAGE_HEIGHT);
+        closeImage.setFitWidth(IMAGE_WIDTH);
+        closeButton.setGraphic(closeImage);
+        closeButton.setTooltip(getToolTip("close Project"));
+        closeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+               System.exit(0);
+            }
+        });
+        //nodes.add(closeButton);
+        saveSelectingNodes.add(closeButton);
+
+
+
+
+        Button saveStateButton = new Button();
+        //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
+        ImageView saveStateImage = new ImageView("saveState.png");
+        saveStateImage.setFitHeight(IMAGE_HEIGHT);
+        saveStateImage.setFitWidth(IMAGE_WIDTH);
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.setTooltip(getToolTip("File"));
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                saveStateButton.setGraphic(null);
+                saveStateButton.graphicProperty().setValue(null);
+                Dialog<Double> dialog = new Dialog<>();
+                dialog.setTitle("File");
+                dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
+
+
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(20, 150, 10, 10));
+                dialog.getDialogPane().setContent(grid);
+
+                int size = saveSelectingNodes.size();
+                Iterator<Button> iterator = saveSelectingNodes.iterator();
+                for(int i = 0; i < size;i++)
+                {
+                    grid.add(iterator.next(),i,0);
+                }
+                for(Button b: saveSelectingNodes)
+                {
+                    b.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            dialog.close();
+                        }
+                    });
+                }
+
+                dialog.setResizable(true);
+                dialog.setWidth(300);
+
+                ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+
+                dialog.getDialogPane().getButtonTypes().addAll(okButton);
+
+                setDialogLocation(dialog);
+                dialog.showAndWait();
+                saveStateButton.setGraphic(saveStateImage);
+                at.resetStages();
             }
         });
         nodes.add(saveStateButton);

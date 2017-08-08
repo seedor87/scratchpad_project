@@ -19,9 +19,7 @@ import javafx.event.EventType;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.*;
 import javafx.scene.Cursor;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.input.Clipboard;
@@ -36,6 +34,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -170,6 +169,7 @@ public class AnnotationToolApplication extends Application {
     private boolean saveTextBox = false;
     private boolean saveEditText = false;
     private EditText editTextToSave;
+    private Stage primaryStage;
 
     //================================================================================
     // Constructors/Starts
@@ -180,6 +180,7 @@ public class AnnotationToolApplication extends Application {
         this.json_fileName = json_fileName;
         System.out.println("From init" + json_fileName);
         remakeFromJSON();
+        this.primaryStage = primaryStage;
 
     }
 
@@ -189,10 +190,12 @@ public class AnnotationToolApplication extends Application {
         remakeFromJSON();
 
         start(primaryStage, secondaryStage, x, y, sizedWindow);
+        this.primaryStage = primaryStage;
     }
 
     public void start(Stage primaryStage) throws IOException {
         start(primaryStage, new Stage(), 0, 0, false);
+        this.primaryStage = primaryStage;
     }
 
     //================================================================================
@@ -276,6 +279,7 @@ public class AnnotationToolApplication extends Application {
         pictureStage.show();
 
         resetStages();
+        this.primaryStage = primaryStage;
     }
 
     private void remakeFromJSON() throws IOException {
@@ -601,6 +605,7 @@ public class AnnotationToolApplication extends Application {
         });
         undoStack.clear();
         redoStack.clear();
+        prev_shapes.clear();
         try
         {
             Files.write(new File(json_fileName).toPath(), Arrays.asList(""), StandardOpenOption.TRUNCATE_EXISTING);
@@ -1493,8 +1498,7 @@ public class AnnotationToolApplication extends Application {
     public String getFileName() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
         timeStamp += ".json";
-        //return timeStamp;
-        return "shape.json";
+        return timeStamp;
     }
     /**
      * Generates a file name based on date and time
@@ -2297,6 +2301,90 @@ public class AnnotationToolApplication extends Application {
         }
 
 
+    }
+
+
+
+    public void newProject() throws IOException {
+
+
+        String path = getFileName();
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File("."));
+        //Set extension filter
+        chooser.setInitialFileName(path);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        chooser.getExtensionFilters().add(extFilter);
+
+
+            chooser.getExtensionFilters().add(extFilter);
+
+
+            //Show save file dialog
+            File file = chooser.showSaveDialog(primaryStage);
+            path = file.getAbsoluteFile().toString();
+
+        json_fileName = path;
+        clearHistory();
+        remakeFromJSON();
+
+
+        System.out.println("new Project: "+json_fileName);
+
+    }
+
+
+
+    public void openProject() throws IOException {
+
+
+        String path = getFileName();
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File("."));
+        //Set extension filter
+        chooser.setInitialFileName(path);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        chooser.getExtensionFilters().add(extFilter);
+
+
+        chooser.getExtensionFilters().add(extFilter);
+
+
+        //import from file
+        // ... user chose "Two"
+        path = chooser.showOpenDialog(null).getPath();
+
+        json_fileName = path;
+        remakeFromJSON();
+
+
+        System.out.println("open Project: "+json_fileName);
+
+    }
+
+    public void saveAsProject() throws IOException {
+
+        String path = getFileName();
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File("."));
+        //Set extension filter
+        chooser.setInitialFileName(path);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        chooser.getExtensionFilters().add(extFilter);
+
+
+        chooser.getExtensionFilters().add(extFilter);
+
+
+        //Show save file dialog
+        File file = chooser.showSaveDialog(primaryStage);
+        path = file.getAbsoluteFile().toString();
+
+        json_fileName = path;
+        remakeFromJSON();
+
+
+        System.out.println("save As: "+json_fileName);
     }
 
 }
