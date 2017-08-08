@@ -63,6 +63,7 @@ public class IconControllerBox extends Stage
     private Button bringToFrontButton;
     private Button selectedButton;
     private Background defaultBackground;
+    private static final Background SELECTED_BACKGROUND = null;
 
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -378,7 +379,7 @@ public class IconControllerBox extends Stage
         });
         nodes.add(shapePickerButton);
 
-        selectedButton = shapePickerButton;
+        //selectedButton = shapePickerButton;
 
         /*
         * Sets up the listeners for changing the graphic of the main button that calls the shape
@@ -732,6 +733,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveButton);
+        selectedButton = moveButton;
 
         Button toggleClickableButton = new Button();
         ImageView toggleClickableImage = new ImageView("pointer.png");
@@ -927,7 +929,7 @@ public class IconControllerBox extends Stage
         setIconSizes(medButtonSize);
 
         defaultBackground = selectedButton.getBackground();
-        selectedButton.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+        selectedButton.setBackground(SELECTED_BACKGROUND);
 
         for(Button node : nodes)
         {
@@ -938,7 +940,7 @@ public class IconControllerBox extends Stage
                     selectedButton.setBackground(defaultBackground);
                     selectedButton = node;
                     defaultBackground = node.getBackground();
-                    selectedButton.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+                    selectedButton.setBackground(SELECTED_BACKGROUND);
                 }
             });
         }
