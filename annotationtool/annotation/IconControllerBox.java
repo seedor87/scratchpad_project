@@ -59,6 +59,8 @@ public class IconControllerBox extends Stage
     private LinkedList<Button> nodes = new LinkedList<>();
     private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
+    private Button sendToBackButton;
+    private Button bringToFrontButton;
 
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -744,49 +746,6 @@ public class IconControllerBox extends Stage
         });
         nodes.add(toggleClickableButton);
 
-        /**
-         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
-         * edited*
-         */
-        Button sendToBackButton = new Button();
-        ImageView sendToBackImage = new ImageView("sendToBack.png");
-        sendToBackImage.setFitHeight(IMAGE_HEIGHT);
-        sendToBackImage.setFitWidth(IMAGE_WIDTH);
-        sendToBackButton.setGraphic(sendToBackImage);
-        sendToBackButton.setTooltip(getToolTip("Send To Back"));
-        sendToBackButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-            	at.getMouseCatchingStage().setAlwaysOnTop(false);
-            	at.getPictureStage().setAlwaysOnTop(false);
-            	at.getPictureStage().toBack();
-                at.toBack();
-            }
-        });
-        nodes.add(sendToBackButton);
-
-        /**
-         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
-         */
-        Button bringToFrontButton = new Button();
-        ImageView bringToFrontImage = new ImageView("bringToFront.png");
-        bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
-        bringToFrontImage.setFitWidth(IMAGE_WIDTH);
-        bringToFrontButton.setGraphic(bringToFrontImage);
-        bringToFrontButton.setTooltip(getToolTip("Bring to Front"));
-        bringToFrontButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                at.toFront();
-                IconControllerBox.this.setAlwaysOnTop(false);
-                IconControllerBox.this.setAlwaysOnTop(true);
-                IconControllerBox.this.toFront();
-
-            }
-        });
-        nodes.add(bringToFrontButton);
 
         /**
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Edit-clear.svg/1024px-Edit-clear.svg.png
@@ -913,16 +872,76 @@ public class IconControllerBox extends Stage
         });
         nodes.add(recordInputButton);
 
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
+         * edited*
+         */
+        sendToBackButton = new Button();
+        ImageView sendToBackImage = new ImageView("sendToBack.png");
+        sendToBackImage.setFitHeight(IMAGE_HEIGHT);
+        sendToBackImage.setFitWidth(IMAGE_WIDTH);
+        sendToBackButton.setGraphic(sendToBackImage);
+        sendToBackButton.setTooltip(getToolTip("Send To Back"));
+        sendToBackButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.getMouseCatchingStage().setAlwaysOnTop(false);
+                at.getPictureStage().setAlwaysOnTop(false);
+                at.getPictureStage().toBack();
+                at.toBack();
+                nodes.remove(sendToBackButton);
+                nodes.add(bringToFrontButton);
+                fitScreen();
+            }
+        });
+        nodes.add(sendToBackButton);
+
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
+         */
+        bringToFrontButton = new Button();
+        ImageView bringToFrontImage = new ImageView("bringToFront.png");
+        bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
+        bringToFrontImage.setFitWidth(IMAGE_WIDTH);
+        bringToFrontButton.setGraphic(bringToFrontImage);
+        bringToFrontButton.setTooltip(getToolTip("Bring to Front"));
+        bringToFrontButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                at.toFront();
+                IconControllerBox.this.setAlwaysOnTop(false);
+                IconControllerBox.this.setAlwaysOnTop(true);
+                IconControllerBox.this.toFront();
+                nodes.remove(bringToFrontButton);
+                nodes.add(sendToBackButton);
+                fitScreen();
+            }
+        });
+        nodes.add(bringToFrontButton);
+
+
+
         setIconSizes(medButtonSize);
 
         this.show();
         location = TOP_LOCATION;
+        nodes.remove(nodes.size()-1);
         this.fitScreen();
         this.setAlwaysOnTop(true);
     }
 
     private void setIconSizes(double size)
     {
+        if(nodes.get(nodes.size()-1) == sendToBackButton)
+        {
+            nodes.add(bringToFrontButton);
+        }
+        else
+        {
+            nodes.add(sendToBackButton);
+        }
         for(Button n : this.nodes)
         {
             //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
@@ -944,6 +963,7 @@ public class IconControllerBox extends Stage
                 ((Circle)graphicsContext).setRadius((size-10)/2);
             }
         }
+        nodes.remove(nodes.size()-1);
         this.buttonSize = size;
         this.fitScreen();
     }
