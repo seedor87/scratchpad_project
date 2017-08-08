@@ -50,6 +50,8 @@ import util.GlobalInputListener;
 import util.InputRecord;
 import util.WindowInfo;
 import util.WindowLinkedInputRecord;
+import util.X11InfoGatherer;
+
 import javax.imageio.ImageIO;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
@@ -70,6 +72,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -103,7 +108,8 @@ public class AnnotationToolApplication extends Application {
     private Gson gson = new Gson();
     private String json_fileName;
     private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
-
+    private ScheduledExecutorService windowGrabber;
+    private ArrayList<WindowInfo> relevantWindows;
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -277,6 +283,19 @@ public class AnnotationToolApplication extends Application {
 
         mouseCatchingStage.show();
         pictureStage.show();
+        
+        if(windowID == null) {
+        	windowGrabber = Executors.newSingleThreadScheduledExecutor();
+        	windowGrabber.scheduleAtFixedRate(new Runnable() {
+				
+				@Override
+				public void run() {
+					updateRelevantWindows();
+				}
+				
+			}, 0, 10, TimeUnit.SECONDS);
+        }
+
 
         resetStages();
         this.primaryStage = primaryStage;
@@ -866,10 +885,19 @@ public class AnnotationToolApplication extends Application {
      *///TODO add the param back if desired
     public void resnapToWindow(WindowInfo windowID) {
         int[] windowInfo = windowID.getDimensions();
-        if(windowInfo[0] != -1 && windowInfo[1] != -1 && windowInfo[2] != -1 && windowInfo[3] != -1) {
+        if(windowInfo[0] != 0 && windowInfo[1] != 0 && windowInfo[2] != 0 && windowInfo[3] != 0) {
             resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
             mouseCatchingStage.setX(windowInfo[2]);
             mouseCatchingStage.setY(windowInfo[3]);
+        } else {
+        	windowGrabber = Executors.newSingleThreadScheduledExecutor();
+        	windowGrabber.scheduleAtFixedRate(new Runnable() {
+				
+				@Override
+				public void run() {
+					updateRelevantWindows();
+				}
+			}, 0, 10, TimeUnit.SECONDS);
         }
     }
 
@@ -1267,20 +1295,24 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-    /*private CirclePopupMenu initializeShapeMenu() {
-        StackPane popupPane = new StackPane();
-    	popupPane.setMinSize(mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight());
-    	notRoot.getChildren().add(popupPane);ƒ
-    	CirclePopupMenu shapeMenu = new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
-    	MenuItem testItem = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
-    	shapeMenu.getItems().add(testItem);
-    	MenuItem testItem2 = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
-    	shapeMenu.getItems().add(testItem2);
-    	MenuItem testItem3 = new MenuItem("This is a test", new ImageView(new Image("pencil-cursor.png")));
-    	shapeMenu.getItems().add(testItem3);
+    public void updateRelevantWindows() {
+    	if(System.getProperty("os.name").equals("Linux")) {
+    		X11InfoGatherer x11 = X11InfoGatherer.getX11InfoGatherer();
+    		ArrayList<WindowInfo> allWindows = x11.getAllWindows();
+    		ArrayList<WindowInfo> relevantWindows = new ArrayList<WindowInfo>();
+    		for(WindowInfo window : allWindows) {
+    			int[] dimensions = window.getDimensions();
+    			if(dimensions[0] + dimensions[2] > mouseCatchingStage.getX() &&
+    			   dimensions[2] < mouseCatchingStage.getX() + mouseCatchingStage.getWidth() &&
+    			   dimensions[1] + dimensions[3] > mouseCatchingStage.getY() && 
+    			   dimensions[3] < mouseCatchingStage.getY() + mouseCatchingStage.getHeight()) {
+    				relevantWindows.add(window);
+    			}
+    		}
+    		this.relevantWindows = relevantWindows;
+    	}
+    }
 
-    	return new CirclePopupMenu(popupPane, MouseButton.SECONDARY);
-    }*/
 
     //================================================================================
     // Getters/Setters
