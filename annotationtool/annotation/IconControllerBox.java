@@ -763,6 +763,24 @@ public class IconControllerBox extends Stage
                 setAlwaysOnTop(true);
             }
         });
+        toggleClickableButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            Background background;
+            @Override
+            public void handle(MouseEvent event)
+            {
+                isSelected = !isSelected;
+                if(isSelected)
+                {
+                    background = toggleClickableButton.getBackground();
+                    toggleClickableButton.setBackground(SELECTED_BACKGROUND);
+                }
+                else
+                {
+                    toggleClickableButton.setBackground(background);
+                }
+            }
+        });
         nodes.add(toggleClickableButton);
 
 
@@ -1098,22 +1116,22 @@ public class IconControllerBox extends Stage
 
         setIconSizes(medButtonSize);
 
-        defaultBackground = selectedButton.getBackground();
-        selectedButton.setBackground(SELECTED_BACKGROUND);
+//        defaultBackground = selectedButton.getBackground();
+//        selectedButton.setBackground(SELECTED_BACKGROUND);
 
-        for(Button node : nodes)
-        {
-            node.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event)
-                {
-                    selectedButton.setBackground(defaultBackground);
-                    selectedButton = node;
-                    defaultBackground = node.getBackground();
-                    selectedButton.setBackground(SELECTED_BACKGROUND);
-                }
-            });
-        }
+//        for(Button node : nodes)
+//        {
+//            node.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+//                @Override
+//                public void handle(MouseEvent event)
+//                {
+//                    selectedButton.setBackground(defaultBackground);
+//                    selectedButton = node;
+//                    defaultBackground = node.getBackground();
+//                    selectedButton.setBackground(SELECTED_BACKGROUND);
+//                }
+//            });
+//        }
 
         this.show();
         location = TOP_LOCATION;
