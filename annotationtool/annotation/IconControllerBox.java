@@ -897,7 +897,7 @@ public class IconControllerBox extends Stage
                 FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
                 try {
 
-                    at.fileManagement(-1); //new file
+                    at.fileManagement("new"); //new file
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -906,29 +906,6 @@ public class IconControllerBox extends Stage
         });
         //nodes.add(newButton);
         saveSelectingNodes.add(newButton);
-
-
-        Button saveAsButton = new Button();
-        ImageView saveAsImage = new ImageView("saveAs.png");
-        saveAsImage.setFitHeight(IMAGE_HEIGHT);
-        saveAsImage.setFitWidth(IMAGE_WIDTH);
-        saveAsButton.setGraphic(saveAsImage);
-        saveAsButton.setTooltip(getToolTip("Save As"));
-        saveAsButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                try {
-
-                    at.fileManagement(1); //save as
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-        //nodes.add(newButton);
-        saveSelectingNodes.add(saveAsButton);
 
 
 
@@ -943,7 +920,7 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 try {
-                    at.fileManagement(0);//open project
+                    at.fileManagement("open");//open project
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -951,6 +928,34 @@ public class IconControllerBox extends Stage
         });
         //nodes.add(openButton);
         saveSelectingNodes.add(openButton);
+
+
+
+        Button saveAsButton = new Button();
+        ImageView saveAsImage = new ImageView("saveAs.png");
+        saveAsImage.setFitHeight(IMAGE_HEIGHT);
+        saveAsImage.setFitWidth(IMAGE_WIDTH);
+        saveAsButton.setGraphic(saveAsImage);
+        saveAsButton.setTooltip(getToolTip("Save As"));
+        saveAsButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+
+                    at.fileManagement("save"); //save as
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(saveAsButton);
+
+
+
+
 
 
 
