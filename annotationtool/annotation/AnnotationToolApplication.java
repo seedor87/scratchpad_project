@@ -2337,38 +2337,9 @@ public class AnnotationToolApplication extends Application {
 
 
 
-    public void newProject() throws IOException {
 
 
-        String path = getFileName();
-        FileChooser chooser = new FileChooser();
-        chooser.setInitialDirectory(new File("."));
-        //Set extension filter
-        chooser.setInitialFileName(path);
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
-        chooser.getExtensionFilters().add(extFilter);
-
-
-            chooser.getExtensionFilters().add(extFilter);
-
-
-            //Show save file dialog
-            File file = chooser.showSaveDialog(primaryStage);
-            path = file.getAbsoluteFile().toString();
-
-        json_fileName = path;
-        clearHistory();
-        remakeFromJSON();
-
-
-        System.out.println("new Project: "+json_fileName);
-
-    }
-
-
-
-    public void openProject() throws IOException {
-
+    public void fileManagement(int flag) throws IOException {
 
         String path = getFileName();
         FileChooser chooser = new FileChooser();
@@ -2377,47 +2348,47 @@ public class AnnotationToolApplication extends Application {
         chooser.setInitialFileName(path);
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
         chooser.getExtensionFilters().add(extFilter);
-
-
-        chooser.getExtensionFilters().add(extFilter);
-
-
-        //import from file
-        // ... user chose "Two"
-        path = chooser.showOpenDialog(null).getPath();
-
-        json_fileName = path;
-        remakeFromJSON();
-
-
-        System.out.println("open Project: "+json_fileName);
-
-    }
-
-    public void saveAsProject() throws IOException {
-
-        String path = getFileName();
-        FileChooser chooser = new FileChooser();
-        chooser.setInitialDirectory(new File("."));
-        //Set extension filter
-        chooser.setInitialFileName(path);
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
-        chooser.getExtensionFilters().add(extFilter);
-
-
-        chooser.getExtensionFilters().add(extFilter);
-
-
-        //Show save file dialog
         File file = chooser.showSaveDialog(primaryStage);
-        path = file.getAbsoluteFile().toString();
-
-        json_fileName = path;
-        remakeFromJSON();
 
 
-        System.out.println("save As: "+json_fileName);
+        switch (flag){
+            case -1: //new project
+                path = file.getAbsoluteFile().toString();
+                json_fileName = path;
+                root.getChildren().clear(); //clears the stage
+                undoStack.clear();
+                redoStack.clear();
+                prev_shapes.clear();
+                remakeFromJSON();
+                System.out.println("new Project: "+json_fileName);
+
+                break;
+            case 0: //open project
+              path = chooser.showOpenDialog(null).getPath();
+                json_fileName = path;
+                root.getChildren().clear(); //clears the stage
+                undoStack.clear();
+                redoStack.clear();
+                prev_shapes.clear();
+                remakeFromJSON();
+                System.out.println("open Project: "+json_fileName);
+
+                break;
+            case 1: // save as
+                //Show save file dialog
+                path = file.getAbsoluteFile().toString();
+                json_fileName = path;
+                remakeFromJSON();
+                System.out.println("save As: "+json_fileName);
+
+                break;
+        }
+
+
+
     }
+
+
 
 }
 

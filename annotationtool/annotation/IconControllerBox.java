@@ -897,7 +897,7 @@ public class IconControllerBox extends Stage
                 FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
                 try {
 
-                    at.newProject();
+                    at.fileManagement(-1); //new file
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -920,8 +920,7 @@ public class IconControllerBox extends Stage
             {
                 try {
 
-                    at.saveAsProject();
-
+                    at.fileManagement(1); //save as
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -944,7 +943,7 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 try {
-                    at.openProject();
+                    at.fileManagement(0);//open project
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
