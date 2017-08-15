@@ -178,9 +178,10 @@ public class AnnotationToolApplication extends Application {
     private Stage primaryStage;
     /*
     This number is used to determine how opaque shapes are
-    when settransparent is used.
+    when settransparent is used. The less opaque that they are, the more shapes that can
+    overlap without losing the ability to click through the window.
      */
-    private final double OPACITY_MULTIPLIER = 0.4;
+    private final double OPACITY_MULTIPLIER = 0.108;
     private Map<Shape, Color> oldColorMap = new HashMap<>();
 
     //================================================================================
