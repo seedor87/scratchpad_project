@@ -866,27 +866,33 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingStage.xProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                pictureStage.setX(mouseCatchingStage.getX());
-                if(lockedControllerBox) {
-                	controllerBox.fitScreen();
+                if (!mouseCatchingStage.isIconified())
+                {
+                    pictureStage.setX(mouseCatchingStage.getX());
+                    if (lockedControllerBox) {
+                        controllerBox.fitScreen();
+                    }
+                    saveState();
                 }
-                saveState();
             }
         });
 
         mouseCatchingStage.yProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                pictureStage.setY(mouseCatchingStage.getY());
-                if(lockedControllerBox) {
-                    controllerBox.fitScreen();
+                if(!mouseCatchingStage.isIconified())
+                {
+                    pictureStage.setY(mouseCatchingStage.getY());
+                    if(lockedControllerBox)
+                    {
+                        controllerBox.fitScreen();
+                    }
+                    saveState();
                 }
-                saveState();
             }
         });
 
     }
-
     /**
      * moves the mousecatchingstage to a new position that is based on the current position and
      * the values of X and Y passed in.
