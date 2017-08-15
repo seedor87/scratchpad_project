@@ -2414,7 +2414,7 @@ public class AnnotationToolApplication extends Application {
 
 
 
-    public void fileManagement(int flag) throws IOException {
+    public void fileManagement(String flag) throws IOException {
 
         String path = getFileName();
         FileChooser chooser = new FileChooser();
@@ -2423,44 +2423,68 @@ public class AnnotationToolApplication extends Application {
         chooser.setInitialFileName(path);
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
         chooser.getExtensionFilters().add(extFilter);
-        File file = chooser.showSaveDialog(primaryStage);
+        writer.flush();
+        writer.close();
 
 
-        switch (flag){
-            case -1: //new project
+
+        switch (flag) {
+            case "new":  //new project
+                File file = chooser.showSaveDialog(primaryStage);
                 path = file.getAbsoluteFile().toString();
                 json_fileName = path;
                 root.getChildren().clear(); //clears the stage
+
                 undoStack.clear();
                 redoStack.clear();
                 prev_shapes.clear();
                 remakeFromJSON();
-                System.out.println("new Project: "+json_fileName);
-
+                System.out.println("new Project: " + json_fileName);
                 break;
-            case 0: //open project
-              path = chooser.showOpenDialog(null).getPath();
-                json_fileName = path;
+            case "open": //open project
+                path = chooser.showOpenDialog(null).getAbsoluteFile().toString();
+
                 root.getChildren().clear(); //clears the stage
+
                 undoStack.clear();
                 redoStack.clear();
                 prev_shapes.clear();
+                json_fileName = path;
                 remakeFromJSON();
-                System.out.println("open Project: "+json_fileName);
-
+                System.out.println("open Project: " + json_fileName);
                 break;
-            case 1: // save as
+            case "save":  // save as
                 //Show save file dialog
-                path = file.getAbsoluteFile().toString();
+                File file_2 = chooser.showSaveDialog(primaryStage);
+                path = file_2.getAbsoluteFile().toString();
+                copy(new File(json_fileName), new File(path));
                 json_fileName = path;
                 remakeFromJSON();
-                System.out.println("save As: "+json_fileName);
+                System.out.println("save As: " + json_fileName);
 
                 break;
         }
 
 
+    }
 
+    // Copy the source file to target file.
+    // In case the dst file does not exist, it is created
+   private  void copy(File source, File target) throws IOException {
+
+        InputStream in = new FileInputStream(source);
+        OutputStream out = new FileOutputStream(target);
+
+        // Copy the bits from instream to outstream
+        byte[] buf = new byte[1024];
+        int len;
+
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+
+        in.close();
+        out.close();
     }
 
 
