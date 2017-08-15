@@ -760,7 +760,7 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.toggleClickable();
-                setAlwaysOnTop(true);
+                //setAlwaysOnTop(true);
             }
         });
         toggleClickableButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -1078,10 +1078,11 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                at.getMouseCatchingStage().setAlwaysOnTop(false);
-                at.getPictureStage().setAlwaysOnTop(false);
-                at.getPictureStage().toBack();
-                at.toBack();
+//                at.getMouseCatchingStage().setAlwaysOnTop(false);
+//                at.getPictureStage().setAlwaysOnTop(false);
+//                at.getPictureStage().toBack();
+//                at.toBack();
+                at.sendToBack();
                 nodes.remove(sendToBackButton);
                 nodes.add(bringToFrontButton);
                 fitScreen();
@@ -1102,10 +1103,11 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                at.toFront();
-                IconControllerBox.this.setAlwaysOnTop(false);
-                IconControllerBox.this.setAlwaysOnTop(true);
-                IconControllerBox.this.toFront();
+//                at.toFront();
+//                IconControllerBox.this.setAlwaysOnTop(false);
+//                IconControllerBox.this.setAlwaysOnTop(true);
+//                IconControllerBox.this.toFront();
+                at.bringToFront();
                 nodes.remove(bringToFrontButton);
                 nodes.add(sendToBackButton);
                 fitScreen();

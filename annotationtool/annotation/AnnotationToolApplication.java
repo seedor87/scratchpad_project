@@ -176,6 +176,12 @@ public class AnnotationToolApplication extends Application {
     private boolean saveEditText = false;
     private EditText editTextToSave;
     private Stage primaryStage;
+    /*
+    This number is used to determine how opaque shapes are
+    when settransparent is used.
+     */
+    private final double OPACITY_MULTIPLIER = 0.4;
+    private Map<Shape, Color> oldColorMap = new HashMap<>();
 
     //================================================================================
     // Constructors/Starts
@@ -281,6 +287,8 @@ public class AnnotationToolApplication extends Application {
         borderShape.setFill(clearPaint);
         root.getChildren().add(borderShape);
 
+        resetStages();
+
         mouseCatchingStage.show();
         pictureStage.show();
         
@@ -297,7 +305,6 @@ public class AnnotationToolApplication extends Application {
         }
 
 
-        resetStages();
         this.primaryStage = primaryStage;
     }
 
@@ -647,40 +654,90 @@ public class AnnotationToolApplication extends Application {
      * Makes it so that the mousecatching stage stops catching mouse events when toggled to unclickable.
      * Calling the method again restores it so that the stage starts catching the events again.
      */
-    public void toggleClickable() {
+    public void toggleClickable()
+    {
         clickable = !clickable;
         this.resetHandlers();
-        if (clickable) {
-            mouseCatchingScene.setFill(clickablyClearPaint);
-            pictureStage.setOpacity(1.0);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    pictureStage.setAlwaysOnTop(false);
-                    mouseCatchingStage.setAlwaysOnTop(false);
-                    mouseCatchingStage.setOpacity(0.004);
-                }
-            });
-            this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
+        if (clickable)
+        {
+            setNotClickThrough();
+            controllerBox.toFront();
         }
         else
-            {
-                mouseCatchingScene.setFill(clearPaint);
-                pictureStage.setOpacity(0.5);
-                Platform.runLater(new Runnable()
-                {
-                      @Override
-                    public void run()
-                    {
-                          pictureStage.setAlwaysOnTop(true);
-                    	  mouseCatchingStage.setAlwaysOnTop(true);
-                    	  mouseCatchingStage.setOpacity(0.0);
-                    	  controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
-                    	  controllerBox.setAlwaysOnTop(true);
+        {
+            setClickThrough();
+        }
+    }
 
-                    }
-                });
+    private void setNotClickThrough()
+    {
+        mouseCatchingScene.setFill(clickablyClearPaint);
+        mouseCatchingStage.setIconified(false);
+        resetStages();
+
+        pictureStage.setOpacity(1.0);
+        mouseCatchingStage.setOpacity(0.004);
+        setShapesNotClickThrough();
+
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
+    }
+    private void setShapesNotClickThrough()
+    {
+        for(Node node : root.getChildren())
+        {
+            Shape shape = (Shape) node;
+            if(shape != borderShape)
+            {
+                if(shape.getFill() == null)
+                {
+                    shape.setStroke(oldColorMap.get(shape));
+                }
+                else
+                {
+                    shape.setFill(oldColorMap.get(shape));
+                }
             }
+        }
+    }
+
+    private void setClickThrough()
+    {
+        mouseCatchingStage.setAlwaysOnTop(false);
+        mouseCatchingScene.setFill(clearPaint);
+        mouseCatchingStage.setIconified(true);
+        mouseCatchingStage.setOpacity(0.0);
+
+        pictureStage.setAlwaysOnTop(false);
+        pictureStage.setAlwaysOnTop(true);
+
+        setShapesClickThrough();
+
+        controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
+        controllerBox.setAlwaysOnTop(true);
+    }
+    private void setShapesClickThrough()
+    {
+        for(Node node: root.getChildren())
+        {
+            if(node != borderShape)
+            {
+                Shape shape = (Shape) node;
+                Color color = (Color) shape.getFill();
+                if(color == null)
+                {
+                    color = (Color) shape.getStroke();
+                    Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getOpacity()*OPACITY_MULTIPLIER);
+                    oldColorMap.put(shape, color);
+                    shape.setStroke(newColor);
+                }
+                else
+                {
+                    Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getOpacity()*OPACITY_MULTIPLIER);
+                    oldColorMap.put(shape, color);
+                    shape.setFill(newColor);
+                }
+            }
+        }
     }
 
     /**
@@ -1217,10 +1274,17 @@ public class AnnotationToolApplication extends Application {
      * Above that: mousecatchingstage
      * On top: controllerbox
      */
-    public void resetStages() {
+    public void resetStages()
+    {
         pictureStage.toFront();
         mouseCatchingStage.toFront();
         controllerBox.toFront();
+        pictureStage.setAlwaysOnTop(false);
+        pictureStage.setAlwaysOnTop(true);
+        mouseCatchingStage.setAlwaysOnTop(false);
+        mouseCatchingStage.setAlwaysOnTop(true);
+        controllerBox.setAlwaysOnTop(false);
+        controllerBox.setAlwaysOnTop(true);
     }
 
     /**
@@ -1843,6 +1907,17 @@ public class AnnotationToolApplication extends Application {
     {
         resetHandlers();
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, lineHandler);
+    }
+    public void sendToBack()
+    {
+        pictureStage.setIconified(true);
+        mouseCatchingStage.setIconified(true);
+    }
+    public void bringToFront()
+    {
+        pictureStage.setIconified(false);
+        mouseCatchingStage.setIconified(false);
+        controllerBox.toFront();
     }
 
     private class LineHandler implements EventHandler<MouseEvent>
