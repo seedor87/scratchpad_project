@@ -1,13 +1,7 @@
 package annotation;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -83,50 +77,6 @@ public class FXAnnotationToolBuilder extends Application {
 	private static String workingPath;
 
 	public static void main(String[] args) {
-		if(args.length > 0) {
-			BufferedReader br = null;
-			FileReader fr = null;
-
-			try {
-
-				fr = new FileReader("state.txt");
-				br = new BufferedReader(fr);
-
-				String sCurrentLine;
-
-				br = new BufferedReader(new FileReader("state.txt"));
-
-				while ((sCurrentLine = br.readLine()) != null) {
-					String[] coords = sCurrentLine.split(" ");
-					widthRestore = Double.valueOf(coords[0]);
-					heightRestore = Double.valueOf(coords[1]);
-					xRestore = Double.valueOf(coords[2]);
-					yRestore = Double.valueOf(coords[3]);
-				}
-
-			} catch (IOException e) {
-
-				e.printStackTrace();
-
-			} finally {
-
-				try {
-
-					if (br != null)
-						br.close();
-
-					if (fr != null)
-						fr.close();
-
-				} catch (IOException ex) {
-
-					ex.printStackTrace();
-
-				}
-
-			}
-		}
-
 		launch(args);
 	}
 
@@ -134,20 +84,6 @@ public class FXAnnotationToolBuilder extends Application {
 	public void start(Stage stage) throws Exception {
 		workingPath = promptDialogBox();
 		System.out.println("from start" + workingPath);
-
-		if(widthRestore > 0) {
-			xPos1 = xRestore;
-			xPos2 = xPos1 + widthRestore;
-			yPos1 = yRestore;
-			yPos2 = yPos1 + heightRestore;
-			if(programRestore != null) {
-				//TODO: Snap into that slim jim
-			} else {
-				build();
-			}
-			return;
-		}
-
 
 		this.stage = stage;
 		this.stage.initStyle(StageStyle.UNDECORATED);
@@ -175,7 +111,6 @@ public class FXAnnotationToolBuilder extends Application {
 		}
 	}
 
-
 	private String promptDialogBox() throws IOException {
 
 
@@ -192,7 +127,7 @@ public class FXAnnotationToolBuilder extends Application {
 		dialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
 		//Set extension filter
 		chooser.setInitialFileName(path);
-		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Annotation Files (*.jnote)", "*.jnote");
 		chooser.getExtensionFilters().add(extFilter);
 		Optional<ButtonType> result = dialog.showAndWait();
 		if (result.get() == buttonTypeOne) { //create new project/file
@@ -225,7 +160,7 @@ public class FXAnnotationToolBuilder extends Application {
 	 */
 	public String getFileName() {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-		timeStamp += ".json";
+		timeStamp += ".jnote";
 		//return timeStamp;
 		return timeStamp;
 	}

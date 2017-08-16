@@ -7,6 +7,8 @@ import changeItem.*;
 import TransferableShapes.*;
 
 import com.google.gson.*;
+import com.sun.jmx.snmp.Timestamp;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -46,6 +48,7 @@ import rectify.AnnotatePoint;
 import rectify.Broken;
 import rectify.Devdata;
 import rectify.Point;
+import util.FilePacker;
 import util.GlobalInputListener;
 import util.InputRecord;
 import util.WindowInfo;
@@ -106,10 +109,12 @@ public class AnnotationToolApplication extends Application {
     //record keeping
     UUID uuid;
     private Gson gson = new Gson();
-    private String json_fileName;
+    private String jnote_fileName;
+    private String json_fileName = "ShapeRecord.json";
     private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
     private ScheduledExecutorService windowGrabber;
     private ArrayList<WindowInfo> relevantWindows;
+    private ArrayList<String> dataFiles = new ArrayList<String>();
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
     private Stage mouseCatchingStage;
@@ -187,18 +192,18 @@ public class AnnotationToolApplication extends Application {
     // Constructors/Starts
     //================================================================================
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String json_fileName) throws IOException {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, String jnote_fileName) throws IOException {
         start(primaryStage, secondaryStage, x, y, sizedWindow);
-        this.json_fileName = json_fileName;
-        System.out.println("From init" + json_fileName);
+        this.jnote_fileName = jnote_fileName;
+        System.out.println("From init" + jnote_fileName);
         remakeFromJSON();
         this.primaryStage = primaryStage;
 
     }
 
-    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID, String json_fileName) throws IOException {
+    public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID, String jnote_fileName) throws IOException {
         this.windowID = windowID;
-        this.json_fileName = json_fileName;
+        this.jnote_fileName = jnote_fileName;
         remakeFromJSON();
 
         start(primaryStage, secondaryStage, x, y, sizedWindow);
@@ -312,7 +317,8 @@ public class AnnotationToolApplication extends Application {
 
 
         try {
-            InputStream is = new FileInputStream(new File(json_fileName));
+        	String jsonRecord = FilePacker.retrieveFromZip(jnote_fileName, "ShapeRecord");
+            InputStream is = new FileInputStream(new File(jsonRecord));
             Reader r = new InputStreamReader(is, "UTF-8");
             Gson gson = new GsonBuilder().create();
             JsonStreamParser p = new JsonStreamParser(r);
@@ -343,15 +349,18 @@ public class AnnotationToolApplication extends Application {
 
                 }
             }
-        } catch (Exception exc) {
+        } catch (FileNotFoundException fnfe) {
+        	FilePacker.createZip(jnote_fileName, new ArrayList<String>());
+    	} catch (Exception exc) {
             exc.printStackTrace();
         }
 
 
         try {
             writer = new FileWriter(json_fileName);
+            dataFiles.add(json_fileName);
         } catch (FileNotFoundException fileNotFound) {
-            System.out.println("ERROR: While Creating or Opening the File " + json_fileName);
+            System.out.println("ERROR: While Creating or Opening the File ShapeRecord.json");
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -1561,7 +1570,7 @@ public class AnnotationToolApplication extends Application {
 
         System.out.println(gson.toJson(shape));
         gson.toJson(shape, writer);
-
+        FilePacker.createZip(jnote_fileName, dataFiles);
 
 
         /*ObjectMapper mapper = new ObjectMapper();
@@ -2421,7 +2430,7 @@ public class AnnotationToolApplication extends Application {
         chooser.setInitialDirectory(new File("."));
         //Set extension filter
         chooser.setInitialFileName(path);
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.json)", "*.json");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Annotation files (*.jnote)", "*.jnote");
         chooser.getExtensionFilters().add(extFilter);
         writer.flush();
         writer.close();
@@ -2432,14 +2441,14 @@ public class AnnotationToolApplication extends Application {
             case "new":  //new project
                 File file = chooser.showSaveDialog(primaryStage);
                 path = file.getAbsoluteFile().toString();
-                json_fileName = path;
+                jnote_fileName = path;
                 root.getChildren().clear(); //clears the stage
 
                 undoStack.clear();
                 redoStack.clear();
                 prev_shapes.clear();
                 remakeFromJSON();
-                System.out.println("new Project: " + json_fileName);
+                System.out.println("new Project: " + jnote_fileName);
                 break;
             case "open": //open project
                 path = chooser.showOpenDialog(null).getAbsoluteFile().toString();
@@ -2449,18 +2458,18 @@ public class AnnotationToolApplication extends Application {
                 undoStack.clear();
                 redoStack.clear();
                 prev_shapes.clear();
-                json_fileName = path;
+                jnote_fileName = path;
                 remakeFromJSON();
-                System.out.println("open Project: " + json_fileName);
+                System.out.println("open Project: " + jnote_fileName);
                 break;
             case "save":  // save as
                 //Show save file dialog
                 File file_2 = chooser.showSaveDialog(primaryStage);
                 path = file_2.getAbsoluteFile().toString();
-                copy(new File(json_fileName), new File(path));
-                json_fileName = path;
+                copy(new File(jnote_fileName), new File(path));
+                jnote_fileName = path;
                 remakeFromJSON();
-                System.out.println("save As: " + json_fileName);
+                System.out.println("save As: " + jnote_fileName);
 
                 break;
         }

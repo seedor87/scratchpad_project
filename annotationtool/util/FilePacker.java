@@ -15,18 +15,16 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class FilePacker {
-	public static void main(String[] args) {
-		System.out.println(retrieveFromZip("ReadZip.coolguy", "test"));
-	}
 	
 	public static String retrieveFromZip(String zipPath, String fileContents) {
 		String fileName = "";
 		try {
 			ZipFile zip = new ZipFile(zipPath);
 			Enumeration entries = zip.entries();
+			int entryNum = 0;
 			while(entries.hasMoreElements()) {
 				ZipEntry entry = (ZipEntry) entries.nextElement();
-				if(entry.getName().startsWith(fileContents, 0)) {
+				if(entry.getName().contains(fileContents)) {
 					InputStream in = zip.getInputStream(entry);
 					fileName = "/tmp/" + entry.getName();
 					if(new File(fileName).exists()) {
@@ -34,17 +32,19 @@ public class FilePacker {
 					}
 					Files.copy(in, Paths.get(fileName));
 				}
+				entryNum++;
 			}
+			System.out.println("Entries: " + entryNum);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			return fileName;
 		}
+		System.out.println("File is at: " + fileName);
+		return fileName;
 	}
 	
 	public static void createZip(String zipName, ArrayList<String> fileNames) {
 		try {
-			FileOutputStream fOut = new FileOutputStream(zipName + ".annot");
+			FileOutputStream fOut = new FileOutputStream(zipName);
 			ZipOutputStream zOut = new ZipOutputStream(fOut);
 			
 			for(String fileName : fileNames) {
