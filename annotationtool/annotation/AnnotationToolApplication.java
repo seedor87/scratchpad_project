@@ -318,7 +318,8 @@ public class AnnotationToolApplication extends Application {
     private void remakeFromJSON() throws IOException {
 
 
-        try {
+        try
+        {
         	String jsonRecord = FilePacker.retrieveFromZip(jnote_fileName, "ShapeRecord");
             InputStream is = new FileInputStream(new File(jsonRecord));
             Reader r = new InputStreamReader(is, "UTF-8");
@@ -351,7 +352,8 @@ public class AnnotationToolApplication extends Application {
 
                 }
             }
-        } catch (FileNotFoundException fnfe) {
+        }
+        catch (FileNotFoundException fnfe) {
         	FilePacker.createZip(jnote_fileName, new ArrayList<String>());
     	} catch (Exception exc) {
             exc.printStackTrace();
@@ -1578,6 +1580,7 @@ public class AnnotationToolApplication extends Application {
 
         System.out.println(gson.toJson(shape));
         gson.toJson(shape, writer);
+        writer.flush();
         FilePacker.createZip(jnote_fileName, dataFiles);
 
 
