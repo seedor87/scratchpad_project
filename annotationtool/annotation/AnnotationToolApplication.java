@@ -198,6 +198,7 @@ public class AnnotationToolApplication extends Application {
         System.out.println("From init" + jnote_fileName);
         remakeFromJSON();
         this.primaryStage = primaryStage;
+        
 
     }
 
