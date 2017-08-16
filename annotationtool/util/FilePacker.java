@@ -18,6 +18,13 @@ public class FilePacker {
 	
 	public static String retrieveFromZip(String zipPath, String fileContents) {
 		String fileName = "";
+		String tempDir = "";
+		if(System.getProperty("os.name").equals("Linux")) {
+			tempDir = "/tmp/";
+		}else{
+			tempDir =  System.getProperty("java.io.tmpdir");
+		}
+
 		try {
 			ZipFile zip = new ZipFile(zipPath);
 			Enumeration entries = zip.entries();
@@ -26,7 +33,7 @@ public class FilePacker {
 				ZipEntry entry = (ZipEntry) entries.nextElement();
 				if(entry.getName().contains(fileContents)) {
 					InputStream in = zip.getInputStream(entry);
-					fileName = "/tmp/" + entry.getName();
+					fileName = tempDir + entry.getName();
 					if(new File(fileName).exists()) {
 						new File(fileName).delete();
 					}
