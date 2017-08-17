@@ -1057,7 +1057,19 @@ public class AnnotationToolApplication extends Application {
             newShape.setFill(line.getStroke());
             undo();
             commitChange(new AddShape(newShape));
+            uuid = UUID.randomUUID();
             Custom_Shape.setUpUUIDMaps(newShape, uuid);
+
+            //Save arrow to file
+            Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.ARROW_STRING, (Color) paint, strokeWidth + "",
+                                        new TransferableShapes.Point(line.getStartX()+"", line.getStartY()+""),
+                                        new TransferableShapes.Point(line.getEndX() + "", line.getEndY()+""));
+            try {
+                writeJSON(custom_shape);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
     }
