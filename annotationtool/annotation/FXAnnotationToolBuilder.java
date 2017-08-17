@@ -1,7 +1,13 @@
 package annotation;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -35,11 +41,19 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import util.FilePacker;
 import util.ProcessRunner;
 import util.WindowInfo;
 import util.X11InfoGatherer;
 
 import javax.swing.*;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonStreamParser;
 
 import static javax.swing.UIManager.get;
 
@@ -57,9 +71,9 @@ public class FXAnnotationToolBuilder extends Application {
 	private TableView table;
 
 	private ArrayList<WindowInfo> windows;
+	private ArrayList<String> prevSessionWindows = new ArrayList<String>();
 	private int[] windowAttributes;
 
-	private static String programRestore;
 
 	private double xPos1;
 	private double yPos1;
@@ -84,6 +98,7 @@ public class FXAnnotationToolBuilder extends Application {
 	public void start(Stage stage) throws Exception {
 		workingPath = promptDialogBox();
 		System.out.println("from start" + workingPath);
+		getLastSessionInfo();
 
 		this.stage = stage;
 		this.stage.initStyle(StageStyle.UNDECORATED);
@@ -152,6 +167,42 @@ public class FXAnnotationToolBuilder extends Application {
 		System.out.println(path);
 		return path;
 	}
+	
+	private void getLastSessionInfo() {
+		String windowRecord = FilePacker.retrieveFromZip(workingPath, "WindowRecord");
+		if(!windowRecord.equals("")) {
+			try {
+				File windowRecordFile = new File(windowRecord);
+				if(windowRecordFile.length() == 0) {
+					return;
+				}
+				InputStream is = new FileInputStream(new File(windowRecord));
+				Reader r = new InputStreamReader(is, "UTF-8");
+	            Gson gson = new GsonBuilder().create();
+	            JsonStreamParser p = new JsonStreamParser(r);
+	            if(p.hasNext()) {
+	            	JsonArray windows = (JsonArray) p.next();
+	            	for(JsonElement e : windows) {
+	            		WindowInfo windowInfo = gson.fromJson(e, WindowInfo.class);
+	            		prevSessionWindows.add(windowInfo.getTitle());
+	            	}
+	            }
+	            if(p.hasNext()) {
+	            	JsonArray dimensions = (JsonArray) p.next();
+	            	widthRestore = gson.fromJson(dimensions.get(0), Double.class);
+	            	heightRestore = gson.fromJson(dimensions.get(1), Double.class);
+	            	xRestore = gson.fromJson(dimensions.get(2), Double.class);
+	            	yRestore = gson.fromJson(dimensions.get(3), Double.class);
+	            }
+	            
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
 
 	/**
 	 * Generates a file name based on date and time
@@ -201,34 +252,31 @@ public class FXAnnotationToolBuilder extends Application {
 		restoreSessionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				double x = 200;
-				double y = 150;
-				double width = 900;
-				double height = 750;
-				//TODO: Open JSON with info from prev. session, update annotation window size variables.
-				Process proc = null;
-				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
-				if(selectedItem != null) {
-					ProcessRunner.focusWindow(selectedItem.getTitle(), proc);
-					ProcessRunner.resizeWindow(selectedItem.getTitle(), x, y, width, height, proc);
-
-
-
-					windowAttributes = selectedItem.getDimensions();
-
-					try {
-						buildFromInfo(selectedItem);
-					} catch (IOException e) {
-						e.printStackTrace();
+				if(widthRestore != -1 && heightRestore != -1) {
+					Process proc = null;
+					WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
+					if(selectedItem != null && prevSessionWindows.size() == 1) {
+						ProcessRunner.focusWindow(selectedItem.getTitle(), proc);
+						ProcessRunner.resizeWindow(selectedItem.getTitle(), xRestore, yRestore, widthRestore, heightRestore, proc);
+						
+						windowAttributes = selectedItem.getDimensions();
+						
+						try {
+							buildFromInfo(selectedItem);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						stage.close();
+					} else {
+						try {
+							System.out.println("hm.");
+							restoreSession(new String[] {String.valueOf(widthRestore), String.valueOf(heightRestore), 
+													     String.valueOf(xRestore), String.valueOf(yRestore)});
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						stage.close();
 					}
-					stage.close();
-				} else {
-					try {
-						restoreSession(new String[] {String.valueOf(width), String.valueOf(height), String.valueOf(x), String.valueOf(y)});
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					stage.close();
 				}
 			}
 		});
@@ -446,8 +494,12 @@ public class FXAnnotationToolBuilder extends Application {
 	 *
 	 * @param args Array containing attributes of the saved window.
 	 */
-	private static void restoreSession(String[] args) throws IOException {
-		if(args.length > 2) {
+	private void restoreSession(String[] args) throws IOException {
+		if(args.length == 4) {
+			building = true;
+			this.stage.setOpacity(0f);
+			this.stage.setIconified(true);
+			
 			double width = Double.valueOf(args[0]);
 			double height = Double.valueOf(args[1]);
 			double x = Double.valueOf(args[2]);
@@ -458,19 +510,15 @@ public class FXAnnotationToolBuilder extends Application {
 			newSecondaryStage.setWidth(width);
 			newStage.setHeight(height);
 			newSecondaryStage.setHeight(height);
+			System.out.println("hmm...");
 
-			if(args.length > 3) {
-				//TODO: Launch program whose name is listed here.
-			} else {
-				AnnotationToolApplication app = new AnnotationToolApplication(
-						newStage,
-						newSecondaryStage,
-						x,
-						y,
-						true,
-						workingPath);
-			}
-
+			AnnotationToolApplication app = new AnnotationToolApplication(
+					newStage,
+					newSecondaryStage,
+					x,
+					y,
+					true,
+					workingPath);
 		} else {
 			launch(args);
 		}

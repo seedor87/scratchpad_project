@@ -106,11 +106,13 @@ public class AnnotationToolApplication extends Application {
     private final Color clearPaint = new Color(0, 0, 0, 0);
     private final double[] minStageSize = {100, 100};
     public static FileWriter writer = null;
+    public static FileWriter windowWriter = null;
     //record keeping
     UUID uuid;
     private Gson gson = new Gson();
     private String jnote_fileName;
     private String json_fileName = "ShapeRecord.json";
+    private String window_fileName = "WindowRecord.json";
     private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
     private ScheduledExecutorService windowGrabber;
     private ArrayList<WindowInfo> relevantWindows;
@@ -299,19 +301,6 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingStage.show();
         pictureStage.show();
         
-        if(windowID == null) {
-        	windowGrabber = Executors.newSingleThreadScheduledExecutor();
-        	windowGrabber.scheduleAtFixedRate(new Runnable() {
-				
-				@Override
-				public void run() {
-					updateRelevantWindows();
-				}
-				
-			}, 0, 10, TimeUnit.SECONDS);
-        }
-
-
         this.primaryStage = primaryStage;
     }
 
@@ -363,6 +352,8 @@ public class AnnotationToolApplication extends Application {
         try {
             writer = new FileWriter(json_fileName);
             dataFiles.add(json_fileName);
+            windowWriter = new FileWriter(window_fileName);
+            dataFiles.add(window_fileName);
         } catch (FileNotFoundException fileNotFound) {
             System.out.println("ERROR: While Creating or Opening the File ShapeRecord.json");
         } catch (IOException ex) {
@@ -957,8 +948,7 @@ public class AnnotationToolApplication extends Application {
      * If the given window closes, stops the scheduled executor service calling the method.
      * 
      * @param windowID The window to snap to.
-     * /@param executor The Scheduled Executor Service calling this method.
-     *///TODO add the param back if desired
+     */
     public void resnapToWindow(WindowInfo windowID) {
         int[] windowInfo = windowID.getDimensions();
         if(windowInfo[0] != 0 && windowInfo[1] != 0 && windowInfo[2] != 0 && windowInfo[3] != 0) {
@@ -966,14 +956,7 @@ public class AnnotationToolApplication extends Application {
             mouseCatchingStage.setX(windowInfo[2]);
             mouseCatchingStage.setY(windowInfo[3]);
         } else {
-        	windowGrabber = Executors.newSingleThreadScheduledExecutor();
-        	windowGrabber.scheduleAtFixedRate(new Runnable() {
-				
-				@Override
-				public void run() {
-					updateRelevantWindows();
-				}
-			}, 0, 10, TimeUnit.SECONDS);
+        	this.windowID = null;
         }
     }
 
@@ -1380,19 +1363,34 @@ public class AnnotationToolApplication extends Application {
 
     public void updateRelevantWindows() {
     	if(System.getProperty("os.name").equals("Linux")) {
-    		X11InfoGatherer x11 = X11InfoGatherer.getX11InfoGatherer();
-    		ArrayList<WindowInfo> allWindows = x11.getAllWindows();
     		ArrayList<WindowInfo> relevantWindows = new ArrayList<WindowInfo>();
-    		for(WindowInfo window : allWindows) {
-    			int[] dimensions = window.getDimensions();
-    			if(dimensions[0] + dimensions[2] > mouseCatchingStage.getX() &&
-    			   dimensions[2] < mouseCatchingStage.getX() + mouseCatchingStage.getWidth() &&
-    			   dimensions[1] + dimensions[3] > mouseCatchingStage.getY() && 
-    			   dimensions[3] < mouseCatchingStage.getY() + mouseCatchingStage.getHeight()) {
-    				relevantWindows.add(window);
+    		if(windowID == null) {
+    			X11InfoGatherer x11 = X11InfoGatherer.getX11InfoGatherer();
+    			ArrayList<WindowInfo> allWindows = x11.getAllWindows();
+    			for(WindowInfo window : allWindows) {
+    				int[] dimensions = window.getDimensions();
+    				if(dimensions[0] + dimensions[2] > mouseCatchingStage.getX() &&
+    						dimensions[2] < mouseCatchingStage.getX() + mouseCatchingStage.getWidth() &&
+    						dimensions[1] + dimensions[3] > mouseCatchingStage.getY() && 
+    						dimensions[3] < mouseCatchingStage.getY() + mouseCatchingStage.getHeight()) {
+    					relevantWindows.add(window);
+    				}
     			}
+    			this.relevantWindows = relevantWindows;
     		}
-    		this.relevantWindows = relevantWindows;
+    		else {
+    			relevantWindows.add(windowID);
+    		}
+    		
+    		try {
+    			windowWriter.close();
+				windowWriter = new FileWriter(window_fileName);
+				gson.toJson(this.relevantWindows, windowWriter);
+				gson.toJson(new double[] {mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight(), 
+										  mouseCatchingStage.getX(), mouseCatchingStage.getY()}, windowWriter);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
     	}
     }
 
@@ -1581,6 +1579,8 @@ public class AnnotationToolApplication extends Application {
         System.out.println(gson.toJson(shape));
         gson.toJson(shape, writer);
         writer.flush();
+        updateRelevantWindows();
+        windowWriter.flush();
         FilePacker.createZip(jnote_fileName, dataFiles);
 
 
