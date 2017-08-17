@@ -79,10 +79,8 @@ public class GlobalInputListener implements
 			FileOutputStream fileOut = new FileOutputStream("inputEvents.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(inputEvents);
-			System.out.println("wrote it");
 			out.close();
 			fileOut.close();
-			System.out.println("Input data saved.");
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
