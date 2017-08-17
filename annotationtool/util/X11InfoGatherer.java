@@ -2,6 +2,8 @@ package util;
 
 import java.util.ArrayList;
 
+import javax.swing.plaf.synth.SynthSeparatorUI;
+
 import com.sun.jna.Native;
 import com.sun.jna.platform.unix.X11;
 import com.sun.jna.platform.unix.X11.Display;
@@ -16,21 +18,14 @@ public class X11InfoGatherer {
 	com.sun.jna.platform.unix.X11.Window root;
     long parentWindowId = -1;
 	
-    public static X11InfoGatherer getX11InfoGatherer() {
-    	if(gatherer != null) {
-    		return gatherer;
-    	} else {
-    		return new X11InfoGatherer();
-    	}
-    }
-    
 	/**
 	 * Creates references to a new X11 instance, the computer's display, and the root window.
 	 */
-	private X11InfoGatherer() {
+	public X11InfoGatherer() {
 		x11 = X11.INSTANCE;
 		display = x11.XOpenDisplay(null);
 		root = x11.XDefaultRootWindow(display);
+		System.out.println("OPEN");
 	}
 	
 	/**
@@ -39,7 +34,11 @@ public class X11InfoGatherer {
 	 * @return An ArrayList containing one WindowInfo for each open window.
 	 */
 	public ArrayList<WindowInfo> getAllWindows() {
-		return getAllWindows(this.root, 0);
+		
+		ArrayList<WindowInfo> windows = getAllWindows(this.root, 0);
+		x11.XCloseDisplay(display);
+		System.out.println("CLOSE");
+		return windows;
 	}
 	
 	/**
@@ -102,10 +101,10 @@ public class X11InfoGatherer {
 	        	}
 	        }
 
-	        
 	        ArrayList<WindowInfo> recursiveWindowList = getAllWindows(window, depth + 1);
 	        windowList.addAll(recursiveWindowList);
 	    }
+	    
 	    return windowList;
 	}
 	
@@ -119,7 +118,8 @@ public class X11InfoGatherer {
 		com.sun.jna.platform.unix.X11.Window window = new com.sun.jna.platform.unix.X11.Window(id);
 		X11.XTextProperty name = new X11.XTextProperty();
 		x11.XGetWMName(display, window, name);
-		
+		x11.XCloseDisplay(display);
+		System.out.println("CLOSE");
 		return name.value;
 	}
 	
@@ -134,6 +134,9 @@ public class X11InfoGatherer {
 		X11.XWindowAttributes attributes = new X11.XWindowAttributes();
         x11.XGetWindowAttributes(display, window, attributes);
         int[] dimensions = {attributes.width, attributes.height, attributes.x, attributes.y};
+        x11.XCloseDisplay(display);
+		System.out.println("CLOSE");
         return dimensions;
 	}
+	
 }

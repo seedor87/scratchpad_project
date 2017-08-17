@@ -1365,8 +1365,9 @@ public class AnnotationToolApplication extends Application {
     	if(System.getProperty("os.name").equals("Linux")) {
     		ArrayList<WindowInfo> relevantWindows = new ArrayList<WindowInfo>();
     		if(windowID == null) {
-    			X11InfoGatherer x11 = X11InfoGatherer.getX11InfoGatherer();
+    			X11InfoGatherer x11 = new X11InfoGatherer();
     			ArrayList<WindowInfo> allWindows = x11.getAllWindows();
+    			System.out.println("gettin window");
     			for(WindowInfo window : allWindows) {
     				int[] dimensions = window.getDimensions();
     				if(dimensions[0] + dimensions[2] > mouseCatchingStage.getX() &&

@@ -119,7 +119,7 @@ public class FXAnnotationToolBuilder extends Application {
 		gc.setLineWidth(4);
 
 		if(System.getProperty("os.name").equals("Linux")) {
-			gatherer = X11InfoGatherer.getX11InfoGatherer();
+			gatherer = new X11InfoGatherer();
 			windows = gatherer.getAllWindows();
 			tableStage = new Stage();
 			createWindowList(tableStage);
