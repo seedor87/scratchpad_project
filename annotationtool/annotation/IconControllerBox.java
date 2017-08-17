@@ -327,7 +327,6 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(eraseButton);
 
         Button shapePickerButton = new Button();
-        //Text numberText = new Text("5");    //TODO change this based on selected option.
         shapePickerGraphic = drawImage;
         shapePickerButton.setGraphic(drawImage);
         shapePickerButton.setTooltip(getToolTip("Pick a shape"));
@@ -335,8 +334,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-                shapePickerButton.setGraphic(null);
-                shapePickerButton.graphicProperty().setValue(null);
+                //shapePickerButton.setGraphic(null);
+                //shapePickerButton.graphicProperty().setValue(null);
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Shape Tool");
                 dialog.initStyle(StageStyle.UTILITY);
@@ -369,31 +368,20 @@ public class IconControllerBox extends Stage
                 dialog.setWidth(300);
 
                 ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+                ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-                dialog.getDialogPane().getButtonTypes().addAll(okButton);
+                dialog.getDialogPane().getButtonTypes().addAll(cancelButton);
 
                 setDialogLocation(dialog);
                 dialog.showAndWait();
                 shapePickerButton.setGraphic(shapePickerGraphic);
+                System.out.println("\n\n\n" + shapePickerGraphic);
                 at.resetStages();
             }
         });
         nodes.add(shapePickerButton);
 
         //selectedButton = shapePickerButton;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         /*
         * Sets up the listeners for changing the graphic of the main button that calls the shape
