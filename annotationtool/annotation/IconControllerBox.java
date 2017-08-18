@@ -329,8 +329,9 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(eraseButton);
 
         Button shapePickerButton = new Button();
-        shapePickerGraphic = drawImage;
-        shapePickerButton.setGraphic(drawImage);
+        ImageView shapePickerImage = new ImageView(drawImage.getImage());
+        shapePickerGraphic = shapePickerImage;
+        shapePickerButton.setGraphic(shapePickerImage);
         shapePickerButton.setTooltip(getToolTip("Pick a shape"));
         shapePickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
