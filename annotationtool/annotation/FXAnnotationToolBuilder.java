@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -193,6 +194,12 @@ public class FXAnnotationToolBuilder extends Application {
 	            	heightRestore = gson.fromJson(dimensions.get(1), Double.class);
 	            	xRestore = gson.fromJson(dimensions.get(2), Double.class);
 	            	yRestore = gson.fromJson(dimensions.get(3), Double.class);
+	            } else {
+	            	System.err.println("NO DIMENSIONS WERE GIVEN");
+	            	widthRestore = 500;
+	            	heightRestore = 500;
+	            	xRestore = 100;
+	            	yRestore = 100;
 	            }
 	            
 			} catch (FileNotFoundException e) {
@@ -227,8 +234,6 @@ public class FXAnnotationToolBuilder extends Application {
 
 		Scene scene = new Scene(new Group());
 		stage.setTitle("Windows");
-		stage.setWidth(600);
-		stage.setHeight(500);
 
 		final Label label = new Label("Windows");
 		label.setFont(new Font("Arial", 20));
@@ -245,7 +250,8 @@ public class FXAnnotationToolBuilder extends Application {
 
 		final VBox vbox = new VBox();
 		vbox.setSpacing(5);
-		vbox.setPadding(new Insets(10, 0, 0, 20));
+		vbox.setPadding(new Insets(10, 20, 20, 20));
+		
 
 		Button restoreSessionButton = new Button();
 		restoreSessionButton.setText("Restore Previous Session");
@@ -280,7 +286,7 @@ public class FXAnnotationToolBuilder extends Application {
 				}
 			}
 		});
-
+		
 		Button selectWindowButton = new Button();
 		selectWindowButton.setText("Annotate Selected Window");
 		selectWindowButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -311,12 +317,24 @@ public class FXAnnotationToolBuilder extends Application {
 				stage.close();
 			}
 		});
+		
+		Label prevSessionLabel = new Label("Windows from previous session:");
+		
+		ListView<String> prevSessionWindowList = new ListView<>();
+		ObservableList<String> prevSessionWindows = FXCollections.observableArrayList(this.prevSessionWindows);
+		prevSessionWindowList.setItems(prevSessionWindows);
+		prevSessionWindowList.setMaxSize(800, 150);
 
 		HBox hbox = new HBox();
 		hbox.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-		hbox.getChildren().addAll(restoreSessionButton, selectWindowButton, annotateDesktopButton);
-
-		vbox.getChildren().addAll(table, hbox);
+		
+		if(this.prevSessionWindows.size() > 0) {
+			hbox.getChildren().addAll(restoreSessionButton, selectWindowButton, annotateDesktopButton);
+			vbox.getChildren().addAll(prevSessionLabel, prevSessionWindowList, table, hbox);
+		} else {
+			hbox.getChildren().addAll(selectWindowButton, annotateDesktopButton);
+			vbox.getChildren().addAll(table, hbox);
+		}
 
 		((Group) scene.getRoot()).getChildren().addAll(vbox);
 
@@ -324,6 +342,7 @@ public class FXAnnotationToolBuilder extends Application {
 		table.setPrefHeight(400);
 
 		stage.setScene(scene);
+		stage.sizeToScene();
 		stage.show();
 	}
 

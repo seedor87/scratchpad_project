@@ -302,6 +302,14 @@ public class AnnotationToolApplication extends Application {
         pictureStage.show();
         
         this.primaryStage = primaryStage;
+        
+        resnapToWindow(windowID);
+        
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.WARNING);
+
+        // Don't forget to disable the parent handlers.
+        logger.setUseParentHandlers(false);
     }
 
     private void remakeFromJSON() throws IOException {
@@ -363,7 +371,7 @@ public class AnnotationToolApplication extends Application {
         for (Object prev_shape : prev_shapes) {
             writeJSON((Custom_Shape) prev_shape);
         }
-
+        
     }
 
 
@@ -950,14 +958,18 @@ public class AnnotationToolApplication extends Application {
      * @param windowID The window to snap to.
      */
     public void resnapToWindow(WindowInfo windowID) {
-        int[] windowInfo = windowID.getDimensions();
-        if(windowInfo[0] != 0 && windowInfo[1] != 0 && windowInfo[2] != 0 && windowInfo[3] != 0) {
-            resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
-            mouseCatchingStage.setX(windowInfo[2]);
-            mouseCatchingStage.setY(windowInfo[3]);
-        } else {
-        	this.windowID = null;
-        }
+    	if(windowID != null) {
+    		int[] windowInfo = windowID.getDimensions();
+    		if(windowInfo[0] != 0 && windowInfo[1] != 0 && windowInfo[2] != 0 && windowInfo[3] != 0) {
+    			resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
+    			mouseCatchingStage.setX(windowInfo[2]);
+    			mouseCatchingStage.setY(windowInfo[3]);
+    			pictureStage.setX(windowInfo[2]);
+    			pictureStage.setY(windowInfo[3]);
+    		} else {
+    			this.windowID = null;
+    		}
+    	}
     }
 
 
@@ -1393,17 +1405,20 @@ public class AnnotationToolApplication extends Application {
     		}
     		else {
     			relevantWindows.add(windowID);
+    			this.relevantWindows = relevantWindows;
     		}
     		
     		try {
-    			windowWriter.close();
-				windowWriter = new FileWriter(window_fileName);
-				gson.toJson(this.relevantWindows, windowWriter);
-				gson.toJson(new double[] {mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight(), 
-										  mouseCatchingStage.getX(), mouseCatchingStage.getY()}, windowWriter);
+    			if(mouseCatchingStage != null) {
+    				windowWriter.close();
+    				windowWriter = new FileWriter(window_fileName);
+    				gson.toJson(this.relevantWindows, windowWriter);
+    				gson.toJson(new double[] {mouseCatchingStage.getWidth(), mouseCatchingStage.getHeight(), 
+    						mouseCatchingStage.getX(), mouseCatchingStage.getY()}, windowWriter);
+    			}
 			} catch (IOException e) {
 				e.printStackTrace();
-			}
+			} 
     	}
     }
 

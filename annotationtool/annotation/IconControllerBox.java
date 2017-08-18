@@ -115,6 +115,8 @@ public class IconControllerBox extends Stage
                         at.writer.close();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (NullPointerException e) {
+                    	e.printStackTrace();
                     }
                     System.exit(0);
                 }
