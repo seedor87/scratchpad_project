@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,6 +23,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -73,8 +75,10 @@ public class FXAnnotationToolBuilder extends Application {
 
 	private ArrayList<WindowInfo> windows;
 	private ArrayList<String> prevSessionWindows = new ArrayList<String>();
+	
+    private String last_file_fileName = "lastFile.txt";
+	
 	private int[] windowAttributes;
-
 
 	private double xPos1;
 	private double yPos1;
@@ -159,7 +163,7 @@ public class FXAnnotationToolBuilder extends Application {
 
 		} else if (result.get() == buttonTypeTwo) { //import from file
 			// ... user chose "Two"
-			path = chooser.showOpenDialog(null).getPath();
+			path = importFile(chooser);
 		} else {
 			// ... user chose CANCEL or closed the dialog
 			System.exit(0);
@@ -167,6 +171,39 @@ public class FXAnnotationToolBuilder extends Application {
 
 		System.out.println(path);
 		return path;
+	}
+	
+	private String importFile(FileChooser chooser) {
+		InputStream is;
+		try {
+			is = new FileInputStream(new File(last_file_fileName));
+			Reader r = new InputStreamReader(is, "UTF-8");
+			BufferedReader br = new BufferedReader(r);
+			String filePath = br.readLine();
+			if(filePath.contains("restore/recovery")) {
+				Alert dialog = new Alert(AlertType.CONFIRMATION);
+				dialog.setTitle("Restore previous session");
+				dialog.setHeaderText("Looks like you didn't save properly before exiting.");
+				dialog.setContentText("Would you like to open your most recent autosave?");
+				ButtonType confirmBtn = new ButtonType("Yes");
+				ButtonType closeBtn = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+				dialog.getButtonTypes().setAll(confirmBtn, closeBtn);
+				Optional<ButtonType> result = dialog.showAndWait();
+				
+				if(result.get() == confirmBtn) {
+					return filePath;
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		String filePath = chooser.showOpenDialog(null).getPath();
+		return filePath;
 	}
 	
 	private void getLastSessionInfo() {

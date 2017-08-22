@@ -325,6 +325,10 @@ public class AnnotationToolApplication extends Application {
             Reader r = new InputStreamReader(is, "UTF-8");
             Gson gson = new GsonBuilder().create();
             JsonStreamParser p = new JsonStreamParser(r);
+            if(p.hasNext()) {
+            	JsonElement e = p.next();
+            	jnote_fileName = gson.fromJson(e, String.class);
+            }
             while (p.hasNext()) {
                 JsonElement e;
                 try {
@@ -363,6 +367,7 @@ public class AnnotationToolApplication extends Application {
         try {
             writer = new FileWriter(json_fileName);
             dataFiles.add(json_fileName);
+            gson.toJson(jnote_fileName, writer);
             windowWriter = new FileWriter(window_fileName);
             dataFiles.add(window_fileName);
         } catch (FileNotFoundException fileNotFound) {
@@ -1584,8 +1589,7 @@ public class AnnotationToolApplication extends Application {
         commitChange(editTextToSave);
         saveEditText = true;
     }
-
-
+    
     public void writeJSON(Custom_Shape shape) throws IOException {
 
         System.out.println(gson.toJson(shape));
@@ -1622,6 +1626,7 @@ public class AnnotationToolApplication extends Application {
         try{
             PrintWriter lastFileWriter = new PrintWriter(last_file_fileName, "UTF-8");
             lastFileWriter.println(fileName);
+            System.out.println("Last file: " + fileName);
             lastFileWriter.close();
         } catch (IOException e) {
         	e.printStackTrace();
@@ -2478,13 +2483,13 @@ public class AnnotationToolApplication extends Application {
         chooser.setInitialFileName(path);
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Annotation files (*.jnote)", "*.jnote");
         chooser.getExtensionFilters().add(extFilter);
-        writer.flush();
-        writer.close();
 
 
 
         switch (flag) {
             case "new":  //new project
+                writer.flush();
+                writer.close();
                 File file = chooser.showSaveDialog(primaryStage);
                 path = file.getAbsoluteFile().toString();
                 jnote_fileName = path;
@@ -2497,6 +2502,8 @@ public class AnnotationToolApplication extends Application {
                 System.out.println("new Project: " + jnote_fileName);
                 break;
             case "open": //open project
+                writer.flush();
+                writer.close();
                 path = chooser.showOpenDialog(null).getAbsoluteFile().toString();
 
                 root.getChildren().clear(); //clears the stage
@@ -2509,6 +2516,8 @@ public class AnnotationToolApplication extends Application {
                 System.out.println("open Project: " + jnote_fileName);
                 break;
             case "save":  // save as
+                writer.flush();
+                writer.close();
                 //Show save file dialog
                 File file_2 = chooser.showSaveDialog(primaryStage);
                 path = file_2.getAbsoluteFile().toString();
@@ -2518,7 +2527,8 @@ public class AnnotationToolApplication extends Application {
                 System.out.println("save As: " + jnote_fileName);
 
                 break;
-            case "sfile": // save file
+            case "sFile": // save file
+            	System.out.println("AAAAAAAA, IT'S " + jnote_fileName);
             	writeJSON(jnote_fileName);
             	break;
         }
