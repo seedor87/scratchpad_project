@@ -110,7 +110,9 @@ public class AnnotationToolApplication extends Application {
     //record keeping
     UUID uuid;
     private Gson gson = new Gson();
+    private String last_file_fileName = "lastFile.txt";
     private String jnote_fileName;
+    private String temp_jnote_fileName;
     private String json_fileName = "ShapeRecord.json";
     private String window_fileName = "WindowRecord.json";
     private ArrayList prev_shapes = new ArrayList<Custom_Shape>();
@@ -228,6 +230,7 @@ public class AnnotationToolApplication extends Application {
      * @param primaryStage
      */
     public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) throws IOException {
+    	temp_jnote_fileName = "restore/recovery_" + getFileName();
         Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
@@ -351,8 +354,8 @@ public class AnnotationToolApplication extends Application {
             }
         }
         catch (FileNotFoundException fnfe) {
-        	FilePacker.createZip(jnote_fileName, new ArrayList<String>());
-    	} catch (Exception exc) {
+        	fnfe.printStackTrace();
+        } catch (Exception exc) {
             exc.printStackTrace();
         }
 
@@ -859,7 +862,6 @@ public class AnnotationToolApplication extends Application {
                 if(lockedControllerBox) {
                     controllerBox.fitScreen();
                 }
-                saveState();
             }
         });
 
@@ -871,7 +873,6 @@ public class AnnotationToolApplication extends Application {
                 if(lockedControllerBox) {
                     controllerBox.fitScreen();
                 }
-                saveState();
             }
         });
 
@@ -884,7 +885,6 @@ public class AnnotationToolApplication extends Application {
                     if (lockedControllerBox) {
                         controllerBox.fitScreen();
                     }
-                    saveState();
                 }
             }
         });
@@ -899,7 +899,6 @@ public class AnnotationToolApplication extends Application {
                     {
                         controllerBox.fitScreen();
                     }
-                    saveState();
                 }
             }
         });
@@ -1348,20 +1347,6 @@ public class AnnotationToolApplication extends Application {
 
     }
 
-
-    private void saveState()
-    {
-        try(  PrintWriter out = new PrintWriter( "state.txt" )  ){
-            out.println(
-                    String.valueOf(mouseCatchingStage.getWidth()) + " " +
-                            String.valueOf(mouseCatchingStage.getHeight()) + " " +
-                            String.valueOf(mouseCatchingStage.getX()) + " " +
-                            String.valueOf(mouseCatchingStage.getY()) );
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void setBorderVisibility(boolean borderVisibility)
     {
         borderShape.setVisible(borderVisibility);
@@ -1603,14 +1588,20 @@ public class AnnotationToolApplication extends Application {
 
     public void writeJSON(Custom_Shape shape) throws IOException {
 
-
         System.out.println(gson.toJson(shape));
         gson.toJson(shape, writer);
         writer.flush();
         updateRelevantWindows();
         windowWriter.flush();
-        FilePacker.createZip(jnote_fileName, dataFiles);
+        FilePacker.createZip(temp_jnote_fileName, dataFiles);
 
+        try{
+            PrintWriter lastFileWriter = new PrintWriter(last_file_fileName, "UTF-8");
+            lastFileWriter.println(temp_jnote_fileName);
+            lastFileWriter.close();
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
 
         /*ObjectMapper mapper = new ObjectMapper();
         holder.add(shape);
@@ -1620,6 +1611,22 @@ public class AnnotationToolApplication extends Application {
         FileWriter writer = new FileWriter(json_fileName);
         writer.write(json);
         writer.close();*/
+    }
+    
+    public void writeJSON(String fileName) throws IOException {
+
+        updateRelevantWindows();
+        windowWriter.flush();
+        FilePacker.createZip(fileName, dataFiles);
+
+        try{
+            PrintWriter lastFileWriter = new PrintWriter(last_file_fileName, "UTF-8");
+            lastFileWriter.println(fileName);
+            lastFileWriter.close();
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
+
     }
 
 
@@ -2511,8 +2518,9 @@ public class AnnotationToolApplication extends Application {
                 System.out.println("save As: " + jnote_fileName);
 
                 break;
-            case "sFile": //save file
-                System.out.println("save File button Pressed!");
+            case "sfile": // save file
+            	writeJSON(jnote_fileName);
+            	break;
         }
 
 
