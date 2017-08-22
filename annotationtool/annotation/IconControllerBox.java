@@ -948,6 +948,32 @@ public class IconControllerBox extends Stage
 
 
 
+        Button saveFileButton = new Button();
+        ImageView saveFileImage = new ImageView("save-file.png");
+        saveFileImage.setFitHeight(IMAGE_HEIGHT);
+        saveFileImage.setFitWidth(IMAGE_WIDTH);
+        saveFileButton.setGraphic(saveFileImage);
+        saveFileButton.setTooltip(getToolTip("Save File"));
+        saveFileButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+
+                    at.fileManagement("sFile"); //save as
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(saveFileButton);
+
+
+
+
+
 
 
         Button closeButton = new Button();

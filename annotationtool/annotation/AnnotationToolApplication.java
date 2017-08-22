@@ -2511,6 +2511,8 @@ public class AnnotationToolApplication extends Application {
                 System.out.println("save As: " + jnote_fileName);
 
                 break;
+            case "sFile": //save file
+                System.out.println("save File button Pressed!");
         }
 
 
