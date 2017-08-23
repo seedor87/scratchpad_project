@@ -1258,7 +1258,10 @@ public class AnnotationToolApplication extends Application {
                     while(!clipboard.hasContent(DataFormat.IMAGE)) {
                         i++;
                         try {
-                            Thread.sleep(50);
+                            if(clipboard.hasContent(DataFormat.PLAIN_TEXT)) {
+                            	System.out.println(clipboard.getContent(DataFormat.PLAIN_TEXT));
+                            }
+                        	Thread.sleep(50);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

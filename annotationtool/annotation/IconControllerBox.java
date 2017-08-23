@@ -134,55 +134,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-            	at.setBorderVisibility(false);
-            	try {
-					Thread.sleep(500);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-            	final Clipboard clipboard = Clipboard.getSystemClipboard();
-                Image clipImage = null;
-                String clipString = null;
-                if(clipboard.hasImage()) {
-                	clipImage = clipboard.getImage();
-                } else if(clipboard.hasString()) {
-                	clipString = clipboard.getString();
-                }
-                clipboard.clear();
-
-                Robot robot;
-                try
-                {
-                    robot = new Robot();
-                }
-                catch (AWTException e)
-                {
-                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
-                }
-
-                try {
-                	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
-					Thread.sleep(200);
-					robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
-					Thread.sleep(200);
-					robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
-					robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-                at.doSave();
-                at.setBorderVisibility(true);
-
-                ClipboardContent clipContent = new ClipboardContent();
-            	if(clipImage != null) {
-            		clipContent.putImage(clipImage);
-            		clipboard.setContent(clipContent);
-            	} else if(clipString != null) {
-            		clipContent.putString(clipString);
-            		clipboard.setContent(clipContent);
-            	}
+            	saveImage(1);
+            	saveImage(2);
             }
         });
         nodes.add(saveImageButton);
@@ -1161,6 +1114,60 @@ public class IconControllerBox extends Stage
         nodes.remove(nodes.size()-1);
         this.fitScreen();
         this.setAlwaysOnTop(true);
+    }
+    
+    private void saveImage(int numTimesRun) {
+    	at.setBorderVisibility(false);
+    	try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	final Clipboard clipboard = Clipboard.getSystemClipboard();
+        Image clipImage = null;
+        String clipString = null;
+        if(clipboard.hasImage()) {
+        	clipImage = clipboard.getImage();
+        } else if(clipboard.hasString()) {
+        	clipString = clipboard.getString();
+        }
+        clipboard.clear();
+
+        Robot robot;
+        try
+        {
+            robot = new Robot();
+        }
+        catch (AWTException e)
+        {
+            throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+        }
+
+        try {
+        	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+			Thread.sleep(200);
+			robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+			Thread.sleep(200);
+			robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+			robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        if(numTimesRun % 2 == 0) {
+        	at.doSave();
+        }
+        at.setBorderVisibility(true);
+
+        ClipboardContent clipContent = new ClipboardContent();
+    	if(clipImage != null) {
+    		clipContent.putImage(clipImage);
+    		clipboard.setContent(clipContent);
+    	} else if(clipString != null) {
+    		clipContent.putString(clipString);
+    		clipboard.setContent(clipContent);
+    	}
     }
 
     private void setIconSizes(double size)
