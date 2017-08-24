@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javafx.application.Application;
@@ -65,6 +66,8 @@ import static javax.swing.UIManager.get;
  * or a window that snaps to a running window (in Linux).
  */
 public class FXAnnotationToolBuilder extends Application {
+	
+	final static String ASSOCIATED_FILETYPE = ".jnote";
 
 	private X11InfoGatherer gatherer;// = X11InfoGatherer.getX11InfoGatherer();
 	private Stage stage;
@@ -101,10 +104,17 @@ public class FXAnnotationToolBuilder extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		workingPath = promptDialogBox();
-		System.out.println("from start" + workingPath);
+		List<String> params = this.getParameters().getRaw();
+		if(params.size() > 0 ) {
+			for(int i = 0; i < params.size(); i++) {
+				if(params.get(i).endsWith(".jnote")) {
+					workingPath = params.get(i);
+				}
+			}
+		} else {
+			workingPath = promptDialogBox();
+		}
 		getLastSessionInfo();
-
 		this.stage = stage;
 		this.stage.initStyle(StageStyle.UNDECORATED);
 		this.stage.setOpacity(0.2d);
