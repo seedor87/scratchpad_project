@@ -332,6 +332,7 @@ public class FXAnnotationToolBuilder extends Application {
 				WindowInfo selectedItem = (WindowInfo)table.getSelectionModel().getSelectedItem();
 				if(selectedItem != null) {
 					windowAttributes = selectedItem.getDimensions();
+					ProcessRunner.focusWindow(selectedItem.getTitle(), proc);
 
 					try {
 						buildFromInfo(selectedItem);
