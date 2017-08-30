@@ -107,11 +107,16 @@ public class FXAnnotationToolBuilder extends Application {
 		List<String> params = this.getParameters().getRaw();
 		if(params.size() > 0 ) {
 			for(int i = 0; i < params.size(); i++) {
-				if(params.get(i).endsWith(".jnote")) {
+				if(params.get(i).trim().endsWith(".jnote")) {
+					System.out.println("GOOD PARAM: " + "\'" + params.get(i) + "\"");
 					workingPath = params.get(i);
 				}
+				else {
+					System.out.println("GARBAGE PARAM: " + params.get(i));
+				}
 			}
-		} else {
+		}
+		if(workingPath == null) {
 			workingPath = promptDialogBox();
 		}
 		getLastSessionInfo();

@@ -44,6 +44,9 @@ public class FilePacker {
 			System.out.println("Entries: " + entryNum);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+			System.err.println("BIG ERROR: " + zipPath + " WAS NOT FOUND");
+			e.printStackTrace();
 		}
 		System.out.println("File is at: " + fileName);
 		return fileName;
