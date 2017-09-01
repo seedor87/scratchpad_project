@@ -230,7 +230,7 @@ public class AnnotationToolApplication extends Application {
      * @param primaryStage
      */
     public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) throws IOException {
-    	temp_jnote_fileName = "restore/recovery_" + getFileName();
+    	temp_jnote_fileName = System.getProperty("user.home") + "/scratchpad/restore/recovery_" + getFileName();
         Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
         this.mouseCatchingStage = primaryStage;
         //this.stage.initStyle(StageStyle.TRANSPARENT);
