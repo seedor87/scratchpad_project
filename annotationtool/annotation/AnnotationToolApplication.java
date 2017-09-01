@@ -221,167 +221,170 @@ public class AnnotationToolApplication extends Application {
         this.primaryStage = primaryStage;
     }
 
-    //================================================================================
-    // Mutators
-    //================================================================================
-
     /**
      * The code starts here.
      * @param primaryStage
      */
     public void start(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow) throws IOException {
     	temp_jnote_fileName = System.getProperty("user.home") + "/scratchpad/restore/recovery_" + getFileName();
-        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-        this.mouseCatchingStage = primaryStage;
-        //this.stage.initStyle(StageStyle.TRANSPARENT);
-        if(!sizedWindow) {
-            //this.mouseCatchingStage.setFullScreen(true);
-            //this.mouseCatchingStage.setMaximized(true);
-            this.mouseCatchingStage.setY(0);
-            this.mouseCatchingStage.setX(0);
-            this.mouseCatchingStage.setHeight(primScreenBounds.getHeight());
-            this.mouseCatchingStage.setWidth(primScreenBounds.getWidth());
-        }
-        else {
-        	this.mouseCatchingStage.setX(x);
-        	this.mouseCatchingStage.setY(y);
-        }
-        this.mouseCatchingStage.setOpacity(0.004);
-        this.mouseCatchingStage.initStyle(StageStyle.UNDECORATED);
-
-        root = new Group();
-
-        notRoot = new Group();
-        mouseCatchingScene = new Scene(notRoot);         // the scene that catches all the mouse events
-        drawingScene = new Scene(root);   // the scene that renders all the drawings.
-        drawingScene.setFill(clearPaint);
-
-        mouseCatchingScene.setFill(clickablyClearPaint);
-
-        //notRoot.getChildren().add(bg);
-
-        pictureStage = secondaryStage;
-        pictureStage.initStyle(StageStyle.TRANSPARENT);
-        pictureStage.setScene(drawingScene);
-        if(!sizedWindow) {
-            //pictureStage.setMaximized(true);
-        	//pictureStage.setFullScreen(true);
-            pictureStage.setX(0);
-            pictureStage.setY(0);
-            this.pictureStage.setHeight(primScreenBounds.getHeight());
-            this.pictureStage.setWidth(primScreenBounds.getWidth());
-        }
-        else {
-            pictureStage.setX(x);
-            pictureStage.setY(y);
-        }
-
-        mouseCatchingStage.setScene(mouseCatchingScene);
-
-        setupListeners();
-
-        controllerBox = new IconControllerBox(this);
-
-        //boxWidth = ((int) controllerBox.getWidth());
-
-        setUpMoveListeners(pictureStage);
-
-        mouseCatchingScene.setCursor(pencilCursor);
-
-        if(pictureStage.isFullScreen() || pictureStage.isMaximized()) {
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            borderShape = new Rectangle(screenSize.getWidth(), screenSize.getHeight());
-        } else {
-            borderShape = new Rectangle( pictureStage.getWidth(), pictureStage.getHeight());
-        }
-        borderShape.setStroke(borderColor);
-        borderShape.setStrokeWidth(borderWidth);
-        borderShape.setFill(clearPaint);
-        root.getChildren().add(borderShape);
-
-        resetStages();
-
-        mouseCatchingStage.show();
-        pictureStage.show();
-        
-        this.primaryStage = primaryStage;
-        
-        resnapToWindow(windowID);
-        
-        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.WARNING);
-
-        // Don't forget to disable the parent handlers.
-        logger.setUseParentHandlers(false);
+    	Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+    	this.mouseCatchingStage = primaryStage;
+    	//this.stage.initStyle(StageStyle.TRANSPARENT);
+    	if(!sizedWindow) {
+    		//this.mouseCatchingStage.setFullScreen(true);
+    		//this.mouseCatchingStage.setMaximized(true);
+    		this.mouseCatchingStage.setY(0);
+    		this.mouseCatchingStage.setX(0);
+    		this.mouseCatchingStage.setHeight(primScreenBounds.getHeight());
+    		this.mouseCatchingStage.setWidth(primScreenBounds.getWidth());
+    	}
+    	else {
+    		this.mouseCatchingStage.setX(x);
+    		this.mouseCatchingStage.setY(y);
+    	}
+    	this.mouseCatchingStage.setOpacity(0.004);
+    	this.mouseCatchingStage.initStyle(StageStyle.UNDECORATED);
+    	
+    	root = new Group();
+    	
+    	notRoot = new Group();
+    	mouseCatchingScene = new Scene(notRoot);         // the scene that catches all the mouse events
+    	drawingScene = new Scene(root);   // the scene that renders all the drawings.
+    	drawingScene.setFill(clearPaint);
+    	
+    	mouseCatchingScene.setFill(clickablyClearPaint);
+    	
+    	//notRoot.getChildren().add(bg);
+    	
+    	pictureStage = secondaryStage;
+    	pictureStage.initStyle(StageStyle.TRANSPARENT);
+    	pictureStage.setScene(drawingScene);
+    	if(!sizedWindow) {
+    		//pictureStage.setMaximized(true);
+    		//pictureStage.setFullScreen(true);
+    		pictureStage.setX(0);
+    		pictureStage.setY(0);
+    		this.pictureStage.setHeight(primScreenBounds.getHeight());
+    		this.pictureStage.setWidth(primScreenBounds.getWidth());
+    	}
+    	else {
+    		pictureStage.setX(x);
+    		pictureStage.setY(y);
+    	}
+    	
+    	mouseCatchingStage.setScene(mouseCatchingScene);
+    	
+    	setupListeners();
+    	
+    	controllerBox = new IconControllerBox(this);
+    	
+    	//boxWidth = ((int) controllerBox.getWidth());
+    	
+    	setUpMoveListeners(pictureStage);
+    	
+    	mouseCatchingScene.setCursor(pencilCursor);
+    	
+    	if(pictureStage.isFullScreen() || pictureStage.isMaximized()) {
+    		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    		borderShape = new Rectangle(screenSize.getWidth(), screenSize.getHeight());
+    	} else {
+    		borderShape = new Rectangle( pictureStage.getWidth(), pictureStage.getHeight());
+    	}
+    	borderShape.setStroke(borderColor);
+    	borderShape.setStrokeWidth(borderWidth);
+    	borderShape.setFill(clearPaint);
+    	root.getChildren().add(borderShape);
+    	
+    	resetStages();
+    	
+    	mouseCatchingStage.show();
+    	pictureStage.show();
+    	
+    	this.primaryStage = primaryStage;
+    	
+    	resnapToWindow(windowID);
+    	
+    	Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+    	logger.setLevel(Level.WARNING);
+    	
+    	// Don't forget to disable the parent handlers.
+    	logger.setUseParentHandlers(false);
     }
 
+    /**
+     * Attempts to rebuild the previous session using the shaperecord json
+     * 
+     * @throws IOException
+     */
     private void remakeFromJSON() throws IOException {
-
-
-        try
-        {
-        	String jsonRecord = FilePacker.retrieveFromZip(jnote_fileName, "ShapeRecord");
-            InputStream is = new FileInputStream(new File(jsonRecord));
-            Reader r = new InputStreamReader(is, "UTF-8");
-            Gson gson = new GsonBuilder().create();
-            JsonStreamParser p = new JsonStreamParser(r);
-            if(p.hasNext()) {
-            	JsonElement e = p.next();
-            	jnote_fileName = gson.fromJson(e, String.class);
-            }
-            while (p.hasNext()) {
-                JsonElement e;
-                try {
-                    e = p.next();
-                } catch (Exception ex) {
-                    /* break case for malformed json exception */
-                    break;
-                }
-                if (e.isJsonObject()) {
-                    Custom_Shape c = gson.fromJson(e, Custom_Shape.class);
-                    switch (c.getType()) {
-                        case "undo":
-                            undo();
-                            break;
-                        case "redo":
-                            redo();
-                            break;
-                        default:
-                            commitChange(c.toChangeItem());
-                            break;
-                    }
-
-                    prev_shapes.add(c);
-                    System.out.println("reading: " + c);
-
-                }
-            }
-        }
-        catch (FileNotFoundException fnfe) {
-        	fnfe.printStackTrace();
-        } catch (Exception exc) {
-            exc.printStackTrace();
-        }
-
-
-        try {
-            writer = new FileWriter(json_fileName);
-            dataFiles.add(json_fileName);
-            gson.toJson(jnote_fileName, writer);
-            windowWriter = new FileWriter(window_fileName);
-            dataFiles.add(window_fileName);
-        } catch (FileNotFoundException fileNotFound) {
-            System.out.println("ERROR: While Creating or Opening the File ShapeRecord.json");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        for (Object prev_shape : prev_shapes) {
-            writeJSON((Custom_Shape) prev_shape);
-        }
-        
+    	
+    	try
+    	{
+    		String jsonRecord = FilePacker.retrieveFromZip(jnote_fileName, "ShapeRecord");
+    		InputStream is = new FileInputStream(new File(jsonRecord));
+    		Reader r = new InputStreamReader(is, "UTF-8");
+    		Gson gson = new GsonBuilder().create();
+    		JsonStreamParser p = new JsonStreamParser(r);
+    		if(p.hasNext()) {
+    			JsonElement e = p.next();
+    			jnote_fileName = gson.fromJson(e, String.class);
+    		}
+    		while (p.hasNext()) {
+    			JsonElement e;
+    			try {
+    				e = p.next();
+    			} catch (Exception ex) {
+    				/* break case for malformed json exception */
+    				break;
+    			}
+    			if (e.isJsonObject()) {
+    				Custom_Shape c = gson.fromJson(e, Custom_Shape.class);
+    				switch (c.getType()) {
+    				case "undo":
+    					undo();
+    					break;
+    				case "redo":
+    					redo();
+    					break;
+    				default:
+    					commitChange(c.toChangeItem());
+    					break;
+    				}
+    				
+    				prev_shapes.add(c);
+    				System.out.println("reading: " + c);
+    				
+    			}
+    		}
+    	}
+    	catch (FileNotFoundException fnfe) {
+    		fnfe.printStackTrace();
+    	} catch (Exception exc) {
+    		exc.printStackTrace();
+    	}
+    	
+    	
+    	try {
+    		writer = new FileWriter(json_fileName);
+    		dataFiles.add(json_fileName);
+    		gson.toJson(jnote_fileName, writer);
+    		windowWriter = new FileWriter(window_fileName);
+    		dataFiles.add(window_fileName);
+    	} catch (FileNotFoundException fileNotFound) {
+    		System.out.println("ERROR: While Creating or Opening the File ShapeRecord.json");
+    	} catch (IOException ex) {
+    		ex.printStackTrace();
+    	}
+    	
+    	for (Object prev_shape : prev_shapes) {
+    		writeJSON((Custom_Shape) prev_shape);
+    	}
+    	
     }
-
+    
+    //================================================================================
+    // Mutators
+    //================================================================================
 
     private void saveTextBox()
     {
@@ -840,7 +843,6 @@ public class AnnotationToolApplication extends Application {
     {
         if(!recording) {
             recording = true;
-            globalInputListener.record();
         } else {
             recording = false;
             globalInputListener.saveInputEvents();

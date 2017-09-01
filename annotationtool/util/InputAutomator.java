@@ -70,11 +70,6 @@ public class InputAutomator {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-//		for(Map.Entry<NativeInputEvent, Long> entry : inputEvents.entrySet()) {
-//			System.out.println(getLongFormInputEvent(entry));
-//		}
-
-//        automator.recreateInputs(inputEvents);
 
         /* Call This method to use the json file to recreate instead*/
 		automator.recreateInputs(true);

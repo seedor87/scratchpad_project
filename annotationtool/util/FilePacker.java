@@ -16,6 +16,13 @@ import java.util.zip.ZipOutputStream;
 
 public class FilePacker {
 	
+	/**
+	 * Retrieves a file from a zip file.
+	 * 
+	 * @param zipPath The path to the zip file.
+	 * @param fileContents The complete or partial name of the file to be retrieved. The first file that matches will be retrieved.
+	 * @return The path to the retrieved file.
+	 */
 	public static String retrieveFromZip(String zipPath, String fileContents) {
 		String fileName = "";
 		String tempDir = "";
@@ -45,13 +52,17 @@ public class FilePacker {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e) {
-			System.err.println("BIG ERROR: " + zipPath + " WAS NOT FOUND");
 			e.printStackTrace();
 		}
-		System.out.println("File is at: " + fileName);
 		return fileName;
 	}
 	
+	/**
+	 * Compresses a group of files into a zip file.
+	 * 
+	 * @param zipName The name of the zip file.
+	 * @param fileNames The path to each file being compressed, in an arraylist.
+	 */
 	public static void createZip(String zipName, ArrayList<String> fileNames) {
 		try {
 			FileOutputStream fOut = new FileOutputStream(zipName);
@@ -73,6 +84,14 @@ public class FilePacker {
 
 	}
 
+	/**
+	 * Adds a file to a zip file.
+	 * 
+	 * @param fileName The path to the file being added
+	 * @param zos The ZipOutputStream being used
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	public static void addToZip(String fileName, ZipOutputStream zos) throws FileNotFoundException, IOException {
 
 		System.out.println("Writing '" + fileName + "' to zip file");
