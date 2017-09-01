@@ -146,6 +146,12 @@ public class FXAnnotationToolBuilder extends Application {
 		}
 	}
 
+	/**
+	 * Prompts the user to select or create a file.
+	 * 
+	 * @return The path to the selected file
+	 * @throws IOException
+	 */
 	private String promptDialogBox() throws IOException {
 
 
@@ -188,6 +194,12 @@ public class FXAnnotationToolBuilder extends Application {
 		return path;
 	}
 	
+	/**
+	 * Allows the user to import a file, and allows them to restore their previous session if they did not save properly.
+	 * 
+	 * @param chooser FileChooser for selecting a file to import
+	 * @return The path to the file to import.
+	 */
 	private String importFile(FileChooser chooser) {
 		InputStream is;
 		try {
@@ -221,6 +233,9 @@ public class FXAnnotationToolBuilder extends Application {
 		return filePath;
 	}
 	
+	/**
+	 * Retrieves info about the the previous session for the selected file
+	 */
 	private void getLastSessionInfo() {
 		String windowRecord = FilePacker.retrieveFromZip(workingPath, "WindowRecord");
 		if(!windowRecord.equals("")) {
@@ -425,6 +440,11 @@ public class FXAnnotationToolBuilder extends Application {
 
 	}
 
+	/**
+	 * @author armstr
+	 *
+	 * Listens to the mouse for building partial screen annotation windows
+	 */
 	private class BuilderMouseHandler implements javafx.event.EventHandler<MouseEvent>
 	{
 
@@ -466,6 +486,10 @@ public class FXAnnotationToolBuilder extends Application {
 
 	}
 
+	/**
+	 * @author armstr
+	 *	Listens for the Escape key, to close the program.
+	 */
 	private class BuilderKeyHandler implements javafx.event.EventHandler<KeyEvent>
 	{
 

@@ -402,6 +402,7 @@ public class AnnotationToolApplication extends Application {
             ioe.printStackTrace();
         }
     }
+    
     private class SaveTextBoxHandler implements EventHandler<MouseEvent>
     {
         @Override
@@ -441,6 +442,9 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Shows a list of options for writing text into the annotation tool.
+     */
     public void showTextOptionStage() {
         if(makingTextBox) {
             if(textOptionStage == null) {
@@ -992,29 +996,6 @@ public class AnnotationToolApplication extends Application {
         result = result + (y*y);
         return Math.sqrt(result);
     }
-
-
-    
-    /**
-     * Hides the box when not being used.
-     */
-/*    private class BoxHidingHandler implements EventHandler<MouseEvent>
-    {
-
-        @Override
-        public void handle(MouseEvent event)
-        {
-            if(event.getEventType() == MouseEvent.MOUSE_ENTERED)
-            {
-                controllerBox.setBounds(controllerBox.getX(), controllerBox.getY(), boxWidth,0);
-            }
-            else if(event.getEventType() == MouseEvent.MOUSE_EXITED)
-            {
-                controllerBox.pack();
-            }
-        }
-    }*/
-
 
     /**
      *  adds a triangle to the most recent straight line drawn to make it an arrow.
@@ -2155,6 +2136,11 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * @author armstr
+     *
+     * Ensures that the annotation window remains attached to any relevant window, snapping to it whenever the mouse button is released.
+     */
     private class ResizeHandler implements NativeMouseInputListener
     {
 
