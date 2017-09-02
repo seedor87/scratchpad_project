@@ -681,6 +681,9 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Used by toggleClickable to make the stages catch mouse events.
+     */
     private void setNotClickThrough()
     {
         mouseCatchingScene.setFill(clickablyClearPaint);
@@ -693,6 +696,10 @@ public class AnnotationToolApplication extends Application {
 
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
     }
+
+    /**
+     * Reverts the changes made by setShapesClickThrough. This brings the shapes back to their original color.
+     */
     private void setShapesNotClickThrough()
     {
         for(Node node : root.getChildren())
@@ -712,6 +719,11 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Used by toggleClickable. Used to make it so that mouse events pass through the mousecatchingstage.
+     * Events pass through the picture stage if too many items are not drawn on top of each other on
+     * linux.
+     */
     private void setClickThrough()
     {
         mouseCatchingStage.setAlwaysOnTop(false);
@@ -727,6 +739,11 @@ public class AnnotationToolApplication extends Application {
         controllerBox.setAlwaysOnTop(false);//resets the controllerbox so that it stays on top.
         controllerBox.setAlwaysOnTop(true);
     }
+
+    /**
+     * Makes it so the shapes are a more transparent color. This allows you to click through them
+     * if you run this on linux.
+     */
     private void setShapesClickThrough()
     {
         for(Node node: root.getChildren())
