@@ -1067,43 +1067,6 @@ public class AnnotationToolApplication extends Application {
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, arrowHandler);
     }
 
-
-    /**
-     * Goes through the undo stack and erases parts of shapes contained in a given path.
-     */
-/*    private void eraseShapes(EraseShape eraseShape)
-    {
-        Shp oldShape;
-        Shp newShape;
-        ListIterator<ChangeItem> iterator = undoStack.listIterator(undoStack.size());        //list iterator starting from top of stack.
-        while(iterator.hasPrevious())
-        {
-            oldShape = iterator.previous();
-            if(!(oldShape instanceof EraseShape))                                       //not instance of eraseshape
-            {
-                newShape = Shp.subtract(oldShape, eraseShape.eraseArea);
-                newShape.setFill(oldShape.getFill());
-                if(oldShape.getFill() == null)
-                {
-                    newShape.setFill(oldShape.getStroke());
-                }
-                eraseShape.shapesPartiallyErased.add(oldShape);
-                iterator.set(newShape);
-            }
-            else
-            {
-                eraseShape.shapesPartiallyErased.add(oldShape);                         //add should probably be push (same for a few lines up)?
-            }
-        }
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run()
-            {
-                paintFromUndoStack();
-            }
-        });
-    }*/
-
     /**
      * clears the main window and then repaints it from scratch.
      */
