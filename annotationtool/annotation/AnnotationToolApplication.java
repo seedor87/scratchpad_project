@@ -1519,8 +1519,6 @@ public class AnnotationToolApplication extends Application {
     // Inner Classes
     //================================================================================
 
-
-
     /**
      * Sets the state of the program so that the user is editing text
      *
@@ -1613,6 +1611,10 @@ public class AnnotationToolApplication extends Application {
         AddShape.movingShapes = true;
     }
 
+    /**
+     * This handler adds a rectangle to the stage based on a drag motion. the rectangle must be made
+     * starting from the top left part of the rectangle.
+     */
     private class RectangleHandler implements EventHandler<MouseEvent>
     {
         Rectangle rectangle;
@@ -1691,6 +1693,10 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * This handler allows the user to make ovals. It starts by making an outbounded rectangle, and then turns it
+     * into an oval that is inbounded to the rectangle.
+     */
     private class OutBoundedOvalHandler implements EventHandler<MouseEvent>
     {
         double top;
@@ -1814,6 +1820,9 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
+    /**
+     * Puts the user into rectification mode. This lets the user create a polygon based on something the user draws.
+     */
     public void setRectifying()
     {
         resetHandlers();
