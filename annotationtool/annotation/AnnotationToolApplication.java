@@ -663,6 +663,8 @@ public class AnnotationToolApplication extends Application {
     /**
      * Makes it so that the mousecatching stage stops catching mouse events when toggled to unclickable.
      * Calling the method again restores it so that the stage starts catching the events again.
+     * If running in linux, it will also cause additions to the picture stage to be clicked through, so long
+     * as too many items are not drawn on top of each other.
      */
     public void toggleClickable()
     {
