@@ -1465,6 +1465,9 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.setCursor(textCursor);
     }
 
+    /**
+     * Sets the state of the program so that you are making rectangles.
+     */
     public void setMakingRectangles()
     {
         this.resetHandlers();
@@ -1483,7 +1486,7 @@ public class AnnotationToolApplication extends Application {
     }
 
     /**
-     *
+     *  Sets the state of the program so that you are drawing an oval that is outbounded by whatever shape that you may drawn.
      */
     public void setDrawingOutboundedOval()
     {
@@ -1515,16 +1518,6 @@ public class AnnotationToolApplication extends Application {
     //================================================================================
     // Inner Classes
     //================================================================================
-
-    /*    private class EraseShape extends Path
-    {
-        Path eraseArea;
-        Stack<Shp> shapesPartiallyErased = new Stack<>();
-        EraseShape(Path eraseArea)
-        {
-            this.eraseArea = eraseArea;
-        }
-    }*/
 
 
 
