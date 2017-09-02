@@ -628,23 +628,6 @@ public class AnnotationToolApplication extends Application {
         }*/
     }
 
-/*    private void undoAnEraseShape(EraseShape eraseShape)
-    {
-        undoStack.clear();
-        while(!(eraseShape.shapesPartiallyErased.isEmpty()))
-        {
-            undoStack.push(eraseShape.shapesPartiallyErased.pop());
-        }
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run()
-            {
-                paintFromUndoStack();
-            }
-        });
-
-    }*/
-
     /**
      * clears the undo and redo stack and all changes from them.
      */
