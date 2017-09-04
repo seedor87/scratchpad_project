@@ -355,7 +355,7 @@ public class Custom_Shape {
 
     /**
      * Creates a line from the values inside of this custom shape.
-     * @return the line that is created. 
+     * @return the line that is created.
      */
     private ChangeItem toLine()
     {
@@ -367,6 +367,10 @@ public class Custom_Shape {
         return new AddShape(line);
     }
 
+    /**
+     * Creates an oval from the values inside of this Custom_Shape. This custom shape should be one that can return an oval.
+     * @return the addshape with the oval representing this custom shape.
+     */
     private ChangeItem toOval()
     {
         Rectangle rectangle = new Rectangle(Double.valueOf(location.getX()), Double.valueOf(location.getY()),
@@ -380,6 +384,10 @@ public class Custom_Shape {
         return new AddShape(rectangle);
     }
 
+    /**
+     * Creates a rectangle from the values inside this custom shape. The custom shape should be one that can return a rectangle.
+     * @return the AddShape that contains the created rectangle.
+     */
     private ChangeItem toRectangle()
     {
         Rectangle rectangle = new Rectangle(Double.valueOf(location.getX()), Double.valueOf(location.getY()),
@@ -391,6 +399,10 @@ public class Custom_Shape {
         return new AddShape(rectangle);
     }
 
+    /**
+     * Creates a polygon from the values inside of this custom shape. This custom shape should be one that can return a polygon.
+     * @return The AddShape created with the created polygon.
+     */
     private ChangeItem toPolygon()
     {
         Polygon polygon = new Polygon();
@@ -408,6 +420,10 @@ public class Custom_Shape {
 //    setUpUUIDMaps(newCircle, uuid);
 //        return newCircle;
 
+    /**
+     * Creates a move shape object from the values inside this custom shape. This custom shape should be one that can return a custom shape.
+     * @return The created move shape.
+     */
     private MoveShape toMoveShape()
     {
         Shape movedShape = addedShapes.get(uuid);
@@ -415,11 +431,22 @@ public class Custom_Shape {
         double newY = Double.valueOf(location.getY());
         return new MoveShape(newX, newY, movedShape);
     }//TODO this does the input for the above and below method, but now the output needs to be done.
+
+    /**
+     * Creates an edit text object from the values inside this custom shape. This custom shape should be one that can return an edit text.
+     * @return the created edit text.
+     */
     private EditText toEditText()
     {
         Text editedText = (Text) addedShapes.get(uuid);
         return new EditText(editedText, string);
     }
+
+    /**
+     * 
+     * @param shape
+     * @param uuid
+     */
     public static void setUpUUIDMaps(Shape shape, UUID uuid)
     {
         addedShapes.put(uuid, shape);
