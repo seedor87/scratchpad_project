@@ -47,38 +47,34 @@ public class Custom_Shape {
     private String heightString = "";
 
 
-    //    public Shape toShape() // TODO throws some custom exception if can not be made into a shape.
-//    {
-//        if(this.getType().equals("circle"))
-//        {
-//            return toCircle();
-//        }
-//        else if (this.getType().equals("path"))
-//        {
-//            return toPath();
-//        }
-//        else if(this.getType().equals(Custom_Shape.TEXT_STRING))
-//        {
-//            //TODO this
-//            return null;
-//        }
-//        else
-//        {
-//            return null;    //TODO replace with custom exception
-//        }
-//    }
-
     public static void changeShape(Shape oldShape, Shape newShape)
     {
         UUID uuid = shapesToUUIDMap.get(oldShape);
         setUpUUIDMaps(newShape, uuid);
     }
+
+    /**
+     * Constructor that takes in a unique id as well as a String.
+     * @param uuid
+     * @param type
+     */
     public Custom_Shape(UUID uuid, String type) {
         this();
         this.uuid = uuid;
         this.type = type;
     }
     //rectangle, oval
+
+    /**
+     * Constructor that should mostly be used for rectangles and ovals.
+     * @param uuid The unique id for this custom shape.
+     * @param type The type of shape that this this custom shape should represent.
+     * @param location The location of this custom shape.
+     * @param color The color of this shape.
+     * @param width The width of the rectangle or oval that this custom shape represents.
+     * @param height The height of the rectangle or oval that this custom shape represents.
+     * @param strokeWidth The width of the stroke that this rectangle or oval has.
+     */
     public Custom_Shape(UUID uuid, String type, Point location, Paint color, double width, double height, double strokeWidth)
     {
         this(uuid, type);
@@ -90,6 +86,16 @@ public class Custom_Shape {
     }
 
     //path, rectified shape
+
+    /**
+     * A custom shape that should be used to represent a path or a polygon made by a rectified shape.
+     * @param uuid The uuid for this custom shape.
+     * @param type The string that represents the type of this custom shape.
+     * @param location The location of the path or rectified shape.
+     * @param color The color of the path or rectified shape.
+     * @param strokeWidth The width of the stroke for the path or rectified shape.
+     * @param points The points that make up the path or rectified shape represented by this custom shape.
+     */
     public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
         this(uuid, type);
         this.location = location;
@@ -114,6 +120,16 @@ public class Custom_Shape {
     }
 
     //Arrow, line
+
+    /**
+     * A custom shape that should be used to represent an arrow or line.
+     * @param uuid The unique id of the shape represented by this custom shape.
+     * @param type The string that represents the shape that this custom shape represents.
+     * @param color The color of the shape represented by this custom shape.
+     * @param strokeWidth The width of the arrow or line that this custom shape represents.
+     * @param start the starting point of the arrow or line that this custom shape represents.
+     * @param end the ending point of the arrow or line that this custom shape represents.
+     */
     public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
         this(uuid, type);
 
@@ -131,6 +147,13 @@ public class Custom_Shape {
     }
 
     //earse shape
+
+    /**
+     * A custom shape that should be used to represent an erased shape.
+     * @param uuid The unique id for the shape represented by this custom shape.
+     * @param type The string that represents the type of the shape that this custom shape represents.
+     * @param points the points of the path area that should get erased by the erase shape that this custom shape represents.
+     */
     public Custom_Shape(UUID uuid, String type, ArrayList<Point> points) {
         this(uuid, type);
 
@@ -138,6 +161,14 @@ public class Custom_Shape {
     }
 
     //edit text
+
+    /**
+     * A custom shape that should be used to represent an EditText.
+     * @param uuid The unique id attached to the shape that is represented by this custom shape.
+     * @param type The string that represents the type of shape that this custom shape represents.
+     * @param string The string that is used for the new string value in the EditText represented by this custom shape.
+     * @param font The font change that is represented by this EditText.
+     */
     public Custom_Shape(UUID uuid, String type, String string, String font) {
         this(uuid, type);
 
@@ -145,13 +176,22 @@ public class Custom_Shape {
         this.font = font;
     }
 
-
+    /**
+     * The generic custom shape constructor.
+     * @param type The string that represents the type of this custom shape.
+     */
     public Custom_Shape(String type) {
         timestamp = getTimestamp();
         this.type = type;
     }
 
     //MoveShape
+
+    /**
+     * The constructor for a custom shape that represents a MoveShape object.
+     * @param type the string that represents the type of the shape that this custom shape represents.
+     * @param movedShape The moved shape that this custom shape represents.
+     */
     public Custom_Shape(String type, Shape movedShape)
     {
         uuid = shapesToUUIDMap.get(movedShape);
@@ -160,6 +200,11 @@ public class Custom_Shape {
         location = new Point(movedShape.getLayoutX() +"", movedShape.getLayoutY() +"");
     }
     //EditText
+
+    /**
+     * A custom shape that represents an EditText object.
+     * @param editText The EditText object that is to be turned into a custom shape.
+     */
     public Custom_Shape(EditText editText)
     {
         Text text = editText.getText();
@@ -168,6 +213,11 @@ public class Custom_Shape {
         this.string = text.getText();
     }
 
+    /**
+     * Gets an uncolored path from the values of the custom shape. The custom shape's type should be one
+     * that should contain values that you can obtain a path from.
+     * @return the path created.
+     */
     private Path toUncoloredPath() {
         Path path = new Path();
         path.getElements().add(new MoveTo(Double.valueOf(points.get(0).getX()), Double.valueOf(points.get(0).getY())));
@@ -179,6 +229,10 @@ public class Custom_Shape {
         return path;
     }
 
+    /**
+     * Gets a circle from the values of this custom shape. The custom shape's type should be that of a circle.
+     * @return the circle created.
+     */
     private Shape toCircle() {
         double xLoc = Double.valueOf(location.getX());
         double yLoc = Double.valueOf(location.getY());
@@ -194,6 +248,11 @@ public class Custom_Shape {
         return newCircle;
     }
 
+    /**
+     * Creates a path from the values inside of this custom shape. The custom shape's type should be one
+     * that should return a path.
+     * @return the path created.
+     */
     private Shape toPath() {
         Path path = toUncoloredPath();
         path.setStroke(Color.valueOf(colorString));
@@ -201,6 +260,11 @@ public class Custom_Shape {
         return path;
     }
 
+    /**
+     * Creates an arrow from the values inside of this custom shape. The custom shape's type should be one
+     * that should return an arrow.
+     * @return the arrow created.
+     */
     private Shape toArrow() {
         Line line = new Line(Double.valueOf(start.getX()), Double.valueOf(start.getY()), Double.valueOf(end.getX()), Double.valueOf(end.getY()));
         line.setStroke(Color.valueOf(colorString));
@@ -210,6 +274,11 @@ public class Custom_Shape {
         return arrow;
     }
 
+    /**
+     * adds an arrow (triangle) to the end of a line.
+     * @param line
+     * @return the arrow created.
+     */
     private Shape addArrowToEndOfLine(Line line) {
         final double halfBaseDistance = 2;
         final double heightDistance = 4;
@@ -249,6 +318,10 @@ public class Custom_Shape {
         return newShape;
     }
 
+    /**
+     * Creates a change item from the values inside of this custom shape. The type of this custom shape should not be undo or redo
+     * @return the changeitem created from the values inside of this custom shape.
+     */
     public ChangeItem toChangeItem()//TODO throw exception if the type is undo or redo.
     {
         switch (type)
@@ -280,6 +353,10 @@ public class Custom_Shape {
         }
     }
 
+    /**
+     * Creates a line from the values inside of this custom shape.
+     * @return the line that is created. 
+     */
     private ChangeItem toLine()
     {
         Line line = new Line(Double.valueOf(start.getX()), Double.valueOf(start.getY()),
