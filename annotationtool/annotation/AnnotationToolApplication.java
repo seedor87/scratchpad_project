@@ -1828,6 +1828,10 @@ public class AnnotationToolApplication extends Application {
         resetHandlers();
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectificationHandler);
     }
+
+    /**
+     * This handler is used in order to rectify whatever shape you draw on the stage to some kind of polygon.
+     */
     private class RectificationHandler implements EventHandler<MouseEvent>
     {
         private int index = 0;
@@ -1886,6 +1890,13 @@ public class AnnotationToolApplication extends Application {
             ArrayList<AnnotatePoint> broken_list = broken.broken(coord_list, closed_path, true, tollerance);
             devdata.setCoord_list(broken_list);
         }
+
+        /**
+         * This method adds a polygon to the picture stage based on a series of points.
+         * The first point is the first point of the polygon. Each successive point has a line drawn from the
+         * last point. The last point then gets connected to the first point.
+         * @param points The list of points used to create the polygon.
+         */
         private void drawFromList(ArrayList<AnnotatePoint> points)
         {
             Polygon polygon = new Polygon();
@@ -1916,16 +1927,27 @@ public class AnnotationToolApplication extends Application {
 
     }
 
+    /**
+     * This sets the state of the program to making straight lines drawn from one point to another.
+     */
     public void setMakingLines()
     {
         resetHandlers();
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, lineHandler);
     }
+
+    /**
+     * Minimizes both the picture stage and the mouse catching stage.
+     */
     public void sendToBack()
     {
         pictureStage.setIconified(true);
         mouseCatchingStage.setIconified(true);
     }
+
+    /**
+     * Un-minimizes the picture stage and the mouse catching stage.
+     */
     public void bringToFront()
     {
         pictureStage.setIconified(false);
@@ -1933,6 +1955,9 @@ public class AnnotationToolApplication extends Application {
         controllerBox.toFront();
     }
 
+    /**
+     * This handler is used for drawing straight lines onto the picture stage.
+     */
     private class LineHandler implements EventHandler<MouseEvent>
     {
         Line line;
