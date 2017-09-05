@@ -443,7 +443,8 @@ public class Custom_Shape {
     }
 
     /**
-     * 
+     * Adds the shape with its UUID to the addedShapes and shapesToUUIDMap in order to maintain the same UUID if the
+     * same shape is used twice.
      * @param shape
      * @param uuid
      */
@@ -464,6 +465,10 @@ public class Custom_Shape {
 //        }
 //    }
 
+    /**
+     * Turns the contents of this custom shape into a Text object. This custom shape should be one that can be turned into a text object. 
+     * @return The Text object.
+     */
     private Text toText()
     {
         Text text = new Text(this.string);
