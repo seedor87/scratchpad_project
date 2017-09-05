@@ -453,20 +453,9 @@ public class Custom_Shape {
         addedShapes.put(uuid, shape);
         shapesToUUIDMap.put(shape, uuid);
     }
-//    public boolean isAddShape()
-//    {
-//        if(type.equals(PATH_STRING) || type.equals(CIRCLE_STRING) || type.equals(ARROW_STRING) || type.equals(TEXT_STRING))
-//        {
-//            return true;
-//        }
-//        else
-//        {
-//            return false;
-//        }
-//    }
 
     /**
-     * Turns the contents of this custom shape into a Text object. This custom shape should be one that can be turned into a text object. 
+     * Turns the contents of this custom shape into a Text object. This custom shape should be one that can be turned into a text object.
      * @return The Text object.
      */
     private Text toText()
@@ -481,34 +470,6 @@ public class Custom_Shape {
         return text;
     }
 
-
-   /* public Custom_Shape readJSON() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(new File("shape.json"), Custom_Shape.class);
-    }
-
-
-    public void writeJSON(Custom_Shape shape) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        String json = mapper.writeValueAsString(shape);
-        //   if (uuid == 0) {
-
-        // } else {
-
-            try {
-                Files.write(new File("shape.json").toPath(), Arrays.asList(json), StandardOpenOption.APPEND);
-            }
-            catch (IOException e)
-            {
-                Files.write(new File("shape.json").toPath(), Arrays.asList(json), StandardOpenOption.CREATE);
-            }
-        // }
-
-
-        //  mapper.writeValue(new File("shape.json"), shape);
-    }*/
 
     public UUID getUuid() {
         return uuid;
@@ -534,13 +495,6 @@ public class Custom_Shape {
         this.location = location;
     }
 
-//    public Color getColor() {
-//        return Color.valueOf(colorString);
-//    }
-
-//    public void setColor(Color color) {
-//        colorString = color.toString();
-//    }
 
     public String getWidthString()
     {
