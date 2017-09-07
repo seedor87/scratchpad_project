@@ -1373,6 +1373,10 @@ public class AnnotationToolApplication extends Application {
         return this.pictureStage;
     }
     
+    public Stage getControllerBox() {
+    	return this.controllerBox;
+    }
+    
     public Stage getMouseCatchingStage() 
     {
     	return this.mouseCatchingStage;

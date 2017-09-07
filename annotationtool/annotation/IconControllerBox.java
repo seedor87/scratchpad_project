@@ -123,6 +123,52 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(exitButton);
+        
+        Button newFileButton = new Button();
+        ImageView newFileImage = new ImageView("file.png");
+        newFileImage.setFitHeight(IMAGE_HEIGHT);
+        newFileImage.setFitWidth(IMAGE_WIDTH);
+        newFileButton.setGraphic(newFileImage);
+        newFileButton.setTooltip(getToolTip("Create or open a new annotation"));
+        newFileButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+				dialog.initOwner(at.getMouseCatchingStage());
+				dialog.setTitle("Creating new annotation");
+				dialog.setHeaderText("This annotation will be closed.");
+				dialog.setContentText("Would you like to save?");
+				ButtonType yesBtn = new ButtonType("Yes");
+				ButtonType noBtn = new ButtonType("No");
+				ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+				dialog.getButtonTypes().setAll(yesBtn, noBtn, cancelBtn);
+				Optional<ButtonType> result = dialog.showAndWait();
+				
+				if(result.get() == yesBtn) {
+					try {
+
+	                    at.fileManagement("sFile"); //save as
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+				} 
+				
+				if(result.get() != cancelBtn) {
+					at.getControllerBox().close();
+					at.getMouseCatchingStage().close();
+					at.getPictureStage().close();
+					FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
+					try {
+						builder.start(new Stage());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+        	
+        });
+        nodes.add(newFileButton);
 
         Button saveImageButton = new Button();
         ImageView saveImage = new ImageView("camera.png");

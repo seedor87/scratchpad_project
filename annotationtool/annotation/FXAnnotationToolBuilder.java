@@ -104,7 +104,14 @@ public class FXAnnotationToolBuilder extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		List<String> params = this.getParameters().getRaw();
+		workingPath = null;
+		List<String> params;
+		if(this.getParameters() != null) {
+			params = this.getParameters().getRaw();
+		}
+		else {
+			params = new ArrayList<String>();
+		}
 		if(params.size() > 0 ) {
 			for(int i = 0; i < params.size(); i++) {
 				if(params.get(i).trim().endsWith(".jnote")) {
