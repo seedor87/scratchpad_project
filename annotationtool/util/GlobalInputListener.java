@@ -39,6 +39,11 @@ public class GlobalInputListener implements
 	private long startTime = System.currentTimeMillis();
 	private boolean saveMove = true;
 	
+	/**
+	 * Sets up a listener that listens for user input, even when the application is not focused.
+	 * 
+	 * @param at The AnnotationTool Application.
+	 */
 	public GlobalInputListener(AnnotationToolApplication at) {
 		// Get the logger for "org.jnativehook" and set the level to warning.
 		Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
@@ -64,25 +69,30 @@ public class GlobalInputListener implements
 			}, 0, 10, TimeUnit.MILLISECONDS);
 	}
 
+	/**
+	 * @return The time since the program started.
+	 */
 	private long getTime() {
 		return System.currentTimeMillis() - startTime;
 	}
 	
+	/**
+	 * @return A Linked Hashmap of the input events and their corresponding times.
+	 */
 	public LinkedHashMap<NativeInputEvent, Long> getInputEvents() {
 		return inputEvents;
 	}
 
-	public void record() {}
-	
+	/**
+	 * Saves the input events and their times to a .ser file.
+	 */
 	public void saveInputEvents() {
 		try {
 			FileOutputStream fileOut = new FileOutputStream("inputEvents.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(inputEvents);
-			System.out.println("wrote it");
 			out.close();
 			fileOut.close();
-			System.out.println("Input data saved.");
 		}catch (IOException e) {
 			e.printStackTrace();
 		}

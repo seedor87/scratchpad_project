@@ -18,6 +18,13 @@ public class MoveShape implements ChangeItem
     double newX;
     double newY;
 
+    /**
+     *
+     * @param shape the shape that this moveShape represents. The new x and y locations are taken from the shape.
+     * @param oldX the old x location of the shape
+     * @param oldY the old y location of the shape.
+     * @param annotationToolApplication
+     */
     public MoveShape(Shape shape, double oldX, double oldY, AnnotationToolApplication annotationToolApplication)
     {
         this.shape = shape;
@@ -35,6 +42,14 @@ public class MoveShape implements ChangeItem
 
         }
     }
+
+    /**
+     *
+     * @param newX The new x location of the shape.
+     * @param newY The new y location of the shape.
+     * @param shape The shape represented by this MoveShape. The old x and y locations are taken
+     *              from this shape.
+     */
     public MoveShape(double newX, double newY, Shape shape)
     {
         this.shape = shape;
@@ -46,6 +61,10 @@ public class MoveShape implements ChangeItem
         shape.setLayoutY(newY);
     }
 
+    /**
+     * Moves the shape represented by this MoveShape object to the new x and y location set in the constructor.
+     * @param annotationToolApplication The AnnotationToolApplication that is having the change added to.
+     */
     @Override
     public void addChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
@@ -53,6 +72,10 @@ public class MoveShape implements ChangeItem
         shape.layoutYProperty().set(newY);
     }
 
+    /**
+     * Moves the shape represented by this MoveShape back to the old x and y location that were set in the constructor.
+     * @param annotationToolApplication The AnnotationToolApplication that needs to have the change
+     */
     @Override
     public void undoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
@@ -60,6 +83,10 @@ public class MoveShape implements ChangeItem
         shape.layoutXProperty().set(oldX);
     }
 
+    /**
+     * Moves the shape represented by this MoveShape back to the new X and Y location.
+     * @param annotationToolApplication The AnnotationToolApplication that needs to have the change redone to
+     */
     @Override
     public void redoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {

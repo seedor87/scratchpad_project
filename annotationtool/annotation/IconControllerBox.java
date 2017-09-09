@@ -26,11 +26,13 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.SocketListener;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Robot;
 import java.awt.Toolkit;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -47,6 +49,7 @@ public class IconControllerBox extends Stage
     private static final int RIGHT_LOCATION = 2;
     private static final int TOOLTIP_FONT_SIZE = 20;
     private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
+    private Thread listenerThread;
     private Pane root;
     private Pane trunk;
     private Scene scene;
@@ -58,7 +61,13 @@ public class IconControllerBox extends Stage
     private AnnotationToolApplication at;
     private LinkedList<Button> nodes = new LinkedList<>();
     private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
+    private LinkedList<Button> saveSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
+    private Button sendToBackButton;
+    private Button bringToFrontButton;
+    private Button selectedButton;
+    private Background defaultBackground;
+    private static final Background SELECTED_BACKGROUND = null;
 
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -78,6 +87,17 @@ public class IconControllerBox extends Stage
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
+        
+        final IconControllerBox CONTROLLER_BOX = this;
+        listenerThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				SocketListener serverSocket = new SocketListener(CONTROLLER_BOX, 26222);
+			}
+        	
+        });
+        listenerThread.start();
 
         Button exitButton = new Button();
         ImageView exitImage = new ImageView("exit.png");
@@ -109,12 +129,30 @@ public class IconControllerBox extends Stage
                         at.writer.close();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (NullPointerException e) {
+                    	e.printStackTrace();
                     }
                     System.exit(0);
                 }
             }
         });
         nodes.add(exitButton);
+        
+        Button newFileButton = new Button();
+        ImageView newFileImage = new ImageView("file.png");
+        newFileImage.setFitHeight(IMAGE_HEIGHT);
+        newFileImage.setFitWidth(IMAGE_WIDTH);
+        newFileButton.setGraphic(newFileImage);
+        newFileButton.setTooltip(getToolTip("Create or open a new annotation"));
+        newFileButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				newFile("");
+			}
+        	
+        });
+        nodes.add(newFileButton);
 
         Button saveImageButton = new Button();
         ImageView saveImage = new ImageView("camera.png");
@@ -126,55 +164,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
-            	at.setBorderVisibility(false);
-            	try {
-					Thread.sleep(500);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-            	final Clipboard clipboard = Clipboard.getSystemClipboard();
-                Image clipImage = null;
-                String clipString = null;
-                if(clipboard.hasImage()) {
-                	clipImage = clipboard.getImage();
-                } else if(clipboard.hasString()) {
-                	clipString = clipboard.getString();
-                }
-                clipboard.clear();
-
-                Robot robot;
-                try
-                {
-                    robot = new Robot();
-                }
-                catch (AWTException e)
-                {
-                    throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
-                }
-
-                try {
-                	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
-					Thread.sleep(200);
-					robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
-					Thread.sleep(200);
-					robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
-					robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-                at.doSave();
-                at.setBorderVisibility(true);
-
-                ClipboardContent clipContent = new ClipboardContent();
-            	if(clipImage != null) {
-            		clipContent.putImage(clipImage);
-            		clipboard.setContent(clipContent);
-            	} else if(clipString != null) {
-            		clipContent.putString(clipString);
-            		clipboard.setContent(clipContent);
-            	}
+            	saveImage(1);
+            	saveImage(2);
             }
         });
         nodes.add(saveImageButton);
@@ -272,8 +263,6 @@ public class IconControllerBox extends Stage
         nodes.add(outBoundedOvalButton);
         shapeSelectingNodes.add(outBoundedOvalButton);
 
-
-
         Button drawButton = new Button();
         ImageView drawImage = new ImageView("pencil-32.png");
         drawImage.setFitHeight(IMAGE_HEIGHT);
@@ -323,16 +312,16 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(eraseButton);
 
         Button shapePickerButton = new Button();
-        //Text numberText = new Text("5");    //TODO change this based on selected option.
-        shapePickerGraphic = drawImage;
-        shapePickerButton.setGraphic(drawImage);
+        ImageView shapePickerImage = new ImageView(drawImage.getImage());
+        shapePickerGraphic = shapePickerImage;
+        shapePickerButton.setGraphic(shapePickerImage);
         shapePickerButton.setTooltip(getToolTip("Pick a shape"));
         shapePickerButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event)
             {
-                shapePickerButton.setGraphic(null);
-                shapePickerButton.graphicProperty().setValue(null);
+                //shapePickerButton.setGraphic(null);
+                //shapePickerButton.graphicProperty().setValue(null);
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Shape Tool");
                 dialog.initStyle(StageStyle.UTILITY);
@@ -351,21 +340,35 @@ public class IconControllerBox extends Stage
                 {
                     grid.add(iterator.next(),i,0);
                 }
+                for(Button b: shapeSelectingNodes)
+                {
+                    b.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            dialog.close();
+                        }
+                    });
+                }
 
                 dialog.setResizable(true);
                 dialog.setWidth(300);
 
                 ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+                ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-                dialog.getDialogPane().getButtonTypes().addAll(okButton);
+                dialog.getDialogPane().getButtonTypes().addAll(cancelButton);
 
                 setDialogLocation(dialog);
                 dialog.showAndWait();
                 shapePickerButton.setGraphic(shapePickerGraphic);
+                System.out.println("\n\n\n" + shapePickerGraphic);
                 at.resetStages();
             }
         });
         nodes.add(shapePickerButton);
+
+        //selectedButton = shapePickerButton;
+
         /*
         * Sets up the listeners for changing the graphic of the main button that calls the shape
         * selecting dialog.
@@ -586,6 +589,7 @@ public class IconControllerBox extends Stage
                     @Override
                     public void handle(MouseEvent event) {
                         changeSize = smallButtonSize;
+                        setIconSizes(changeSize);
                     }
                 });
 
@@ -596,6 +600,7 @@ public class IconControllerBox extends Stage
                     @Override
                     public void handle(MouseEvent event) {
                         changeSize = medButtonSize;
+                        setIconSizes(changeSize);
                     }
                 });
 
@@ -606,8 +611,18 @@ public class IconControllerBox extends Stage
                     @Override
                     public void handle(MouseEvent event) {
                         changeSize = largeButtonSize;
+                        setIconSizes(changeSize);
                     }
                 });
+                EventHandler<MouseEvent> dialogHandler = new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        dialog.close();
+                    }
+                };
+                button1.addEventHandler(MouseEvent.MOUSE_CLICKED, dialogHandler);
+                button2.addEventHandler(MouseEvent.MOUSE_CLICKED, dialogHandler);
+                button3.addEventHandler(MouseEvent.MOUSE_CLICKED, dialogHandler);
 
                 grid.add(button1,0,0);
                 grid.add(button2, 1,0);
@@ -706,6 +721,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveButton);
+        selectedButton = moveButton;
 
         Button toggleClickableButton = new Button();
         ImageView toggleClickableImage = new ImageView("pointer.png");
@@ -718,54 +734,29 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.toggleClickable();
-                setAlwaysOnTop(true);
+                //setAlwaysOnTop(true);
+            }
+        });
+        toggleClickableButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            Background background;
+            @Override
+            public void handle(MouseEvent event)
+            {
+                isSelected = !isSelected;
+                if(isSelected)
+                {
+                    background = toggleClickableButton.getBackground();
+                    toggleClickableButton.setBackground(SELECTED_BACKGROUND);
+                }
+                else
+                {
+                    toggleClickableButton.setBackground(background);
+                }
             }
         });
         nodes.add(toggleClickableButton);
 
-        /**
-         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
-         * edited*
-         */
-        Button sendToBackButton = new Button();
-        ImageView sendToBackImage = new ImageView("sendToBack.png");
-        sendToBackImage.setFitHeight(IMAGE_HEIGHT);
-        sendToBackImage.setFitWidth(IMAGE_WIDTH);
-        sendToBackButton.setGraphic(sendToBackImage);
-        sendToBackButton.setTooltip(getToolTip("Send To Back"));
-        sendToBackButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-            	at.getMouseCatchingStage().setAlwaysOnTop(false);
-            	at.getPictureStage().setAlwaysOnTop(false);
-            	at.getPictureStage().toBack();
-                at.toBack();
-            }
-        });
-        nodes.add(sendToBackButton);
-
-        /**
-         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
-         */
-        Button bringToFrontButton = new Button();
-        ImageView bringToFrontImage = new ImageView("bringToFront.png");
-        bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
-        bringToFrontImage.setFitWidth(IMAGE_WIDTH);
-        bringToFrontButton.setGraphic(bringToFrontImage);
-        bringToFrontButton.setTooltip(getToolTip("Bring to Front"));
-        bringToFrontButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                at.toFront();
-                IconControllerBox.this.setAlwaysOnTop(false);
-                IconControllerBox.this.setAlwaysOnTop(true);
-                IconControllerBox.this.toFront();
-
-            }
-        });
-        nodes.add(bringToFrontButton);
 
         /**
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Edit-clear.svg/1024px-Edit-clear.svg.png
@@ -840,6 +831,7 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
+/*
 
         Button saveStateButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
@@ -854,6 +846,191 @@ public class IconControllerBox extends Stage
             public void handle(MouseEvent event)
             {
                 at.saveSceneState();
+            }
+        });
+        nodes.add(saveStateButton);
+
+
+*/
+
+
+
+
+
+        Button newButton = new Button();
+        ImageView newImage = new ImageView("new.png");
+        newImage.setFitHeight(IMAGE_HEIGHT);
+        newImage.setFitWidth(IMAGE_WIDTH);
+        newButton.setGraphic(newImage);
+        newButton.setTooltip(getToolTip("New Project"));
+        newButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                //
+                FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
+                try {
+
+                    at.fileManagement("new"); //new file
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(newButton);
+
+
+
+        Button openButton = new Button();
+        ImageView openImage = new ImageView("open.png");
+        openImage.setFitHeight(IMAGE_HEIGHT);
+        openImage.setFitWidth(IMAGE_WIDTH);
+        openButton.setGraphic(openImage);
+        openButton.setTooltip(getToolTip("Open Project"));
+        openButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+                    at.fileManagement("open");//open project
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //nodes.add(openButton);
+        saveSelectingNodes.add(openButton);
+
+
+
+        Button saveAsButton = new Button();
+        ImageView saveAsImage = new ImageView("saveAs.png");
+        saveAsImage.setFitHeight(IMAGE_HEIGHT);
+        saveAsImage.setFitWidth(IMAGE_WIDTH);
+        saveAsButton.setGraphic(saveAsImage);
+        saveAsButton.setTooltip(getToolTip("Save As"));
+        saveAsButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+
+                    at.fileManagement("save"); //save as
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(saveAsButton);
+
+
+
+
+
+        Button saveFileButton = new Button();
+        ImageView saveFileImage = new ImageView("save-file.png");
+        saveFileImage.setFitHeight(IMAGE_HEIGHT);
+        saveFileImage.setFitWidth(IMAGE_WIDTH);
+        saveFileButton.setGraphic(saveFileImage);
+        saveFileButton.setTooltip(getToolTip("Save File"));
+        saveFileButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                try {
+
+                    at.fileManagement("sFile"); //save as
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        //nodes.add(newButton);
+        saveSelectingNodes.add(saveFileButton);
+
+
+
+
+
+
+
+        Button closeButton = new Button();
+        ImageView closeImage = new ImageView("close.png");
+        closeImage.setFitHeight(IMAGE_HEIGHT);
+        closeImage.setFitWidth(IMAGE_WIDTH);
+        closeButton.setGraphic(closeImage);
+        closeButton.setTooltip(getToolTip("close Project"));
+        closeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+               System.exit(0);
+            }
+        });
+        //nodes.add(closeButton);
+        saveSelectingNodes.add(closeButton);
+
+
+
+
+        Button saveStateButton = new Button();
+        //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
+        ImageView saveStateImage = new ImageView("saveState.png");
+        saveStateImage.setFitHeight(IMAGE_HEIGHT);
+        saveStateImage.setFitWidth(IMAGE_WIDTH);
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.setTooltip(getToolTip("File"));
+        saveStateButton.setGraphic(saveStateImage);
+        saveStateButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+                saveStateButton.setGraphic(null);
+                saveStateButton.graphicProperty().setValue(null);
+                Dialog<Double> dialog = new Dialog<>();
+                dialog.setTitle("File");
+                dialog.initStyle(StageStyle.UTILITY);
+                dialog.initOwner(IconControllerBox.this);
+
+
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(20, 150, 10, 10));
+                dialog.getDialogPane().setContent(grid);
+
+                int size = saveSelectingNodes.size();
+                Iterator<Button> iterator = saveSelectingNodes.iterator();
+                for(int i = 0; i < size;i++)
+                {
+                    grid.add(iterator.next(),i,0);
+                }
+                for(Button b: saveSelectingNodes)
+                {
+                    b.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            dialog.close();
+                        }
+                    });
+                }
+
+                dialog.setResizable(true);
+                dialog.setWidth(300);
+
+                ButtonType okButton = new ButtonType("Ok", ButtonBar.ButtonData.YES);
+
+                dialog.getDialogPane().getButtonTypes().addAll(okButton);
+
+                setDialogLocation(dialog);
+                dialog.showAndWait();
+                saveStateButton.setGraphic(saveStateImage);
+                at.resetStages();
             }
         });
         nodes.add(saveStateButton);
@@ -892,16 +1069,147 @@ public class IconControllerBox extends Stage
         });
         nodes.add(recordInputButton);
 
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
+         * edited*
+         */
+        sendToBackButton = new Button();
+        ImageView sendToBackImage = new ImageView("sendToBack.png");
+        sendToBackImage.setFitHeight(IMAGE_HEIGHT);
+        sendToBackImage.setFitWidth(IMAGE_WIDTH);
+        sendToBackButton.setGraphic(sendToBackImage);
+        sendToBackButton.setTooltip(getToolTip("Send To Back"));
+        sendToBackButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+//                at.getMouseCatchingStage().setAlwaysOnTop(false);
+//                at.getPictureStage().setAlwaysOnTop(false);
+//                at.getPictureStage().toBack();
+//                at.toBack();
+                at.sendToBack();
+                nodes.remove(sendToBackButton);
+                nodes.add(bringToFrontButton);
+                fitScreen();
+            }
+        });
+        nodes.add(sendToBackButton);
+
+        /**
+         * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
+         */
+        bringToFrontButton = new Button();
+        ImageView bringToFrontImage = new ImageView("bringToFront.png");
+        bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
+        bringToFrontImage.setFitWidth(IMAGE_WIDTH);
+        bringToFrontButton.setGraphic(bringToFrontImage);
+        bringToFrontButton.setTooltip(getToolTip("Bring to Front"));
+        bringToFrontButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event)
+            {
+//                at.toFront();
+//                IconControllerBox.this.setAlwaysOnTop(false);
+//                IconControllerBox.this.setAlwaysOnTop(true);
+//                IconControllerBox.this.toFront();
+                at.bringToFront();
+                nodes.remove(bringToFrontButton);
+                nodes.add(sendToBackButton);
+                fitScreen();
+            }
+        });
+        nodes.add(bringToFrontButton);
+
         setIconSizes(medButtonSize);
+
+//        defaultBackground = selectedButton.getBackground();
+//        selectedButton.setBackground(SELECTED_BACKGROUND);
+
+//        for(Button node : nodes)
+//        {
+//            node.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+//                @Override
+//                public void handle(MouseEvent event)
+//                {
+//                    selectedButton.setBackground(defaultBackground);
+//                    selectedButton = node;
+//                    defaultBackground = node.getBackground();
+//                    selectedButton.setBackground(SELECTED_BACKGROUND);
+//                }
+//            });
+//        }
 
         this.show();
         location = TOP_LOCATION;
+        nodes.remove(nodes.size()-1);
         this.fitScreen();
         this.setAlwaysOnTop(true);
+    }
+    
+    private void saveImage(int numTimesRun) {
+    	at.setBorderVisibility(false);
+    	try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	final Clipboard clipboard = Clipboard.getSystemClipboard();
+        Image clipImage = null;
+        String clipString = null;
+        if(clipboard.hasImage()) {
+        	clipImage = clipboard.getImage();
+        } else if(clipboard.hasString()) {
+        	clipString = clipboard.getString();
+        }
+        clipboard.clear();
+
+        Robot robot;
+        try
+        {
+            robot = new Robot();
+        }
+        catch (AWTException e)
+        {
+            throw new RuntimeException(e);          //potentially fixes robot working with ubuntu.
+        }
+
+        try {
+        	robot.keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+			Thread.sleep(200);
+			robot.keyPress(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+			Thread.sleep(200);
+			robot.keyRelease(java.awt.event.KeyEvent.VK_PRINTSCREEN);
+			robot.keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        if(numTimesRun % 2 == 0) {
+        	at.doSave();
+        }
+        at.setBorderVisibility(true);
+
+        ClipboardContent clipContent = new ClipboardContent();
+    	if(clipImage != null) {
+    		clipContent.putImage(clipImage);
+    		clipboard.setContent(clipContent);
+    	} else if(clipString != null) {
+    		clipContent.putString(clipString);
+    		clipboard.setContent(clipContent);
+    	}
     }
 
     private void setIconSizes(double size)
     {
+        if(nodes.get(nodes.size()-1) == sendToBackButton)
+        {
+            nodes.add(bringToFrontButton);
+        }
+        else
+        {
+            nodes.add(sendToBackButton);
+        }
         for(Button n : this.nodes)
         {
             //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
@@ -923,6 +1231,7 @@ public class IconControllerBox extends Stage
                 ((Circle)graphicsContext).setRadius((size-10)/2);
             }
         }
+        nodes.remove(nodes.size()-1);
         this.buttonSize = size;
         this.fitScreen();
     }
@@ -1057,6 +1366,45 @@ public class IconControllerBox extends Stage
         {
             dialog.setY(pictureStage.getY());
         }
+    }
+    
+    public void newFile(String path) {
+    	System.out.println("Opening new file");
+    	Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+		dialog.initOwner(at.getMouseCatchingStage());
+		dialog.setTitle("Creating new annotation");
+		dialog.setHeaderText("This annotation will be closed.");
+		dialog.setContentText("Would you like to save?");
+		ButtonType yesBtn = new ButtonType("Yes");
+		ButtonType noBtn = new ButtonType("No");
+		ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+		dialog.getButtonTypes().setAll(yesBtn, noBtn, cancelBtn);
+		Optional<ButtonType> result = dialog.showAndWait();
+		
+		if(result.get() == yesBtn) {
+			try {
+
+                at.fileManagement("sFile"); //save as
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+		} 
+		
+		if(result.get() != cancelBtn) {
+			at.getControllerBox().close();
+			at.getMouseCatchingStage().close();
+			at.getPictureStage().close();
+			FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
+			try {
+				if(!new File(path).exists() || !path.endsWith(".jnote")) {
+					builder.start(new Stage());
+				} else {
+					builder.start(new Stage(), path);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
     }
 }
 

@@ -19,17 +19,27 @@ public class AddShape implements ChangeItem
     private Shape shape;
     private AnnotationToolApplication annotationToolApplication;
 
+    /**
+     * Creates an AddShape and initializes its shape to the the passed in shape.
+     * @param shape
+     */
     public AddShape(Shape shape)
     {
         this.shape = shape;
     }
 
+    /**
+     * @return the shape represented by this AddShape.
+     */
     public Shape getShape()
     {
         return shape;
     }
 
-
+    /**
+     * This adds the shape represented by this AddShape to the picture stage.
+     * @param annotationToolApplication The AnnotationToolApplication that is having the change added to.
+     */
     @Override
     public void addChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
@@ -62,6 +72,10 @@ public class AddShape implements ChangeItem
         });*/
     }
 
+    /**
+     * This removes the shape from the stage.
+     * @param annotationToolApplication The AnnotationToolApplication that needs to have the change
+     */
     @Override
     public void undoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
@@ -76,11 +90,20 @@ public class AddShape implements ChangeItem
         });
     }
 
+    /**
+     * This adds the shape back to the stage after it previously was removed from the stage.
+     * @param annotationToolApplication The AnnotationToolApplication that needs to have the change redone to
+     */
     @Override
     public void redoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
         addChangeToStage(annotationToolApplication);
     }
+
+    /**
+     * Allows for moving the shape to a different area on the window whenever movingShapes is true.
+     * The picture stage also needs to be on top in order to click on the shapes to move them.
+     */
     private class MoveShapeHandler implements EventHandler<MouseEvent>
     {
         double oldX;
@@ -94,10 +117,8 @@ public class AddShape implements ChangeItem
         {
             if(event.getEventType() == MouseEvent.MOUSE_PRESSED && movingShapes)
             {
-                //oldX = shape.getTranslateX();
                 oldX = shape.layoutXProperty().get();
                 oldY = shape.layoutYProperty().get();
-                //oldY = shape.getTranslateY();
                 oldClickX = event.getScreenX();
                 oldClickY = event.getScreenY();
             }

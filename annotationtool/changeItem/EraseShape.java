@@ -37,7 +37,11 @@ public class EraseShape implements ChangeItem
         return shapesPartiallyErased;
     }
 
-
+    /**
+     * Goes through each shape on the stage and removes any overlapping area between the shapes on the main window
+     * and the eraseShape.
+     * @param annotationToolApplication The AnnotationToolApplication that is having the change added to.
+     */
     @Override
     public void addChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
@@ -84,6 +88,10 @@ public class EraseShape implements ChangeItem
         });
     }
 
+    /**
+     * Adds the erased area back to the main window.
+     * @param annotationToolApplication The AnnotationToolApplication that needs to have the change
+     */
     @Override
     public void undoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
@@ -105,6 +113,10 @@ public class EraseShape implements ChangeItem
 
     }
 
+    /**
+     * Redoes the changes made by undo. This is inherently faster than simply adding the changes to the stage.
+     * @param annotationToolApplication The AnnotationToolApplication that needs to have the change redone to
+     */
     @Override
     public void redoChangeToStage(AnnotationToolApplication annotationToolApplication)
     {
