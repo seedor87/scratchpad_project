@@ -26,11 +26,13 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.SocketListener;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Robot;
 import java.awt.Toolkit;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -47,6 +49,7 @@ public class IconControllerBox extends Stage
     private static final int RIGHT_LOCATION = 2;
     private static final int TOOLTIP_FONT_SIZE = 20;
     private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
+    private Thread listenerThread;
     private Pane root;
     private Pane trunk;
     private Scene scene;
@@ -84,6 +87,17 @@ public class IconControllerBox extends Stage
         smallButtonSize = .25 * dotsPerInch;
         medButtonSize = .35 * dotsPerInch;
         largeButtonSize = .6 * dotsPerInch;
+        
+        final IconControllerBox CONTROLLER_BOX = this;
+        listenerThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				SocketListener serverSocket = new SocketListener(CONTROLLER_BOX, 26222);
+			}
+        	
+        });
+        listenerThread.start();
 
         Button exitButton = new Button();
         ImageView exitImage = new ImageView("exit.png");
@@ -134,37 +148,7 @@ public class IconControllerBox extends Stage
 
 			@Override
 			public void handle(MouseEvent event) {
-				Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
-				dialog.initOwner(at.getMouseCatchingStage());
-				dialog.setTitle("Creating new annotation");
-				dialog.setHeaderText("This annotation will be closed.");
-				dialog.setContentText("Would you like to save?");
-				ButtonType yesBtn = new ButtonType("Yes");
-				ButtonType noBtn = new ButtonType("No");
-				ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-				dialog.getButtonTypes().setAll(yesBtn, noBtn, cancelBtn);
-				Optional<ButtonType> result = dialog.showAndWait();
-				
-				if(result.get() == yesBtn) {
-					try {
-
-	                    at.fileManagement("sFile"); //save as
-	                } catch (Exception e) {
-	                    e.printStackTrace();
-	                }
-				} 
-				
-				if(result.get() != cancelBtn) {
-					at.getControllerBox().close();
-					at.getMouseCatchingStage().close();
-					at.getPictureStage().close();
-					FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
-					try {
-						builder.start(new Stage());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
+				newFile("");
 			}
         	
         });
@@ -1382,6 +1366,45 @@ public class IconControllerBox extends Stage
         {
             dialog.setY(pictureStage.getY());
         }
+    }
+    
+    public void newFile(String path) {
+    	System.out.println("Opening new file");
+    	Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+		dialog.initOwner(at.getMouseCatchingStage());
+		dialog.setTitle("Creating new annotation");
+		dialog.setHeaderText("This annotation will be closed.");
+		dialog.setContentText("Would you like to save?");
+		ButtonType yesBtn = new ButtonType("Yes");
+		ButtonType noBtn = new ButtonType("No");
+		ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+		dialog.getButtonTypes().setAll(yesBtn, noBtn, cancelBtn);
+		Optional<ButtonType> result = dialog.showAndWait();
+		
+		if(result.get() == yesBtn) {
+			try {
+
+                at.fileManagement("sFile"); //save as
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+		} 
+		
+		if(result.get() != cancelBtn) {
+			at.getControllerBox().close();
+			at.getMouseCatchingStage().close();
+			at.getPictureStage().close();
+			FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
+			try {
+				if(!new File(path).exists() || !path.endsWith(".jnote")) {
+					builder.start(new Stage());
+				} else {
+					builder.start(new Stage(), path);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
     }
 }
 

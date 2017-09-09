@@ -126,6 +126,15 @@ public class FXAnnotationToolBuilder extends Application {
 		if(workingPath == null) {
 			workingPath = promptDialogBox();
 		}
+		prepareStage(stage);
+	}
+	
+	public void start(Stage stage, String path) throws Exception {
+		workingPath = path;
+		prepareStage(stage);
+	}
+	
+	private void prepareStage(Stage stage) {
 		getLastSessionInfo();
 		this.stage = stage;
 		this.stage.initStyle(StageStyle.UNDECORATED);

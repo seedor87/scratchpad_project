@@ -25,7 +25,6 @@ public class X11InfoGatherer {
 		x11 = X11.INSTANCE;
 		display = x11.XOpenDisplay(null);
 		root = x11.XDefaultRootWindow(display);
-		System.out.println("OPEN");
 	}
 	
 	/**
@@ -37,7 +36,6 @@ public class X11InfoGatherer {
 		
 		ArrayList<WindowInfo> windows = getAllWindows(this.root, 0);
 		x11.XCloseDisplay(display);
-		System.out.println("CLOSE");
 		return windows;
 	}
 	
@@ -119,7 +117,6 @@ public class X11InfoGatherer {
 		X11.XTextProperty name = new X11.XTextProperty();
 		x11.XGetWMName(display, window, name);
 		x11.XCloseDisplay(display);
-		System.out.println("CLOSE");
 		return name.value;
 	}
 	
@@ -135,7 +132,6 @@ public class X11InfoGatherer {
         x11.XGetWindowAttributes(display, window, attributes);
         int[] dimensions = {attributes.width, attributes.height, attributes.x, attributes.y};
         x11.XCloseDisplay(display);
-		System.out.println("CLOSE");
         return dimensions;
 	}
 	
