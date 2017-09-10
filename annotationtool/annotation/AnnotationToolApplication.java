@@ -40,6 +40,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import org.comtel2000.keyboard.control.KeyBoardPopup;
+import org.comtel2000.keyboard.control.KeyBoardPopupBuilder;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
@@ -51,6 +54,7 @@ import rectify.Point;
 import util.FilePacker;
 import util.GlobalInputListener;
 import util.InputRecord;
+import util.VirtualKeyboard;
 import util.WindowInfo;
 import util.WindowLinkedInputRecord;
 import util.X11InfoGatherer;
@@ -71,10 +75,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -121,6 +123,7 @@ public class AnnotationToolApplication extends Application {
     private ArrayList<String> dataFiles = new ArrayList<String>();
     // Screen Setup and Layout
     private IconControllerBox controllerBox;
+    private VirtualKeyboard vk;
     private Stage mouseCatchingStage;
     private Stage pictureStage;
     private Stage textOptionStage;
@@ -1445,7 +1448,6 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
-
     }
 
     /**
@@ -1476,7 +1478,6 @@ public class AnnotationToolApplication extends Application {
     {
         this.resetHandlers();
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectangleHandler);
-
     }
 
 
@@ -1487,6 +1488,7 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         textBoxText.delete(0,textBoxText.length());
+
     }
 
     /**
@@ -1496,6 +1498,12 @@ public class AnnotationToolApplication extends Application {
     {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, outBoundedOvalHandler);
+    }
+    
+    public void hideVirtualKeyboard() {
+    	if(vk != null) {
+    		vk.close();
+    	}
     }
 
 
@@ -1821,6 +1829,7 @@ public class AnnotationToolApplication extends Application {
             saveTextBox = true;
 
             redoStack.clear();
+            vk = VirtualKeyboard.openVirtualKeyboard();
         }
     }
 

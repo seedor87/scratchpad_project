@@ -320,6 +320,8 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
+            	
                 //shapePickerButton.setGraphic(null);
                 //shapePickerButton.graphicProperty().setValue(null);
                 Dialog<Double> dialog = new Dialog<>();
@@ -410,6 +412,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Brush and Text Size");
                 //dialog.initStyle(StageStyle.UTILITY);
@@ -494,6 +497,7 @@ public class IconControllerBox extends Stage
         ColorPicker colorPicker = new ColorPicker(Color.BLACK);
         colorPicker.setOnAction(new EventHandler() {
             public void handle(Event t) {
+            	at.hideVirtualKeyboard();
                 Color c = colorPicker.getValue();
                 at.setPaint(c);
             }
@@ -520,6 +524,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.undo();
                 try
                 {
@@ -543,6 +548,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.redo();
                 try
                 {
@@ -567,6 +573,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 changeSize = buttonSize;
                 Dialog<Double> dialog = new Dialog<>();
                 dialog.setTitle("Select Button Size");
@@ -669,6 +676,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 location = LEFT_LOCATION;
                 fitScreen();
             }
@@ -685,6 +693,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 location = RIGHT_LOCATION;
                 fitScreen();
             }
@@ -701,6 +710,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 location = TOP_LOCATION;
                 fitScreen();
             }
@@ -717,6 +727,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.setMovingHandler();
             }
         });
@@ -733,6 +744,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.toggleClickable();
                 //setAlwaysOnTop(true);
             }
@@ -743,6 +755,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 isSelected = !isSelected;
                 if(isSelected)
                 {
@@ -771,6 +784,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.doClear();
             }
         });
@@ -811,6 +825,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.clearHistory();
             }
         });
@@ -827,6 +842,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.setSelectAndMoveHandler();
             }
         });
@@ -990,6 +1006,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 saveStateButton.setGraphic(null);
                 saveStateButton.graphicProperty().setValue(null);
                 Dialog<Double> dialog = new Dialog<>();
@@ -1047,6 +1064,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.toggleLockedControllerBox();
             }
         });
@@ -1064,6 +1082,7 @@ public class IconControllerBox extends Stage
             @Override
             public void handle(MouseEvent event)
             {
+            	at.hideVirtualKeyboard();
                 at.recordInput();
             }
         });
@@ -1087,6 +1106,7 @@ public class IconControllerBox extends Stage
 //                at.getPictureStage().setAlwaysOnTop(false);
 //                at.getPictureStage().toBack();
 //                at.toBack();
+            	at.hideVirtualKeyboard();
                 at.sendToBack();
                 nodes.remove(sendToBackButton);
                 nodes.add(bringToFrontButton);
