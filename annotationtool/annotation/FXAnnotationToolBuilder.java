@@ -523,6 +523,7 @@ public class FXAnnotationToolBuilder extends Application {
 		building = true;
 		this.stage.setOpacity(0f);
 		this.stage.setIconified(true);
+		this.stage.close();
 
 		Stage newStage = new Stage();
 		Stage newSecondaryStage = new Stage();
@@ -607,6 +608,7 @@ public class FXAnnotationToolBuilder extends Application {
 			building = true;
 			this.stage.setOpacity(0f);
 			this.stage.setIconified(true);
+			this.stage.close();
 			
 			double width = Double.valueOf(args[0]);
 			double height = Double.valueOf(args[1]);

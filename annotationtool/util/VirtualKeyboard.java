@@ -21,6 +21,7 @@ public class VirtualKeyboard {
 	public static VirtualKeyboard vk;
 	private int posX, posY;
 	private Stage stage;
+	private KeyboardPane kb;
 	
 	private VirtualKeyboard() {
 
@@ -29,10 +30,10 @@ public class VirtualKeyboard {
 	    stage.setResizable(false);
 	    stage.initStyle(StageStyle.UNDECORATED);
 
-	    KeyboardPane kb = new KeyboardPane();
+	    kb = new KeyboardPane();
 	    kb.setLayer(DefaultLayer.NUMBLOCK);
 	    kb.addRobotHandler(new NativeAsciiRobotHandler());
-	    kb.setOnKeyboardCloseButton(e -> System.exit(0));
+	    kb.setOnKeyboardCloseButton(e -> close());
         try {
 			kb.load();
 		} catch (Exception e1) {
@@ -91,28 +92,14 @@ public class VirtualKeyboard {
 	  
 	  public static VirtualKeyboard openVirtualKeyboard() {
 		  if(vk == null) {
-			  Thread vkThread = new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					Platform.runLater(new Runnable() {
-						
-						@Override
-						public void run() {
-							VirtualKeyboard vk = new VirtualKeyboard();
-						}
-					});
-				}
-				  
-			  });
-			  vkThread.start();
+			  VirtualKeyboard vk = new VirtualKeyboard();
 		  } else {
-			  vk.stage.setOpacity(1);
+			  vk.kb.setOpacity(1);
 		  }
 		  return vk;
 	  }
 	  
 	  public void close() {
-		  this.stage.setOpacity(0);
+		  kb.setOpacity(0);
 	  }
 }

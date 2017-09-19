@@ -1502,7 +1502,11 @@ public class AnnotationToolApplication extends Application {
     
     public void hideVirtualKeyboard() {
     	if(vk != null) {
+    		System.out.println("vk closing");
     		vk.close();
+    	}
+    	else {
+    		System.out.println("vk is null");
     	}
     }
 
