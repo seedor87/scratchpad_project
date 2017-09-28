@@ -1,5 +1,6 @@
 package TransferableShapes;
 
+import annotation.AnnotationToolApplication;
 import changeItem.*;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
@@ -45,6 +46,12 @@ public class Custom_Shape {
     private String colorString = "";
     private String widthString = "";
     private String heightString = "";
+    private static AnnotationToolApplication annotationToolApplication;
+
+    public static void setAnnotationToolApplication(AnnotationToolApplication annotationToolApplication)
+    {
+        Custom_Shape.annotationToolApplication = annotationToolApplication;
+    }
 
 
     public static void changeShape(Shape oldShape, Shape newShape)
@@ -327,27 +334,43 @@ public class Custom_Shape {
         switch (type)
         {
             case PATH_STRING:
-                return new AddShape(toPath());
+                Shape path = toPath();
+                annotationToolApplication.addLeaderToFollower(path);
+                return new AddShape(path);
             case ERASE_STRING:
                 return new EraseShape(toUncoloredPath());
             case ARROW_STRING:
-                return new AddShape(toArrow());
+                Shape arrow = toArrow();
+                annotationToolApplication.addLeaderToFollower(arrow);
+                return new AddShape(arrow);
             case CIRCLE_STRING:
-                return new AddShape(toCircle());
+                Shape circle = toCircle();
+                annotationToolApplication.addLeaderToFollower(circle);
+                return new AddShape(circle);
             case TEXT_STRING:
-                return new AddShape(toText());
+                Shape text = toText();
+                annotationToolApplication.addLeaderToFollower(text);
+                return new AddShape(text);
             case MOVE_SHAPE_STRING:
                 return toMoveShape();
             case EDIT_TEXT_STRING:
                 return toEditText();
             case RECTIFICATION_STRING:
-                return toPolygon();
+                Shape polygon = toPolygon();
+                annotationToolApplication.addLeaderToFollower(polygon);
+                return new AddShape(polygon);
             case RECTANGLE_STRING:
-                return toRectangle();
+                Shape rectangle = toRectangle();
+                annotationToolApplication.addLeaderToFollower(rectangle);
+                return new AddShape(rectangle);
             case OVAL_STRING:
-                return toOval();
+                Shape oval = toOval();
+                annotationToolApplication.addLeaderToFollower(oval);
+                return new AddShape(oval);//todo here
             case LINE_STRING:
-                return toLine();
+                Shape line = toLine();
+                annotationToolApplication.addLeaderToFollower(line);
+                return new AddShape(line);
             default:
                 return null;    //TODO change this to throw a custom exception
         }
@@ -357,21 +380,21 @@ public class Custom_Shape {
      * Creates a line from the values inside of this custom shape.
      * @return the line that is created.
      */
-    private ChangeItem toLine()
+    private Shape toLine()
     {
         Line line = new Line(Double.valueOf(start.getX()), Double.valueOf(start.getY()),
                             Double.valueOf(end.getX()), Double.valueOf(end.getY()));
         line.setStroke(Color.valueOf(colorString));
         line.setStrokeWidth(Double.valueOf(strokeWidth));
         setUpUUIDMaps(line,uuid);
-        return new AddShape(line);
+        return line;
     }
 
     /**
      * Creates an oval from the values inside of this Custom_Shape. This custom shape should be one that can return an oval.
      * @return the addshape with the oval representing this custom shape.
      */
-    private ChangeItem toOval()
+    private Shape toOval()
     {
         Rectangle rectangle = new Rectangle(Double.valueOf(location.getX()), Double.valueOf(location.getY()),
                 Double.valueOf(widthString), Double.valueOf(heightString));
@@ -381,14 +404,14 @@ public class Custom_Shape {
         rectangle.setArcHeight(rectangle.getHeight());
         rectangle.setArcWidth(rectangle.getWidth());
         setUpUUIDMaps(rectangle,uuid);
-        return new AddShape(rectangle);
+        return rectangle;
     }
 
     /**
      * Creates a rectangle from the values inside this custom shape. The custom shape should be one that can return a rectangle.
      * @return the AddShape that contains the created rectangle.
      */
-    private ChangeItem toRectangle()
+    private Shape toRectangle()
     {
         Rectangle rectangle = new Rectangle(Double.valueOf(location.getX()), Double.valueOf(location.getY()),
                                 Double.valueOf(widthString), Double.valueOf(heightString));
@@ -396,14 +419,14 @@ public class Custom_Shape {
         rectangle.setStroke(Color.valueOf(colorString));
         rectangle.setStrokeWidth(Double.valueOf(strokeWidth));
         setUpUUIDMaps(rectangle,uuid);
-        return new AddShape(rectangle);
+        return rectangle;
     }
 
     /**
      * Creates a polygon from the values inside of this custom shape. This custom shape should be one that can return a polygon.
      * @return The AddShape created with the created polygon.
      */
-    private ChangeItem toPolygon()
+    private Shape toPolygon()
     {
         Polygon polygon = new Polygon();
         for(Point point : points)
@@ -414,7 +437,7 @@ public class Custom_Shape {
         polygon.setStroke(Color.valueOf(colorString));
         polygon.setFill(null);
         setUpUUIDMaps(polygon, uuid);
-        return new AddShape(polygon);
+        return polygon;
         //TODO test
     }
 //    setUpUUIDMaps(newCircle, uuid);
@@ -427,8 +450,11 @@ public class Custom_Shape {
     private MoveShape toMoveShape()
     {
         Shape movedShape = addedShapes.get(uuid);
+        Shape leader = annotationToolApplication.getFollowersToLeaders().get(movedShape);
         double newX = Double.valueOf(location.getX());
         double newY = Double.valueOf(location.getY());
+        leader.setLayoutX(newX);
+        leader.setLayoutY(newY);
         return new MoveShape(newX, newY, movedShape);
     }//TODO this does the input for the above and below method, but now the output needs to be done.
 
