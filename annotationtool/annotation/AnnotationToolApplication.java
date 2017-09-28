@@ -193,6 +193,9 @@ public class AnnotationToolApplication extends Application {
     private final double OPACITY_MULTIPLIER = 0.108;
     private Map<Shape, Color> oldColorMap = new HashMap<>();
 
+    private Map<Shape,Shape> leadersToFollowers = new HashMap<>();
+    private Map<Shape,Shape> followersToLeaders = new HashMap<>();
+
     //================================================================================
     // Constructors/Starts
     //================================================================================
@@ -388,6 +391,7 @@ public class AnnotationToolApplication extends Application {
 
     private void saveTextBox()
     {
+        addLeaderToFollower(text);
         uuid = UUID.randomUUID();
         Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
         custom_shape.setTextSize(text.getFont().getSize() + "");
@@ -825,7 +829,6 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
         pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
 
-
         //mouseCatchingStage.addEventHandler(TouchEvent.ANY, new TwoTouchChangeSize());
 /*
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, new BoxHidingHandler());
@@ -1041,6 +1044,7 @@ public class AnnotationToolApplication extends Application {
             newShape.setFill(line.getStroke());
             undo();
             commitChange(new AddShape(newShape));
+            addLeaderToFollower(newShape);
             uuid = UUID.randomUUID();
             Custom_Shape.setUpUUIDMaps(newShape, uuid);
 
@@ -1651,11 +1655,11 @@ public class AnnotationToolApplication extends Application {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                addLeaderToFollower(rectangle);
                 rectangle = null;
             }
         }
     }
-
     /**
      * Creates arrows. should be implemented with MouseEvent.ANY when you add the
      * handler to the mousecatchingscene.
@@ -1766,6 +1770,7 @@ public class AnnotationToolApplication extends Application {
                     e.printStackTrace();
                 }
                 commitChange(new AddShape(rectangle));
+                addLeaderToFollower(rectangle);
                 root.getChildren().remove(tempPath);
                 redoStack.clear();
             }
@@ -1912,6 +1917,7 @@ public class AnnotationToolApplication extends Application {
             polygon.setStrokeWidth(strokeWidth);
             polygon.setFill(null);
             commitChange(new AddShape(polygon));
+            addLeaderToFollower(polygon);
             uuid = UUID.randomUUID();
             Custom_Shape.setUpUUIDMaps(polygon, uuid);
             ArrayList<TransferableShapes.Point> transferablePoints = new ArrayList<>();
@@ -1938,6 +1944,73 @@ public class AnnotationToolApplication extends Application {
     {
         resetHandlers();
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, lineHandler);
+    }
+
+    //TODO use this
+    private void setFollowing(Shape leader, Shape follower)
+    {
+        leader.addEventHandler(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+            boolean reset = true;
+            boolean didReset = false;
+            double startX;
+            double startY;
+            double shapeStartX;
+            double shapeStartY;
+            double currentX;
+            double currentY;
+            long delayTime = 1000;
+            Date startTime;
+            Color oldColor;
+            @Override
+            public void handle(MouseEvent mouseEvent)
+            {
+                if(mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED)
+                {
+                    startTime = new Date();
+                    shapeStartX = leader.getLayoutX();
+                    shapeStartY = leader.getLayoutY();
+                    startX = mouseEvent.getScreenX();
+                    startY = mouseEvent.getScreenY();
+                    reset = true;
+                    //System.out.println(shapeStartX +"," + shapeStartY + ",\n" + startX + "," + startY +'\n'+ leader + '\n' + follower);
+                    //oldColor = (Color) follower.getStroke();
+                }
+                else if(mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED && startTime != null)
+                {
+                    if (new Date().getTime() - startTime.getTime() > delayTime)
+                    {
+                        currentX = shapeStartX + mouseEvent.getScreenX() - startX;
+                        currentY = shapeStartY + mouseEvent.getScreenY() - startY;
+                        leader.setLayoutX(currentX);
+                        leader.setLayoutY(currentY);
+                        follower.setLayoutX(currentX);
+                        follower.setLayoutY(currentY);
+                        if(reset)
+                        {
+                            didReset = true;
+                            resetHandlers();
+                            //follower.setStroke(new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(), oldColor.getOpacity()/2));
+                        }
+                        reset = false;
+                    }
+                    else
+                    {
+                        startTime = null;
+                    }
+                }
+                else if(mouseEvent.getEventType() ==MouseEvent.MOUSE_RELEASED)
+                {
+                    if(didReset)
+                    {
+                        //TODO make all moveshapes use this constructor
+                        commitChange(new MoveShape(follower, shapeStartX,shapeStartY, AnnotationToolApplication.this, leader));
+                        setDrawingText();
+                        didReset = false;
+                        //follower.setFill(oldColor);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -1992,6 +2065,7 @@ public class AnnotationToolApplication extends Application {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                addLeaderToFollower(line);
                 Custom_Shape.setUpUUIDMaps(line, uuid);
                 redoStack.clear();
             }
@@ -2054,6 +2128,8 @@ public class AnnotationToolApplication extends Application {
                     path.getElements().add(moveTo);
                 } else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 
+                    addLeaderToFollower(path);
+
                     try {
                         uuid = UUID.randomUUID();
                         Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.PATH_STRING, pathElements);
@@ -2079,6 +2155,20 @@ public class AnnotationToolApplication extends Application {
 
             }
         }
+    }
+
+    /**
+     * Allows the follower shape to be moved using a click and hold event
+     *
+     * @param follower
+     *///TODO finish this for touch events as well?
+    private void addLeaderToFollower(Shape follower)
+    {
+        Shape leader = Shape.union(follower,follower);
+        setFollowing(leader, follower);
+        notRoot.getChildren().add(leader);
+        leadersToFollowers.put(leader,follower);
+        followersToLeaders.put(follower,leader);
     }
 
     /**
@@ -2446,6 +2536,8 @@ public class AnnotationToolApplication extends Application {
                 }  catch (IOException e) {
                     e.printStackTrace(); }
 
+
+                addLeaderToFollower(newCircle);
 
                 redoStack.clear();
                 circle = null;

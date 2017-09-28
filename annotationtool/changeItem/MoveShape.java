@@ -13,6 +13,7 @@ import java.io.IOException;
 public class MoveShape implements ChangeItem
 {
     Shape shape;
+    Shape leader;
     double oldX;
     double oldY;
     double newX;
@@ -43,6 +44,12 @@ public class MoveShape implements ChangeItem
         }
     }
 
+    public MoveShape(Shape follower, double oldX, double oldY, AnnotationToolApplication annotationToolApplication, Shape leader)
+    {
+        this(follower,oldX, oldY,annotationToolApplication);
+        this.leader = leader;
+    }
+
     /**
      *
      * @param newX The new x location of the shape.
@@ -70,6 +77,11 @@ public class MoveShape implements ChangeItem
     {
         shape.layoutXProperty().set(newX);
         shape.layoutYProperty().set(newY);
+        if(leader != null)
+        {
+            leader.layoutXProperty().set(newX);
+            leader.layoutYProperty().set(newY);
+        }
     }
 
     /**
@@ -81,6 +93,11 @@ public class MoveShape implements ChangeItem
     {
         shape.layoutYProperty().set(oldY);
         shape.layoutXProperty().set(oldX);
+        if(leader != null)
+        {
+            leader.layoutXProperty().set(oldX);
+            leader.layoutYProperty().set(oldY);
+        }
     }
 
     /**
