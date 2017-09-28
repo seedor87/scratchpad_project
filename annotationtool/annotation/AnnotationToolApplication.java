@@ -127,7 +127,7 @@ public class AnnotationToolApplication extends Application {
     private Scene mouseCatchingScene;
     private Scene drawingScene;
     private Group root;
-    private Group notRoot;
+    private Group leaderRoot;
     private VBox box;
     private Color textColor = Color.BLACK;
     private Color borderColor = Color.BLUE;
@@ -249,9 +249,9 @@ public class AnnotationToolApplication extends Application {
     	this.mouseCatchingStage.initStyle(StageStyle.UNDECORATED);
     	
     	root = new Group();
-    	
-    	notRoot = new Group();
-    	mouseCatchingScene = new Scene(notRoot);         // the scene that catches all the mouse events
+
+        leaderRoot = new Group();
+    	mouseCatchingScene = new Scene(leaderRoot);         // the scene that catches all the mouse events
     	drawingScene = new Scene(root);   // the scene that renders all the drawings.
     	drawingScene.setFill(clearPaint);
     	
@@ -314,12 +314,18 @@ public class AnnotationToolApplication extends Application {
     	logger.setUseParentHandlers(false);
     }
 
+    public ObservableList<Node> getLeaderGroup()
+    {
+        return leaderRoot.getChildren();
+    }
+
     /**
      * Attempts to rebuild the previous session using the shaperecord json
      * 
      * @throws IOException
      */
     private void remakeFromJSON() throws IOException {
+        Custom_Shape.setAnnotationToolApplication(this);
     	
     	try
     	{
@@ -2162,13 +2168,18 @@ public class AnnotationToolApplication extends Application {
      *
      * @param follower
      *///TODO finish this for touch events as well?
-    private void addLeaderToFollower(Shape follower)
+    public void addLeaderToFollower(Shape follower)
     {
         Shape leader = Shape.union(follower,follower);
         setFollowing(leader, follower);
-        notRoot.getChildren().add(leader);
+        leaderRoot.getChildren().add(leader);
         leadersToFollowers.put(leader,follower);
         followersToLeaders.put(follower,leader);
+    }
+
+    public Map<Shape, Shape> getFollowersToLeaders()
+    {
+        return followersToLeaders;
     }
 
     /**
