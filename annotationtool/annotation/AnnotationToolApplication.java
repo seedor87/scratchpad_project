@@ -7,7 +7,6 @@ import changeItem.*;
 import TransferableShapes.*;
 
 import com.google.gson.*;
-import com.sun.jmx.snmp.Timestamp;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -29,7 +28,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
@@ -75,9 +73,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -164,10 +160,10 @@ public class AnnotationToolApplication extends Application {
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
     // Cursors
-    private Cursor pencilCursor = new ImageCursor(new Image("pencil-cursor.png"));
-    private Cursor eraserCursor = new ImageCursor(new Image("eraser-cursor.png"));
-    private Cursor textCursor = new ImageCursor(new Image("TextIcon.png"));
-    private Cursor arrowCursor = new ImageCursor(new Image("arrow-cursor.png"));
+    private Cursor pencilCursor = new ImageCursor(new Image("pictures/pencil-cursor.png"));
+    private Cursor eraserCursor = new ImageCursor(new Image("pictures/eraser-cursor.png"));
+    private Cursor textCursor = new ImageCursor(new Image("pictures/TextIcon.png"));
+    private Cursor arrowCursor = new ImageCursor(new Image("pictures/arrow-cursor.png"));
     // Settings
     private WindowInfo windowID;
     private String textFont = "Times New Roman";
@@ -1453,7 +1449,7 @@ public class AnnotationToolApplication extends Application {
      */
     public void setMovingHandler() {
         this.resetHandlers();
-        mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+        mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/hand.png")));
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
 
     }
@@ -1800,7 +1796,7 @@ public class AnnotationToolApplication extends Application {
                 originalY = event.getScreenY();
                 originalStageX = mouseCatchingStage.getX();
                 originalStageY = mouseCatchingStage.getY();
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("grab.png")));
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/grab.png")));
             } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 double changeX = event.getScreenX() - originalX;
                 double changeY = event.getScreenY() - originalY;
@@ -1808,7 +1804,7 @@ public class AnnotationToolApplication extends Application {
                 mouseCatchingStage.setY(originalStageY + changeY);
             } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
                 originalX = -1;
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("hand.png")));
+                mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/hand.png")));
             }
         }
     }
@@ -1955,6 +1951,7 @@ public class AnnotationToolApplication extends Application {
     //TODO use this
     private void setFollowing(Shape leader, Shape follower)
     {
+        setTouchFollowing(leader,follower);
         leader.addEventHandler(MouseEvent.ANY, new EventHandler<MouseEvent>() {
             boolean reset = true;
             boolean didReset = false;
@@ -1964,9 +1961,8 @@ public class AnnotationToolApplication extends Application {
             double shapeStartY;
             double currentX;
             double currentY;
-            long delayTime = 1000;
+            long delayTime = 10;
             Date startTime;
-            Color oldColor;
             @Override
             public void handle(MouseEvent mouseEvent)
             {
@@ -2005,6 +2001,70 @@ public class AnnotationToolApplication extends Application {
                     }
                 }
                 else if(mouseEvent.getEventType() ==MouseEvent.MOUSE_RELEASED)
+                {
+                    if(didReset)
+                    {
+                        //TODO make all moveshapes use this constructor
+                        commitChange(new MoveShape(follower, shapeStartX,shapeStartY, AnnotationToolApplication.this, leader));
+                        setDrawingText();
+                        didReset = false;
+                        //follower.setFill(oldColor);
+                    }
+                }
+            }
+        });
+    }
+
+
+    private void setTouchFollowing(Shape leader, Shape follower)
+    {
+        leader.addEventHandler(TouchEvent.ANY, new EventHandler<TouchEvent>() {
+            boolean reset = true;
+            boolean didReset = false;
+            double startX;
+            double startY;
+            double shapeStartX;
+            double shapeStartY;
+            double currentX;
+            double currentY;
+            long delayTime = 1000;
+            Date startTime;
+            @Override
+            public void handle(TouchEvent event) {
+                if(event.getEventType() == TouchEvent.TOUCH_PRESSED && event.getTouchCount() == 1)
+                {
+                    System.out.println("onetouch");
+                    startTime = new Date();
+                    shapeStartX = leader.getLayoutX();
+                    shapeStartY = leader.getLayoutY();
+                    startX = event.getTouchPoint().getScreenX();
+                    startY = event.getTouchPoint().getScreenY();
+                    reset = true;
+                }
+                else if(event.getEventType() == TouchEvent.TOUCH_MOVED && event.getTouchCount() ==1 && startTime !=null)
+                {
+                    if (new Date().getTime() - startTime.getTime() > delayTime)
+                    {
+                        currentX = shapeStartX + event.getTouchPoint().getScreenX() - startX;
+                        currentY = shapeStartY + event.getTouchPoint().getScreenY() - startY;
+                        leader.setLayoutX(currentX);
+                        leader.setLayoutY(currentY);
+                        follower.setLayoutX(currentX);
+                        follower.setLayoutY(currentY);
+                        if(reset)
+                        {
+                            didReset = true;
+                            resetHandlers();
+                            //follower.setStroke(new Color(oldColor.getRed(), oldColor.getGreen(), oldColor.getBlue(), oldColor.getOpacity()/2));
+                        }
+                        reset = false;
+                    }
+                    else
+                    {
+                        startTime = null;
+                    }
+                }
+                else if(event.getEventType() == TouchEvent.TOUCH_RELEASED && didReset)
                 {
                     if(didReset)
                     {
