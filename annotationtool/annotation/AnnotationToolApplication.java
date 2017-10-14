@@ -136,14 +136,14 @@ public class AnnotationToolApplication extends Application {
     private DrawingHandler drawingHandler = new DrawingHandler(this);
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler(this);
-    private ShortcutHandler shortcutHandler = new ShortcutHandler();
+    private ShortcutHandler shortcutHandler = new ShortcutHandler(this);
     private TextBoxHandler textBoxHandler = new TextBoxHandler(this);
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler(this);
     private CircleHandler circleHandler = new CircleHandler(this);
     private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler(this);
     private EraseHandler eraseHandler = new EraseHandler(this);
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler(this);
-    private ResizeHandler resizeHandler = new ResizeHandler();
+    private ResizeHandler resizeHandler = new ResizeHandler(this);
     private RectangleHandler rectangleHandler = new RectangleHandler(this);
     private RectificationHandler rectificationHandler = new RectificationHandler(this);
     private LineHandler lineHandler = new LineHandler(this);
@@ -1186,6 +1186,11 @@ public class AnnotationToolApplication extends Application {
         });
     }
 
+    public boolean getMakingTextBox()
+    {
+        return makingTextBox;
+    }
+
     public boolean getSaveTextBox() {
         return saveTextBox;
     }
@@ -1197,6 +1202,10 @@ public class AnnotationToolApplication extends Application {
     public void setSaveEditText(boolean saveEditText)
     {
         this.saveEditText = saveEditText;
+    }
+    public WindowInfo getWindowID()
+    {
+        return windowID;
     }
 
     public void setTextSize(Integer textSize) {
@@ -1667,70 +1676,6 @@ public class AnnotationToolApplication extends Application {
     {
         return followersToLeaders;
     }
-
-
-    /**
-     * @author armstr
-     *
-     * Ensures that the annotation window remains attached to any relevant window, snapping to it whenever the mouse button is released.
-     */
-    private class ResizeHandler implements NativeMouseInputListener
-    {
-
-        public ResizeHandler() {
-            // Get the logger for "org.jnativehook" and set the level to warning.
-            Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-            logger.setLevel(Level.WARNING);
-
-            // Don't forget to disable the parent handlers.
-            logger.setUseParentHandlers(false);
-
-        }
-
-        @Override
-        public void nativeMouseReleased(NativeMouseEvent nativeEvent) {
-            if(windowID != null) {
-                resnapToWindow(windowID);
-            }
-        }
-
-        @Override
-        public void nativeMouseClicked(NativeMouseEvent nativeEvent) {}
-        @Override
-        public void nativeMousePressed(NativeMouseEvent nativeEvent) {}
-        @Override
-        public void nativeMouseDragged(NativeMouseEvent nativeEvent) {}
-        @Override
-        public void nativeMouseMoved(NativeMouseEvent nativeEvent) {}
-    }
-
-    /**
-     * Handles if the user presses the escape button.
-     * If the user is in a text box, it closes the text box. It returns you to
-     * drawing mode if you are in a text box.
-     *
-     * If you are not in a text box, the program is closed.
-     */
-    private class ShortcutHandler implements EventHandler<KeyEvent>
-    {
-        public void handle(KeyEvent event)
-        {
-            if(event.getCode() == KeyCode.ESCAPE) {
-                if(makingTextBox) {
-                    setDrawingText();
-                } else {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.exit(0);
-                        }
-                    });
-                }
-            }
-        }
-    }
-
-
 
     /**
      * Handler to reset the controllerbox to make sure it is on top
