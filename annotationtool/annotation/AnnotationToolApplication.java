@@ -136,15 +136,13 @@ public class AnnotationToolApplication extends Application {
     private DrawingHandler drawingHandler = new DrawingHandler(this);
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler(this);
-    private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();
     private ShortcutHandler shortcutHandler = new ShortcutHandler();
     private TextBoxHandler textBoxHandler = new TextBoxHandler(this);
     private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler(this);
-    private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
     private CircleHandler circleHandler = new CircleHandler(this);
     private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler(this);
     private EraseHandler eraseHandler = new EraseHandler(this);
-    private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
+    private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler(this);
     private ResizeHandler resizeHandler = new ResizeHandler();
     private RectangleHandler rectangleHandler = new RectangleHandler(this);
     private RectificationHandler rectificationHandler = new RectificationHandler(this);
@@ -392,7 +390,7 @@ public class AnnotationToolApplication extends Application {
     // Mutators
     //================================================================================
 
-    private void saveTextBox()
+    public void saveTextBox()
     {
         addLeaderToFollower(text);
         uuid = UUID.randomUUID();
@@ -409,20 +407,8 @@ public class AnnotationToolApplication extends Application {
             ioe.printStackTrace();
         }
     }
-    
-    private class SaveTextBoxHandler implements EventHandler<MouseEvent>
-    {
-        @Override
-        public void handle(MouseEvent event)
-        {
-            if(saveTextBox)
-            {
-                saveTextBox();
-                saveTextBox = false;
-            }
-        }
-    }
-    private void saveEditText()
+
+    public void saveEditText()
     {
         Custom_Shape custom_shape = new Custom_Shape(editTextToSave);
         try
@@ -432,18 +418,6 @@ public class AnnotationToolApplication extends Application {
         catch (IOException ioe)
         {
             ioe.printStackTrace();
-        }
-    }
-    private class SaveEditTextHandler implements EventHandler<MouseEvent>
-    {
-        @Override
-        public void handle(MouseEvent event)
-        {
-            if(saveEditText)
-            {
-                saveEditText();
-                saveEditText = false;
-            }
         }
     }
 
@@ -735,7 +709,7 @@ public class AnnotationToolApplication extends Application {
      * Removes all handlers from the scene.
      * Should be called before adding more in to prevent multiple handlers trying to handle the same event(S).
      */
-    private void resetHandlers()
+    public void resetHandlers()
     {
         for (HandlerGroup h : eventHandlers)
         {
@@ -749,6 +723,14 @@ public class AnnotationToolApplication extends Application {
         AddShape.movingShapes = false;
         resetStages();
         mouseCatchingScene.setCursor(pencilCursor);
+    }
+
+    /**
+     * Not fully implemented. should get saved state from resethandlers and restore it. currently just resets back to drawing
+     */
+    public void unResetHandlers()
+    {
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
     }
 
 
@@ -777,15 +759,12 @@ public class AnnotationToolApplication extends Application {
         drawingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED,putControllerBoxOnTopHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-        //mouseCatchingScene.addEventHandler(ZoomEvent.ANY, touchSendToBackHandler);                       //Doesnt need to be added below cause we always wanna be listening for it
-        //mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchHandler);
-        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);
+        mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);       //Doesnt need to be added below cause we always wanna be listening for it
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
-        //mouseCatchingScene.addEventHandler(MouseEvent.ANY, new moveShapeHandler());
-        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
-        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler());
-        mouseCatchingStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
-        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler());
+        mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler(this));
+        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler(this));
+        mouseCatchingStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler(this));
+        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler(this));
 
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
@@ -794,7 +773,6 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
-        //eventHandlers.add(new HandlerGroup(TouchEvent.ANY, twoTouchHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedOvalHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
@@ -891,7 +869,7 @@ public class AnnotationToolApplication extends Application {
      * Does the same thing as resizeAnnotationWindow, but instead of taking in the change in x and the change in y
      * it takes in the new values of x and y.
      */
-    private void resizeAnnotationWindow2(double width, double height)
+    public void resizeAnnotationWindow2(double width, double height)
     {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         double screenWidth = screenSize.getWidth();
@@ -1190,6 +1168,11 @@ public class AnnotationToolApplication extends Application {
     	return this.mouseCatchingStage;
     }
 
+    public Scene getMouseCatchingScene()
+    {
+        return mouseCatchingScene;
+    }
+
     public Double getStrokeWidth() {
         return  strokeWidth;
     }
@@ -1201,6 +1184,19 @@ public class AnnotationToolApplication extends Application {
                 mouseCatchingStage.setAlwaysOnTop(alwaysOnTop);
             }
         });
+    }
+
+    public boolean getSaveTextBox() {
+        return saveTextBox;
+    }
+
+    public boolean getSaveEditText()
+    {
+        return saveEditText;
+    }
+    public void setSaveEditText(boolean saveEditText)
+    {
+        this.saveEditText = saveEditText;
     }
 
     public void setTextSize(Integer textSize) {
@@ -1735,197 +1731,6 @@ public class AnnotationToolApplication extends Application {
     }
 
 
-    /**
-     * Triggers toggleClickable when triggered. Should be implemented with ZoomEvent.ANY
-     * Not being used in the most current version.
-     */
-    private class TouchSendToBackHandler implements EventHandler<ZoomEvent> {
-        @Override
-        public void handle(ZoomEvent event) {
-            if(event.getEventType() == ZoomEvent.ZOOM_STARTED) {
-                resetHandlers();
-            }
-            if(event.getEventType() == ZoomEvent.ZOOM_FINISHED) {
-                if(event.getTotalZoomFactor() < 1)          // if the user triggers a zoom out event.
-                {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            toggleClickable();
-                        }
-                    });
-                }
-                mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-            }
-        }
-    }
-
-    /**
-     * Handles touch events that involve two touch points.
-     * can be used to move the window with two fingers, and/or to
-     * resize it with two fingers
-     * should be implemented with TouchEvent.ANY when you add the
-     * handler to the mousecatchingscene.
-     */
-    private class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent> {
-        boolean using = false;
-        int topPointIndex;
-        int bottomPointIndex;
-        int rightPointIndex;
-        int leftPointIndex;
-        TouchPoint topPoint;
-        TouchPoint bottomPoint;
-        TouchPoint leftPoint;
-        TouchPoint rightPoint;
-        double originalScreenX;
-        double originalScreenY;
-        double originalScreenWidth;
-        double originalScreenHeight;
-
-        double rightXChange = 0;
-        double topYChange = 0;
-        double leftXChange = 0;
-        double bottomYChange = 0;
-
-        @Override
-        public void handle(TouchEvent event) {
-            if(event.getTouchCount() == 2) {
-                using = true;
-                /*
-                Sets up some variables to keep track of which first point was which.
-                 */
-                if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
-                    resetHandlers();
-                    originalScreenX = mouseCatchingStage.getX();
-                    originalScreenY = mouseCatchingStage.getY();
-                    originalScreenWidth = mouseCatchingStage.getWidth();
-                    originalScreenHeight = mouseCatchingStage.getHeight();
-                    double rightXChange = 0;
-                    double topYChange = 0;
-                    double leftXChange = 0;
-                    double bottomYChange = 0;
-
-                    TouchPoint point1 = event.getTouchPoints().get(0);
-                    TouchPoint point2 = event.getTouchPoints().get(1);
-                    if(point1.getY() < point2.getY()) {
-                        topPointIndex = 0;
-                        bottomPointIndex = 1;
-                        topPoint = point1;
-                        bottomPoint = point2;
-                    } else {
-                        bottomPointIndex = 0;
-                        topPointIndex = 1;
-                        bottomPoint = point1;
-                        topPoint = point2;
-                    }
-                    if(point1.getScreenX() > point2.getScreenX()) {
-                        rightPointIndex = 0;
-                        leftPointIndex = 1;
-                        rightPoint = point1;
-                        leftPoint = point2;
-                    } else {
-                        rightPointIndex = 1;
-                        leftPointIndex = 0;
-                        rightPoint = point2;
-                        leftPoint = point1;
-                    }
-                } else if(event.getEventType() == TouchEvent.TOUCH_MOVED && event.getTouchCount() == 2) {
-                    for(TouchPoint touchPoint : event.getTouchPoints()) {
-                        if(touchPoint.getState() != TouchPoint.State.STATIONARY) {
-                            int index = event.getTouchPoints().indexOf(touchPoint);
-                            if(index == rightPointIndex) {
-                                rightXChange = touchPoint.getScreenX() - rightPoint.getScreenX();
-                            } else if(index == leftPointIndex) {
-                                leftXChange = leftPoint.getScreenX() - touchPoint.getScreenX();
-                            }
-                            if(index == topPointIndex) {
-                                topYChange = topPoint.getScreenY() - touchPoint.getScreenY();
-                            } else if(index == bottomPointIndex) {
-                                bottomYChange = touchPoint.getScreenY() - bottomPoint.getScreenY();
-                            }
-                            //mouseCatchingStage.setHeight(topYChange + originalScreenHeight + bottomYChange);
-                            //mouseCatchingStage.setWidth(rightXChange + leftXChange);
-                            resizeAnnotationWindow2(rightXChange  +  originalScreenWidth + leftXChange
-                                    ,topYChange + originalScreenHeight + bottomYChange);
-                            mouseCatchingStage.setX(originalScreenX - leftXChange);
-                            mouseCatchingStage.setY(originalScreenY - topYChange);
-                        }
-                    }
-                }
-            } else if(event.getEventType() == TouchEvent.TOUCH_RELEASED && using) {
-                using = false;
-                mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
-            }
-
-        }
-    }
-
-    /**
-     * not being used in current version. Original purpose was similar to TwoTouchChangeSizeAndMoveHandler
-     */
-    private class TwoTouchHandler implements EventHandler<TouchEvent> {
-        TouchPoint firstPoint;
-        TouchPoint secondPoint;
-        private double[] primaryTouchCoords = {-1d, -1d};
-        private double[] secondaryTouchCoords = {-1d, -1d};
-        private double[] touchDist = {0, 0};
-        private double resizeTolerance = 6;
-
-        @Override
-        public void handle(TouchEvent event) {
-            if(event.getEventType() == TouchEvent.TOUCH_PRESSED && event.getTouchCount() == 2) {
-                firstPoint = event.getTouchPoints().get(0);
-                secondPoint = event.getTouchPoints().get(1);
-            }
-            if(event.getTouchCount() == 2) {
-                TouchPoint primaryTouch = event.getTouchPoints().get(0);
-                TouchPoint secondaryTouch = event.getTouchPoints().get(1);
-
-                if(event.getEventType() == TouchEvent.TOUCH_PRESSED) {
-                    setPoints(primaryTouch, secondaryTouch);
-                }
-
-                if(event.getEventType() == TouchEvent.TOUCH_MOVED) {
-                    if(primaryTouchCoords[0] == -1 || primaryTouchCoords[1] == -1 || secondaryTouchCoords[0] == -1 || secondaryTouchCoords[1] == -1) {
-                        setPoints(primaryTouch, secondaryTouch);
-                    } else {
-                        double[] newPrimaryCoords = {primaryTouch.getScreenX(), primaryTouch.getScreenY()};
-                        double[] newSecondaryCoords = {secondaryTouch.getScreenX(), secondaryTouch.getScreenY()};
-                        double[] newTouchDist = {Math.abs(newPrimaryCoords[0] - newSecondaryCoords[0]), Math.abs(newPrimaryCoords[1] - newSecondaryCoords[1])};
-                        if(Math.hypot(newTouchDist[0], newTouchDist[1]) > resizeTolerance) {
-                            adjustAnnotationWindowSize(newTouchDist[0] - touchDist[0], newTouchDist[1] - touchDist[1]);
-                        } else {
-                            moveAnnotationWindow(newPrimaryCoords[0] - primaryTouchCoords[0], newPrimaryCoords[1] - primaryTouchCoords[1]);
-                        }
-                        primaryTouchCoords = newPrimaryCoords;
-                        secondaryTouchCoords = newSecondaryCoords;
-                        touchDist = newTouchDist;
-                    }
-                }
-            }
-
-            if(event.getEventType() == TouchEvent.TOUCH_RELEASED) {
-                clickable = true;
-                primaryTouchCoords[0] = -1;
-                primaryTouchCoords[1] = -1;
-                secondaryTouchCoords[0] = -1;
-                secondaryTouchCoords[1] = -1;
-                touchDist[0] = 0;
-                touchDist[1] = 0;
-            }
-        }
-
-        private void setPoints(TouchPoint primaryTouch, TouchPoint secondaryTouch) {
-            clickable = false;
-            primaryTouchCoords[0] = primaryTouch.getScreenX();
-            primaryTouchCoords[1] = primaryTouch.getScreenY();
-            secondaryTouchCoords[0] = secondaryTouch.getScreenX();
-            secondaryTouchCoords[1] = secondaryTouch.getScreenY();
-            touchDist[0] = Math.abs(primaryTouchCoords[0] - secondaryTouchCoords[0]);
-            touchDist[1] = Math.abs(primaryTouchCoords[1] - secondaryTouchCoords[1]);
-        }
-
-    }
 
     /**
      * Handler to reset the controllerbox to make sure it is on top
@@ -1939,7 +1744,6 @@ public class AnnotationToolApplication extends Application {
         }
     }
 
-
     public void fileManagement(String flag) throws IOException {
 
         String path = getFileName();
@@ -1949,8 +1753,6 @@ public class AnnotationToolApplication extends Application {
         chooser.setInitialFileName(path);
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Annotation files (*.jnote)", "*.jnote");
         chooser.getExtensionFilters().add(extFilter);
-
-
 
         switch (flag) {
             case "new":  //new project
@@ -1998,8 +1800,6 @@ public class AnnotationToolApplication extends Application {
             	writeJSON(jnote_fileName);
             	break;
         }
-
-
     }
 
     // Copy the source file to target file.
