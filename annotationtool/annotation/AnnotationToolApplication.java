@@ -138,8 +138,8 @@ public class AnnotationToolApplication extends Application {
     private ArrowHandler arrowHandler = new ArrowHandler(this);
     private TwoTouchHandler twoTouchHandler = new TwoTouchHandler();
     private ShortcutHandler shortcutHandler = new ShortcutHandler();
-    private TextBoxHandler textBoxHandler = new TextBoxHandler();
-    private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler();
+    private TextBoxHandler textBoxHandler = new TextBoxHandler(this);
+    private TextBoxKeyHandler textBoxKeyHandler = new TextBoxKeyHandler(this);
     private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
     private CircleHandler circleHandler = new CircleHandler(this);
     private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler(this);
@@ -1112,6 +1112,11 @@ public class AnnotationToolApplication extends Application {
         borderShape.setVisible(borderVisibility);
     }
 
+    public StringBuffer getTextBoxText()
+    {
+        return textBoxText;
+    }
+
     public boolean mouseInWindowBounds(int mouseX, int mouseY)
     {
         if(mouseX > mouseCatchingStage.getX() && mouseX < mouseCatchingStage.getWidth() + mouseCatchingStage.getX() &&
@@ -1301,6 +1306,19 @@ public class AnnotationToolApplication extends Application {
         return this.root;
     }
 
+    public String getTextFont()
+    {
+        return this.textFont;
+    }
+    public double getTextSize()
+    {
+        return textSize;
+    }
+    public void setSaveTextBox(boolean setSaveTextBox)
+    {
+        saveTextBox = setSaveTextBox;
+    }
+
     public void setStroke(double strokeWidth) {
         this.strokeWidth = strokeWidth;
     }
@@ -1438,28 +1456,6 @@ public class AnnotationToolApplication extends Application {
                 originalX = -1;
                 mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/hand.png")));
             }
-        }
-    }
-
-
-    /**
-     * Creates a text box at the given location of click. Should be implemented with MouseEvent.MOUSE_CLICKED
-     * TextBoxKeyHandler changes the text in the box if needed.
-     */
-    private class TextBoxHandler implements EventHandler<MouseEvent> {
-        @Override
-        public void handle(MouseEvent event) {
-            String defaultText = "Text";
-            text = new Text(event.getX(), event.getY(), defaultText);
-            text.setFont(new Font(textFont, textSize));
-            text.setFill(textColor);
-            //undoStack.push(new AddShape(text));
-            commitChange(new AddShape(text));
-            root.getChildren().add(text);
-            textBoxText.delete(0, textBoxText.length());
-            saveTextBox = true;
-
-            redoStack.clear();
         }
     }
 
@@ -1643,32 +1639,19 @@ public class AnnotationToolApplication extends Application {
         return paint;
     }
 
-    /**
-     * Edits the current text box based on key inputs. should be implemented with KeyEvent.KEY_TYPED
-     */
-    private class TextBoxKeyHandler implements EventHandler<KeyEvent> {
-        @Override
-        public void handle(KeyEvent event) {
-            char c = event.getCharacter().charAt(0);
-            System.out.println(c);
-            if (((c > 31) && (c < 127))) {
-                textBoxText.append(c);
-                text.setText(textBoxText.toString());
-            } else if (c == 8) {
-                if (textBoxText.length() > 0) {
-                    textBoxText.deleteCharAt(textBoxText.length() - 1);
-                    text.setText(textBoxText.toString());
-                }
-            } else if (c == 13) {
-                textBoxText.append(System.lineSeparator());
-                text.setText(textBoxText.toString());
-            }
-        }
-    }
 
     public boolean getClickable()
     {
         return clickable;
+    }
+
+    public void setText(Text text)
+    {
+        this.text = text;
+    }
+    public Text getText()
+    {
+        return text;
     }
 
     /**
@@ -2089,8 +2072,3 @@ public class AnnotationToolApplication extends Application {
         out.close();
     }
 }
-
-
-
-
-
