@@ -132,7 +132,7 @@ public class AnnotationToolApplication extends Application {
     private javafx.scene.paint.Paint paint = Color.BLACK;
     // Handlers
     private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
-    private MovingHandler movingHandler = new MovingHandler();
+    private MovingHandler movingHandler = new MovingHandler(this);
     private DrawingHandler drawingHandler = new DrawingHandler(this);
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler(this);
@@ -1433,35 +1433,6 @@ public class AnnotationToolApplication extends Application {
         AddShape.movingShapes = true;
     }
 
-    /**
-     * Handler for moving the stage. should be implemented with MouseEvent.ANY when you add the
-     * handler to the mousecatchingscene.
-     */
-    private class MovingHandler implements EventHandler<MouseEvent> {
-        double originalX = -1;
-        double originalY;
-        double originalStageX;
-        double originalStageY;
-
-        @Override
-        public void handle(MouseEvent event) {
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                originalX = event.getScreenX();
-                originalY = event.getScreenY();
-                originalStageX = mouseCatchingStage.getX();
-                originalStageY = mouseCatchingStage.getY();
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/grab.png")));
-            } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                double changeX = event.getScreenX() - originalX;
-                double changeY = event.getScreenY() - originalY;
-                mouseCatchingStage.setX(originalStageX + changeX);
-                mouseCatchingStage.setY(originalStageY + changeY);
-            } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-                originalX = -1;
-                mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/hand.png")));
-            }
-        }
-    }
 
     /**
      * Puts the user into rectification mode. This lets the user create a polygon based on something the user draws.
