@@ -143,7 +143,7 @@ public class AnnotationToolApplication extends Application {
     private TouchSendToBackHandler touchSendToBackHandler = new TouchSendToBackHandler();
     private CircleHandler circleHandler = new CircleHandler(this);
     private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler(this);
-    private EraseHandler eraseHandler = new EraseHandler();
+    private EraseHandler eraseHandler = new EraseHandler(this);
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler();
     private ResizeHandler resizeHandler = new ResizeHandler();
     private RectangleHandler rectangleHandler = new RectangleHandler(this);
@@ -153,7 +153,6 @@ public class AnnotationToolApplication extends Application {
     // Annotation Objects
     private Path path;
     private Line line;
-    private Path eraserPath;
     private Stroke stroke;
     private Text text;
     private Circle circle;
@@ -1673,56 +1672,6 @@ public class AnnotationToolApplication extends Application {
         return followersToLeaders;
     }
 
-    /**
-     * Handles erasing a shaded area from the existing shapes on the screen.
-     * should be implemented with MouseEvent.ANY when you add the
-     * handler to the mousecatchingscene.
-     */
-    private class EraseHandler implements EventHandler<MouseEvent> {
-        //TODO probably linkedlist is better.
-        ArrayList<TransferableShapes.Point> pathElements;
-        Color eraserColor = new Color(0,0,0,.1);
-
-        @Override
-        public void handle(MouseEvent event) {
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                pathElements = new ArrayList<>();
-                eraserPath = new Path();
-                eraserPath.setStrokeWidth(strokeWidth);
-                eraserPath.setSmooth(true);
-                MoveTo moveTo = new MoveTo(event.getX(), event.getY());
-                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
-                eraserPath.getElements().add(moveTo);
-                root.getChildren().add(eraserPath);
-                eraserPath.setStroke(eraserColor);
-            } else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                LineTo moveTo = new LineTo(event.getX(), event.getY());
-                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
-                eraserPath.getElements().add(moveTo);
-            } else if (eraserPath != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-                root.getChildren().remove(eraserPath);
-                changeItem.EraseShape eraseShape = new changeItem.EraseShape(eraserPath);
-                commitChange(eraseShape);
-
-                try {
-                    uuid = UUID.randomUUID();
-                    Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.ERASE_STRING, pathElements);
-                    shape.setStrokeWidth(String.valueOf(eraserPath.getStrokeWidth()));
-
-                    // holder.add(shape);
-                    writeJSON(shape);
-
-                } catch (JsonParseException e) {
-                    e.printStackTrace();
-                }  catch (IOException e) {
-                    e.printStackTrace(); }
-
-
-                eraseShape = null;
-                redoStack.clear();
-            }
-        }
-    }
 
     /**
      * @author armstr
