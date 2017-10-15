@@ -21,22 +21,27 @@ public class MovingHandler implements EventHandler<MouseEvent>
     private AnnotationToolApplication annotationToolApplication;
     private Stage mouseCatchingStage;
     private Scene mouseCatchingScene;
+    private ImageCursor grabCursor = new ImageCursor(new Image("pictures/grab.png"));
+    private ImageCursor handCursor = new ImageCursor(new Image("pictures/hand.png"));
 
     public MovingHandler(AnnotationToolApplication annotationToolApplication)
     {
         this.annotationToolApplication = annotationToolApplication;
-        mouseCatchingStage = annotationToolApplication.getMouseCatchingStage();
-        mouseCatchingScene = annotationToolApplication.getMouseCatchingScene();
     }
 
     @Override
     public void handle(MouseEvent event) {
+        if(mouseCatchingStage == null)
+        {
+            mouseCatchingStage = annotationToolApplication.getMouseCatchingStage();
+            mouseCatchingScene = annotationToolApplication.getMouseCatchingScene();
+        }
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
             originalX = event.getScreenX();
             originalY = event.getScreenY();
             originalStageX = mouseCatchingStage.getX();
             originalStageY = mouseCatchingStage.getY();
-            mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/grab.png")));
+            mouseCatchingScene.setCursor(grabCursor);
         } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
             double changeX = event.getScreenX() - originalX;
             double changeY = event.getScreenY() - originalY;
@@ -44,7 +49,7 @@ public class MovingHandler implements EventHandler<MouseEvent>
             mouseCatchingStage.setY(originalStageY + changeY);
         } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             originalX = -1;
-            mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/hand.png")));
+            mouseCatchingScene.setCursor(handCursor);
         }
     }
 }
