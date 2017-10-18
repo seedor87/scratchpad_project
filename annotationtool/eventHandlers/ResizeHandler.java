@@ -4,7 +4,7 @@ import annotation.AnnotationToolApplication;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
-import util.WindowInfo;
+import utils.WindowInfo;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

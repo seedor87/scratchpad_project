@@ -1,4 +1,4 @@
-package util;
+package utils;
 
 import java.awt.*;
 import java.awt.event.InputEvent;

@@ -1,4 +1,4 @@
-package util;
+package utils;
 
 import org.jnativehook.NativeInputEvent;
 import org.jnativehook.keyboard.NativeKeyEvent;

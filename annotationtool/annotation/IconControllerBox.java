@@ -1,7 +1,7 @@
 package annotation;
 
 
-import TransferableShapes.Custom_Shape;
+import transferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -25,7 +25,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import util.SocketListener;
+import utils.SocketListener;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -99,7 +99,7 @@ public class IconControllerBox extends Stage
         listenerThread.start();
 
         Button exitButton = new Button();
-        ImageView exitImage = new ImageView("pictures/exit.png");
+        ImageView exitImage = new ImageView("icons/exit.png");
         exitImage.setFitHeight(IMAGE_HEIGHT);
         exitImage.setFitWidth(IMAGE_WIDTH);
         exitButton.setGraphic(exitImage);
@@ -138,7 +138,7 @@ public class IconControllerBox extends Stage
         nodes.add(exitButton);
         
         Button newFileButton = new Button();
-        ImageView newFileImage = new ImageView("pictures/file.png");
+        ImageView newFileImage = new ImageView("icons/file.png");
         newFileImage.setFitHeight(IMAGE_HEIGHT);
         newFileImage.setFitWidth(IMAGE_WIDTH);
         newFileButton.setGraphic(newFileImage);
@@ -154,7 +154,7 @@ public class IconControllerBox extends Stage
         nodes.add(newFileButton);
 
         Button saveImageButton = new Button();
-        ImageView saveImage = new ImageView("pictures/camera.png");
+        ImageView saveImage = new ImageView("icons/camera.png");
         saveImage.setFitHeight(IMAGE_HEIGHT);
         saveImage.setFitWidth(IMAGE_WIDTH);
         saveImageButton.setGraphic(saveImage);
@@ -170,7 +170,7 @@ public class IconControllerBox extends Stage
         nodes.add(saveImageButton);
 
         Button arrowButton = new Button();
-        ImageView arrowImage = new ImageView("pictures/arrow.png");
+        ImageView arrowImage = new ImageView("icons/arrow.png");
         arrowImage.setFitHeight(IMAGE_HEIGHT);
         arrowImage.setFitWidth(IMAGE_WIDTH);
         arrowButton.setGraphic(arrowImage);
@@ -201,7 +201,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(circleButton);
 
         Button rectificationButton = new Button();
-        ImageView rectificationImage = new ImageView("pictures/star.png");
+        ImageView rectificationImage = new ImageView("icons/star.png");
         rectificationImage.setFitHeight(IMAGE_HEIGHT);
         rectificationImage.setFitWidth(IMAGE_WIDTH);
         rectificationButton.setGraphic(rectificationImage);
@@ -217,7 +217,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(rectificationButton);
 
         Button lineButton = new Button();
-        ImageView lineImage = new ImageView("pictures/line.png");
+        ImageView lineImage = new ImageView("icons/line.png");
         lineImage.setFitHeight(IMAGE_HEIGHT);
         lineImage.setFitWidth(IMAGE_WIDTH);
         lineButton.setGraphic(lineImage);
@@ -232,7 +232,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(lineButton);
 
         Button rectangleButton = new Button();
-        ImageView rectangleImage = new ImageView("pictures/rectangle.png");
+        ImageView rectangleImage = new ImageView("icons/rectangle.png");
         rectangleImage.setFitHeight(IMAGE_HEIGHT);
         rectangleImage.setFitWidth(IMAGE_WIDTH);
         rectangleButton.setGraphic(rectangleImage);
@@ -248,7 +248,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(rectangleButton);
 
         Button outBoundedOvalButton = new Button();
-        ImageView ovalImage = new ImageView("pictures/oval.png");
+        ImageView ovalImage = new ImageView("icons/oval.png");
         ovalImage.setFitHeight(IMAGE_HEIGHT);
         ovalImage.setFitWidth(IMAGE_WIDTH);
         outBoundedOvalButton.setGraphic(ovalImage);
@@ -263,7 +263,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(outBoundedOvalButton);
 
         Button drawButton = new Button();
-        ImageView drawImage = new ImageView("pictures/pencil-32.png");
+        ImageView drawImage = new ImageView("icons/pencil-32.png");
         drawImage.setFitHeight(IMAGE_HEIGHT);
         drawImage.setFitWidth(IMAGE_WIDTH);
         drawButton.setGraphic(drawImage);
@@ -279,7 +279,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(drawButton);
 
         Button textButton = new Button();
-        ImageView textImage = new ImageView("pictures/TextIcon.png");
+        ImageView textImage = new ImageView("icons/TextIcon.png");
         textImage.setFitHeight(IMAGE_HEIGHT);
         textImage.setFitWidth(IMAGE_WIDTH);
         textButton.setGraphic(textImage);
@@ -295,7 +295,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(textButton);
 
         Button eraseButton = new Button();
-        ImageView eraseImage = new ImageView("pictures/eraser.png");
+        ImageView eraseImage = new ImageView("icons/eraser.png");
         eraseImage.setFitHeight(IMAGE_HEIGHT);
         eraseImage.setFitWidth(IMAGE_WIDTH);
         eraseButton.setGraphic(eraseImage);
@@ -510,7 +510,7 @@ public class IconControllerBox extends Stage
         nodes.add(colorPickerButton);
 
         Button undoButton = new Button();
-        ImageView undoImage = new ImageView("pictures/undoImage.png");
+        ImageView undoImage = new ImageView("icons/undoImage.png");
         undoImage.setFitHeight(IMAGE_HEIGHT);
         undoImage.setFitWidth(IMAGE_WIDTH);
         undoButton.setGraphic(undoImage);
@@ -533,7 +533,7 @@ public class IconControllerBox extends Stage
         nodes.add(undoButton);
 
         Button redoButton = new Button();
-        ImageView redoImage = new ImageView("pictures/redoImage.png");
+        ImageView redoImage = new ImageView("icons/redoImage.png");
         redoImage.setFitHeight(IMAGE_HEIGHT);
         redoImage.setFitWidth(IMAGE_WIDTH);
         redoButton.setGraphic(redoImage);
@@ -556,7 +556,7 @@ public class IconControllerBox extends Stage
         nodes.add(redoButton);
 
         Button changeButtonSizeButton = new Button();
-        ImageView changeButtonSizeImage = new ImageView("pictures/changebuttonsizeimage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
+        ImageView changeButtonSizeImage = new ImageView("icons/changebuttonsizeimage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
         changeButtonSizeImage.setFitHeight(IMAGE_HEIGHT);
         changeButtonSizeImage.setFitWidth(IMAGE_WIDTH);
         changeButtonSizeButton.setGraphic(changeButtonSizeImage);
@@ -659,7 +659,7 @@ public class IconControllerBox extends Stage
 
 
         Button snapToLeftButton = new Button();
-        ImageView snapToLeftImage = new ImageView("pictures/snapLeftImage.png");
+        ImageView snapToLeftImage = new ImageView("icons/snapLeftImage.png");
         snapToLeftImage.setFitHeight(IMAGE_HEIGHT);
         snapToLeftImage.setFitWidth(IMAGE_WIDTH);
         snapToLeftButton.setGraphic(snapToLeftImage);
@@ -675,7 +675,7 @@ public class IconControllerBox extends Stage
         nodes.add(snapToLeftButton);
 
         Button snapToRightButton = new Button();
-        ImageView snapToRightImage = new ImageView("pictures/snapRightImage.png");
+        ImageView snapToRightImage = new ImageView("icons/snapRightImage.png");
         snapToRightImage.setFitHeight(IMAGE_HEIGHT);
         snapToRightImage.setFitWidth(IMAGE_WIDTH);
         snapToRightButton.setGraphic(snapToRightImage);
@@ -691,7 +691,7 @@ public class IconControllerBox extends Stage
         nodes.add(snapToRightButton);
 
         Button snapToTopButton = new Button();
-        ImageView snapToTopImage = new ImageView("pictures/snapTopImage.png");
+        ImageView snapToTopImage = new ImageView("icons/snapTopImage.png");
         snapToTopImage.setFitHeight(IMAGE_HEIGHT);
         snapToTopImage.setFitWidth(IMAGE_WIDTH);
         snapToTopButton.setGraphic(snapToTopImage);
@@ -707,7 +707,7 @@ public class IconControllerBox extends Stage
         nodes.add(snapToTopButton);
 
         Button moveButton = new Button();
-        ImageView moveImage = new ImageView("pictures/hand.png");
+        ImageView moveImage = new ImageView("icons/hand.png");
         moveImage.setFitHeight(IMAGE_HEIGHT);
         moveImage.setFitWidth(IMAGE_WIDTH);
         moveButton.setGraphic(moveImage);
@@ -723,7 +723,7 @@ public class IconControllerBox extends Stage
         selectedButton = moveButton;
 
         Button toggleClickableButton = new Button();
-        ImageView toggleClickableImage = new ImageView("pictures/pointer.png");
+        ImageView toggleClickableImage = new ImageView("icons/pointer.png");
         toggleClickableImage.setFitHeight(IMAGE_HEIGHT);
         toggleClickableImage.setFitWidth(IMAGE_WIDTH);
         toggleClickableButton.setGraphic(toggleClickableImage);
@@ -761,7 +761,7 @@ public class IconControllerBox extends Stage
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Edit-clear.svg/1024px-Edit-clear.svg.png
          */
         Button eraseTransparentButton = new Button();
-        ImageView eraseTransparentImage = new ImageView("pictures/eraseTransparent.png");
+        ImageView eraseTransparentImage = new ImageView("icons/eraseTransparent.png");
         eraseTransparentImage.setFitHeight(IMAGE_HEIGHT);
         eraseTransparentImage.setFitWidth(IMAGE_WIDTH);
         eraseTransparentButton.setGraphic(eraseTransparentImage);
@@ -801,7 +801,7 @@ public class IconControllerBox extends Stage
         nodes.add(preferencesButton);*/
 
         Button clearHistoryButton = new Button();
-        ImageView clearHistoryImage = new ImageView("pictures/clearHistory.png");
+        ImageView clearHistoryImage = new ImageView("icons/clearHistory.png");
         clearHistoryImage.setFitHeight(IMAGE_HEIGHT);
         clearHistoryImage.setFitWidth(IMAGE_WIDTH);
         clearHistoryButton.setGraphic(clearHistoryImage);
@@ -816,7 +816,7 @@ public class IconControllerBox extends Stage
         nodes.add(clearHistoryButton);
 
         Button moveShapesButton = new Button();
-        ImageView moveShapesImage = new ImageView("pictures/selectimage.png");
+        ImageView moveShapesImage = new ImageView("icons/selectimage.png");
         moveShapesImage.setFitHeight(IMAGE_HEIGHT);
         moveShapesImage.setFitWidth(IMAGE_WIDTH);
         moveShapesButton.setGraphic(moveShapesImage);
@@ -857,7 +857,7 @@ public class IconControllerBox extends Stage
 
 
         Button newButton = new Button();
-        ImageView newImage = new ImageView("pictures/new.png");
+        ImageView newImage = new ImageView("icons/new.png");
         newImage.setFitHeight(IMAGE_HEIGHT);
         newImage.setFitWidth(IMAGE_WIDTH);
         newButton.setGraphic(newImage);
@@ -883,7 +883,7 @@ public class IconControllerBox extends Stage
 
 
         Button openButton = new Button();
-        ImageView openImage = new ImageView("pictures/open.png");
+        ImageView openImage = new ImageView("icons/open.png");
         openImage.setFitHeight(IMAGE_HEIGHT);
         openImage.setFitWidth(IMAGE_WIDTH);
         openButton.setGraphic(openImage);
@@ -905,7 +905,7 @@ public class IconControllerBox extends Stage
 
 
         Button saveAsButton = new Button();
-        ImageView saveAsImage = new ImageView("pictures/saveAs.png");
+        ImageView saveAsImage = new ImageView("icons/saveAs.png");
         saveAsImage.setFitHeight(IMAGE_HEIGHT);
         saveAsImage.setFitWidth(IMAGE_WIDTH);
         saveAsButton.setGraphic(saveAsImage);
@@ -931,7 +931,7 @@ public class IconControllerBox extends Stage
 
 
         Button saveFileButton = new Button();
-        ImageView saveFileImage = new ImageView("pictures/save-file.png");
+        ImageView saveFileImage = new ImageView("icons/save-file.png");
         saveFileImage.setFitHeight(IMAGE_HEIGHT);
         saveFileImage.setFitWidth(IMAGE_WIDTH);
         saveFileButton.setGraphic(saveFileImage);
@@ -959,7 +959,7 @@ public class IconControllerBox extends Stage
 
 
         Button closeButton = new Button();
-        ImageView closeImage = new ImageView("pictures/close.png");
+        ImageView closeImage = new ImageView("icons/close.png");
         closeImage.setFitHeight(IMAGE_HEIGHT);
         closeImage.setFitWidth(IMAGE_WIDTH);
         closeButton.setGraphic(closeImage);
@@ -979,7 +979,7 @@ public class IconControllerBox extends Stage
 
         Button saveStateButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
-        ImageView saveStateImage = new ImageView("pictures/saveState.png");
+        ImageView saveStateImage = new ImageView("icons/saveState.png");
         saveStateImage.setFitHeight(IMAGE_HEIGHT);
         saveStateImage.setFitWidth(IMAGE_WIDTH);
         saveStateButton.setGraphic(saveStateImage);
@@ -1036,7 +1036,7 @@ public class IconControllerBox extends Stage
 
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
-        ImageView lockControllerBoxImage = new ImageView("pictures/padlock.png");
+        ImageView lockControllerBoxImage = new ImageView("icons/padlock.png");
         lockControllerBoxImage.setFitHeight(IMAGE_HEIGHT);
         lockControllerBoxImage.setFitWidth(IMAGE_WIDTH);
         lockControllerBoxButton.setGraphic(lockControllerBoxImage);
@@ -1054,7 +1054,7 @@ public class IconControllerBox extends Stage
 
         Button recordInputButton = new Button();
         //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
-        ImageView recordInputImage = new ImageView("pictures/record.png");
+        ImageView recordInputImage = new ImageView("icons/record.png");
         recordInputImage.setFitHeight(IMAGE_HEIGHT);
         recordInputImage.setFitWidth(IMAGE_WIDTH);
         recordInputButton.setGraphic(recordInputImage);
@@ -1073,7 +1073,7 @@ public class IconControllerBox extends Stage
          * edited*
          */
         sendToBackButton = new Button();
-        ImageView sendToBackImage = new ImageView("pictures/sendToBack.png");
+        ImageView sendToBackImage = new ImageView("icons/sendToBack.png");
         sendToBackImage.setFitHeight(IMAGE_HEIGHT);
         sendToBackImage.setFitWidth(IMAGE_WIDTH);
         sendToBackButton.setGraphic(sendToBackImage);
@@ -1098,7 +1098,7 @@ public class IconControllerBox extends Stage
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
          */
         bringToFrontButton = new Button();
-        ImageView bringToFrontImage = new ImageView("pictures/bringToFront.png");
+        ImageView bringToFrontImage = new ImageView("icons/bringToFront.png");
         bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
         bringToFrontImage.setFitWidth(IMAGE_WIDTH);
         bringToFrontButton.setGraphic(bringToFrontImage);

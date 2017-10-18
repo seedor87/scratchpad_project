@@ -1,15 +1,15 @@
-package rectify;
+package annotation;
 /**
  * Created by Bob S on 6/6/2017.
  */
-public class AnnotatePoint {
+public class AnnotationPoint {
 
     private double x;
     private double y;
     private double width;
     private double pressure;
 
-    public AnnotatePoint(double x, double y, double width, double pressure)
+    public AnnotationPoint(double x, double y, double width, double pressure)
     {
         this.x = x;
         this.y = y;

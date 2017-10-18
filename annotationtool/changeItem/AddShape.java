@@ -1,6 +1,5 @@
 package changeItem;
 
-import TransferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
 import javafx.event.EventHandler;

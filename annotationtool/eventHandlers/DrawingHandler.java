@@ -1,8 +1,8 @@
 package eventHandlers;
 
 
-import TransferableShapes.Custom_Shape;
-import TransferableShapes.Point;
+import transferableShapes.Custom_Shape;
+import transferableShapes.TransferableShapePoint;
 import annotation.AnnotationToolApplication;
 import changeItem.AddShape;
 import com.google.gson.JsonParseException;
@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 public class DrawingHandler implements EventHandler<MouseEvent> {
 
-    private ArrayList<Point> pathElements;
+    private ArrayList<TransferableShapePoint> pathElements;
     private AnnotationToolApplication annotationToolApplication;
     private Path path;
     private UUID uuid;
@@ -46,14 +46,14 @@ public class DrawingHandler implements EventHandler<MouseEvent> {
                 MoveTo moveTo = new MoveTo(event.getX(), event.getY());
                 LineTo lineTo = new LineTo(event.getX(), event.getY());
                 pathElements = new ArrayList<>();
-                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                pathElements.add(new TransferableShapePoint(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 path.getElements().add(moveTo);
                 //root.getChildren().add(path);
                 annotationToolApplication.commitChange(new AddShape(path));
                 path.setStroke(annotationToolApplication.getPaint());
             } else if (path != null && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 LineTo moveTo = new LineTo(event.getX(), event.getY());
-                pathElements.add(new TransferableShapes.Point(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
+                pathElements.add(new TransferableShapePoint(String.valueOf(moveTo.getX()), String.valueOf(moveTo.getY())));
                 path.getElements().add(moveTo);
             } else if (path != null && event.getEventType() == MouseEvent.MOUSE_RELEASED) {
 

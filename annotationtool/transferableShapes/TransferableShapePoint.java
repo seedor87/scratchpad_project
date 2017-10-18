@@ -1,18 +1,18 @@
-package TransferableShapes;
+package transferableShapes;
 
 /**
  * Created by Research on 7/11/2017.
  */
-public class Point {
+public class TransferableShapePoint {
     private String x;
     private String y;
 
-    public Point(String x, String y) {
+    public TransferableShapePoint(String x, String y) {
         this.x = x;
 
         this.y = y;
     }
-    public Point()
+    public TransferableShapePoint()
     {
 
     }

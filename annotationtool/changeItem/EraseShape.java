@@ -1,9 +1,8 @@
 package changeItem;
 
-import TransferableShapes.Custom_Shape;
+import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;

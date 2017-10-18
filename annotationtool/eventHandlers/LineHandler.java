@@ -1,13 +1,14 @@
 package eventHandlers;
 
 
-import TransferableShapes.Custom_Shape;
+import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import changeItem.AddShape;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import transferableShapes.TransferableShapePoint;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -46,8 +47,8 @@ public class LineHandler implements EventHandler<MouseEvent>
             uuid = UUID.randomUUID();
             Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.LINE_STRING, (Color) annotationToolApplication.getPaint(),
                     String.valueOf(annotationToolApplication.getStrokeWidth())
-                    , new TransferableShapes.Point(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())),
-                    new TransferableShapes.Point(String.valueOf(event.getX()), String.valueOf(event.getY())));
+                    , new TransferableShapePoint(String.valueOf(line.getStartX()), String.valueOf(line.getStartY())),
+                    new TransferableShapePoint(String.valueOf(event.getX()), String.valueOf(event.getY())));
             try {
                 annotationToolApplication.writeJSON(custom_shape);
             } catch (IOException e) {

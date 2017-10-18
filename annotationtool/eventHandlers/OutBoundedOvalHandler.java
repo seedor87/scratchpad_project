@@ -1,6 +1,6 @@
 package eventHandlers;
 
-import TransferableShapes.Custom_Shape;
+import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import changeItem.AddShape;
 import javafx.event.EventHandler;
@@ -9,6 +9,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
+import transferableShapes.TransferableShapePoint;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -81,7 +82,7 @@ public class OutBoundedOvalHandler implements EventHandler<MouseEvent>
             uuid = UUID.randomUUID();
             Custom_Shape.setUpUUIDMaps(rectangle, uuid);
             Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.OVAL_STRING,
-                    new TransferableShapes.Point(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
+                    new TransferableShapePoint(String.valueOf(rectangle.getX()), String.valueOf(rectangle.getY())),
                     annotationToolApplication.getPaint(), rectangle.getWidth(), rectangle.getHeight(), annotationToolApplication.getStrokeWidth());
             try {
                 annotationToolApplication.writeJSON(custom_shape);

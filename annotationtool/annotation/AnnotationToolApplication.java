@@ -4,7 +4,7 @@ package annotation;
  */
 
 import changeItem.*;
-import TransferableShapes.*;
+import transferableShapes.*;
 
 import com.google.gson.*;
 
@@ -31,7 +31,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
-import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
@@ -44,16 +43,12 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
-import rectify.AnnotatePoint;
-import rectify.Broken;
-import rectify.Devdata;
-import rectify.Point;
-import util.FilePacker;
-import util.GlobalInputListener;
-import util.InputRecord;
-import util.WindowInfo;
-import util.WindowLinkedInputRecord;
-import util.X11InfoGatherer;
+import utils.FilePacker;
+import utils.GlobalInputListener;
+import utils.InputRecord;
+import utils.WindowInfo;
+import utils.WindowLinkedInputRecord;
+import utils.X11InfoGatherer;
 
 import javax.imageio.ImageIO;
 import java.awt.Dimension;
@@ -159,10 +154,10 @@ public class AnnotationToolApplication extends Application {
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
     // Cursors
-    private Cursor pencilCursor = new ImageCursor(new Image("pictures/pencil-cursor.png"));
-    private Cursor eraserCursor = new ImageCursor(new Image("pictures/eraser-cursor.png"));
-    private Cursor textCursor = new ImageCursor(new Image("pictures/TextIcon.png"));
-    private Cursor arrowCursor = new ImageCursor(new Image("pictures/arrow-cursor.png"));
+    private Cursor pencilCursor = new ImageCursor(new Image("icons/pencil-cursor.png"));
+    private Cursor eraserCursor = new ImageCursor(new Image("icons/eraser-cursor.png"));
+    private Cursor textCursor = new ImageCursor(new Image("icons/TextIcon.png"));
+    private Cursor arrowCursor = new ImageCursor(new Image("icons/arrow-cursor.png"));
     // Settings
     private WindowInfo windowID;
     private String textFont = "Times New Roman";
@@ -397,7 +392,7 @@ public class AnnotationToolApplication extends Application {
         Custom_Shape custom_shape = new Custom_Shape(uuid, Custom_Shape.TEXT_STRING, text.getText(), textFont);
         custom_shape.setTextSize(text.getFont().getSize() + "");
         custom_shape.setColorString(paint.toString());
-        custom_shape.setLocation(new TransferableShapes.Point(String.valueOf(text.getX()), String.valueOf(text.getY())));
+        custom_shape.setLocation(new TransferableShapePoint(String.valueOf(text.getX()), String.valueOf(text.getY())));
         try{
             writeJSON(custom_shape);
             Custom_Shape.setUpUUIDMaps(text, uuid);
@@ -514,9 +509,9 @@ public class AnnotationToolApplication extends Application {
                 commitChange(eraseShape);
             }
         });
-        ArrayList<TransferableShapes.Point> pathElements = new ArrayList<>();
-        pathElements.add(new TransferableShapes.Point(0 +"",h/2 +""));
-        pathElements.add(new TransferableShapes.Point(w + "", h/2 + ""));
+        ArrayList<TransferableShapePoint> pathElements = new ArrayList<>();
+        pathElements.add(new TransferableShapePoint(0 +"",h/2 +""));
+        pathElements.add(new TransferableShapePoint(w + "", h/2 + ""));
         try
         {
             uuid = UUID.randomUUID();
@@ -1256,7 +1251,7 @@ public class AnnotationToolApplication extends Application {
      */
     public void setMovingHandler() {
         this.resetHandlers();
-        mouseCatchingScene.setCursor(new ImageCursor(new Image("pictures/hand.png")));
+        mouseCatchingScene.setCursor(new ImageCursor(new Image("icons/hand.png")));
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
     }
 

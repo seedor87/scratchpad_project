@@ -21,8 +21,8 @@ public class MovingHandler implements EventHandler<MouseEvent>
     private AnnotationToolApplication annotationToolApplication;
     private Stage mouseCatchingStage;
     private Scene mouseCatchingScene;
-    private ImageCursor grabCursor = new ImageCursor(new Image("pictures/grab.png"));
-    private ImageCursor handCursor = new ImageCursor(new Image("pictures/hand.png"));
+    private ImageCursor grabCursor = new ImageCursor(new Image("icons/grab.png"));
+    private ImageCursor handCursor = new ImageCursor(new Image("icons/hand.png"));
 
     public MovingHandler(AnnotationToolApplication annotationToolApplication)
     {

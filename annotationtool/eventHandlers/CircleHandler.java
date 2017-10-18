@@ -1,6 +1,6 @@
 package eventHandlers;
 
-import TransferableShapes.Custom_Shape;
+import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import changeItem.AddShape;
 import com.google.gson.JsonParseException;
@@ -9,6 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import transferableShapes.TransferableShapePoint;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class CircleHandler implements EventHandler<MouseEvent>
             try {
                 uuid = UUID.randomUUID();
                 Custom_Shape shape = new Custom_Shape(uuid, Custom_Shape.CIRCLE_STRING);
-                shape.setLocation(new TransferableShapes.Point(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
+                shape.setLocation(new TransferableShapePoint(String.valueOf(circle.getCenterX()), String.valueOf(circle.getCenterY())));
                 shape.setColorString((annotationToolApplication.getPaint().toString()));
                 shape.setStrokeWidth(String.valueOf(annotationToolApplication.getStrokeWidth()));
                 shape.setRadius(String.valueOf(circle.getRadius()));

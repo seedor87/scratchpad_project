@@ -1,4 +1,4 @@
-package TransferableShapes;
+package transferableShapes;
 
 import annotation.AnnotationToolApplication;
 import changeItem.*;
@@ -34,12 +34,12 @@ public class Custom_Shape {
     private String timestamp = "";
     private UUID uuid;
     private String type;
-    private Point location = new Point("", "");
+    private TransferableShapePoint location = new TransferableShapePoint("", "");
     private String strokeWidth = "";
-    private ArrayList<Point> points = new ArrayList<Point>();
+    private ArrayList<TransferableShapePoint> transferableShapePoints = new ArrayList<TransferableShapePoint>();
     private String radius = "";
-    private Point start = new Point("", "");
-    private Point end = new Point("", "");
+    private TransferableShapePoint start = new TransferableShapePoint("", "");
+    private TransferableShapePoint end = new TransferableShapePoint("", "");
     private String string = "";
     private String font = "";
     private String textSize = "";
@@ -82,7 +82,7 @@ public class Custom_Shape {
      * @param height The height of the rectangle or oval that this custom shape represents.
      * @param strokeWidth The width of the stroke that this rectangle or oval has.
      */
-    public Custom_Shape(UUID uuid, String type, Point location, Paint color, double width, double height, double strokeWidth)
+    public Custom_Shape(UUID uuid, String type, TransferableShapePoint location, Paint color, double width, double height, double strokeWidth)
     {
         this(uuid, type);
         this.location = location;
@@ -101,18 +101,18 @@ public class Custom_Shape {
      * @param location The location of the path or rectified shape.
      * @param color The color of the path or rectified shape.
      * @param strokeWidth The width of the stroke for the path or rectified shape.
-     * @param points The points that make up the path or rectified shape represented by this custom shape.
+     * @param transferableShapePoints The transferableShapePoints that make up the path or rectified shape represented by this custom shape.
      */
-    public Custom_Shape(UUID uuid, String type, Point location, Color color, String strokeWidth, ArrayList<Point> points) {
+    public Custom_Shape(UUID uuid, String type, TransferableShapePoint location, Color color, String strokeWidth, ArrayList<TransferableShapePoint> transferableShapePoints) {
         this(uuid, type);
         this.location = location;
         colorString = color.toString();
         this.strokeWidth = strokeWidth;
-        this.points = points;
+        this.transferableShapePoints = transferableShapePoints;
     }
 
     //circle , text
-    public Custom_Shape(UUID uuid, String type, Point location, Color color, String stroke_string, String radius_font) {
+    public Custom_Shape(UUID uuid, String type, TransferableShapePoint location, Color color, String stroke_string, String radius_font) {
         this(uuid, type);
         this.location = location;
         colorString = color.toString();
@@ -137,7 +137,7 @@ public class Custom_Shape {
      * @param start the starting point of the arrow or line that this custom shape represents.
      * @param end the ending point of the arrow or line that this custom shape represents.
      */
-    public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, Point start, Point end) {
+    public Custom_Shape(UUID uuid, String type, Color color, String strokeWidth, TransferableShapePoint start, TransferableShapePoint end) {
         this(uuid, type);
 
         this.location = location;
@@ -159,12 +159,12 @@ public class Custom_Shape {
      * A custom shape that should be used to represent an erased shape.
      * @param uuid The unique id for the shape represented by this custom shape.
      * @param type The string that represents the type of the shape that this custom shape represents.
-     * @param points the points of the path area that should get erased by the erase shape that this custom shape represents.
+     * @param transferableShapePoints the transferableShapePoints of the path area that should get erased by the erase shape that this custom shape represents.
      */
-    public Custom_Shape(UUID uuid, String type, ArrayList<Point> points) {
+    public Custom_Shape(UUID uuid, String type, ArrayList<TransferableShapePoint> transferableShapePoints) {
         this(uuid, type);
 
-        this.points = points;
+        this.transferableShapePoints = transferableShapePoints;
     }
 
     //edit text
@@ -204,7 +204,7 @@ public class Custom_Shape {
         uuid = shapesToUUIDMap.get(movedShape);
         System.out.println(uuid);
         this.type = type;
-        location = new Point(movedShape.getLayoutX() +"", movedShape.getLayoutY() +"");
+        location = new TransferableShapePoint(movedShape.getLayoutX() +"", movedShape.getLayoutY() +"");
     }
     //EditText
 
@@ -227,10 +227,10 @@ public class Custom_Shape {
      */
     private Path toUncoloredPath() {
         Path path = new Path();
-        path.getElements().add(new MoveTo(Double.valueOf(points.get(0).getX()), Double.valueOf(points.get(0).getY())));
-        int size = points.size();
+        path.getElements().add(new MoveTo(Double.valueOf(transferableShapePoints.get(0).getX()), Double.valueOf(transferableShapePoints.get(0).getY())));
+        int size = transferableShapePoints.size();
         for (int i = 1; i < size; i++) {
-            path.getElements().add(new LineTo(Double.valueOf(points.get(i).getX()), Double.valueOf(points.get(i).getY())));
+            path.getElements().add(new LineTo(Double.valueOf(transferableShapePoints.get(i).getX()), Double.valueOf(transferableShapePoints.get(i).getY())));
         }
         path.setStrokeWidth(Double.valueOf(strokeWidth));
         return path;
@@ -314,7 +314,7 @@ public class Custom_Shape {
             triangle.getPoints().
                     addAll((line.getEndX() + (halfBaseDistance * strokeWidth * Math.sin(Math.atan2(yDistance, xDistance)))),
                             line.getEndY() - (halfBaseDistance * strokeWidth * Math.cos(Math.atan2(yDistance, xDistance))));
-            //triangle.getPoints().addAll( (mouseEvent.getX() + 2*strokeWidth), mouseEvent.getY());
+            //triangle.getTransferableShapePoints().addAll( (mouseEvent.getX() + 2*strokeWidth), mouseEvent.getY());
             //point 3
             triangle.getPoints().
                     addAll(line.getEndX() + strokeWidth * heightDistance * Math.cos(Math.atan2(yDistance, xDistance)),
@@ -429,9 +429,9 @@ public class Custom_Shape {
     private Shape toPolygon()
     {
         Polygon polygon = new Polygon();
-        for(Point point : points)
+        for(TransferableShapePoint transferableShapePoint : transferableShapePoints)
         {
-            polygon.getPoints().addAll(Double.valueOf(point.getX()), Double.valueOf(point.getY()));
+            polygon.getPoints().addAll(Double.valueOf(transferableShapePoint.getX()), Double.valueOf(transferableShapePoint.getY()));
         }
         polygon.setStrokeWidth(Double.valueOf(strokeWidth));
         polygon.setStroke(Color.valueOf(colorString));
@@ -513,11 +513,11 @@ public class Custom_Shape {
         this.type = type;
     }
 
-    public Point getLocation() {
+    public TransferableShapePoint getLocation() {
         return location;
     }
 
-    public void setLocation(Point location) {
+    public void setLocation(TransferableShapePoint location) {
         this.location = location;
     }
 
@@ -547,12 +547,12 @@ public class Custom_Shape {
         this.strokeWidth = strokeWidth;
     }
 
-    public ArrayList<Point> getPoints() {
-        return points;
+    public ArrayList<TransferableShapePoint> getTransferableShapePoints() {
+        return transferableShapePoints;
     }
 
-    public void setPoints(ArrayList<Point> points) {
-        this.points = points;
+    public void setTransferableShapePoints(ArrayList<TransferableShapePoint> transferableShapePoints) {
+        this.transferableShapePoints = transferableShapePoints;
     }
 
     public String getRadius() {
@@ -563,19 +563,19 @@ public class Custom_Shape {
         this.radius = radius;
     }
 
-    public Point getStart() {
+    public TransferableShapePoint getStart() {
         return start;
     }
 
-    public void setStart(Point start) {
+    public void setStart(TransferableShapePoint start) {
         this.start = start;
     }
 
-    public Point getEnd() {
+    public TransferableShapePoint getEnd() {
         return end;
     }
 
-    public void setEnd(Point end) {
+    public void setEnd(TransferableShapePoint end) {
         this.end = end;
     }
 

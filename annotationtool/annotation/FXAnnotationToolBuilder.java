@@ -16,7 +16,6 @@ import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -45,12 +44,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import util.FilePacker;
-import util.ProcessRunner;
-import util.WindowInfo;
-import util.X11InfoGatherer;
-
-import javax.swing.*;
+import utils.FilePacker;
+import utils.ProcessRunner;
+import utils.WindowInfo;
+import utils.X11InfoGatherer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

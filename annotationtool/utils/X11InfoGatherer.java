@@ -1,8 +1,6 @@
-package util;
+package utils;
 
 import java.util.ArrayList;
-
-import javax.swing.plaf.synth.SynthSeparatorUI;
 
 import com.sun.jna.Native;
 import com.sun.jna.platform.unix.X11;
