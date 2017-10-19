@@ -82,6 +82,7 @@ public class RectificationHandler implements EventHandler<MouseEvent>
 
         double tolerance = RECTIFY_THICKNESS_FACTOR * annotationToolApplication.getStrokeWidth();
         ArrayList<AnnotationPoint> broken_list = rectificationToolKit.broken(coord_list, closed_path, true, tolerance);
+        drawFromList(broken_list);
     }
 
     /**
