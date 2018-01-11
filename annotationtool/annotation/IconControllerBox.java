@@ -48,6 +48,11 @@ public class IconControllerBox extends Stage
     private static final int RIGHT_LOCATION = 2;
     private static final int TOOLTIP_FONT_SIZE = 20;
     private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
+    private final String selectedStyle = "-fx-color: paleturquoise";
+    private final String unSelectedStyle = "-fx-background-color:" +
+            "                            -fx-shadow-highlight-color,"  +
+            "                            linear-gradient(to bottom, derive(-fx-color,-22%) 0%, derive(-fx-color,-15%) 100%)," +
+            "                            linear-gradient(to bottom, derive(-fx-color,-15%) 0%, derive(-fx-color,-10%) 50%, derive(-fx-color,-8%) 98%, derive(-fx-color,-12%) 100%);";
     private Thread listenerThread;
     private Pane root;
     private Pane trunk;
@@ -94,7 +99,7 @@ public class IconControllerBox extends Stage
 			public void run() {
 				SocketListener serverSocket = new SocketListener(CONTROLLER_BOX, 26222);
 			}
-        	
+
         });
         listenerThread.start();
 
@@ -149,7 +154,7 @@ public class IconControllerBox extends Stage
 			public void handle(MouseEvent event) {
 				newFile("");
 			}
-        	
+
         });
         nodes.add(newFileButton);
 
@@ -706,21 +711,24 @@ public class IconControllerBox extends Stage
         });
         nodes.add(snapToTopButton);
 
-        Button moveButton = new Button();
-        ImageView moveImage = new ImageView("icons/hand.png");
-        moveImage.setFitHeight(IMAGE_HEIGHT);
-        moveImage.setFitWidth(IMAGE_WIDTH);
-        moveButton.setGraphic(moveImage);
-        moveButton.setTooltip(getToolTip("Move window"));
-        moveButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                at.setMovingHandler();
-            }
-        });
-        nodes.add(moveButton);
-        selectedButton = moveButton;
+        /*
+        The old move control, kept for posterity
+         */
+//        Button moveButton = new Button();
+//        ImageView moveImage = new ImageView("icons/hand.png");
+//        moveImage.setFitHeight(IMAGE_HEIGHT);
+//        moveImage.setFitWidth(IMAGE_WIDTH);
+//        moveButton.setGraphic(moveImage);
+//        moveButton.setTooltip(getToolTip("Move window"));
+//        moveButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event)
+//            {
+//                at.setMovingHandler();
+//            }
+//        });
+//        nodes.add(moveButton);
+//        selectedButton = moveButton;
 
         Button toggleClickableButton = new Button();
         ImageView toggleClickableImage = new ImageView("icons/pointer.png");
@@ -830,8 +838,8 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
-/*
 
+/*
         Button saveStateButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
         ImageView saveStateImage = new ImageView("saveState.png");
@@ -848,8 +856,6 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(saveStateButton);
-
-
 */
 
 
@@ -869,9 +875,7 @@ public class IconControllerBox extends Stage
                 //
                 FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
                 try {
-
                     at.fileManagement("new"); //new file
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1051,7 +1055,6 @@ public class IconControllerBox extends Stage
         });
         nodes.add(lockControllerBoxButton);
 
-
         Button recordInputButton = new Button();
         //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
         ImageView recordInputImage = new ImageView("icons/record.png");
@@ -1067,6 +1070,77 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(recordInputButton);
+
+        Button resizeButton = new Button();
+        ImageView resizeImage = new ImageView("icons/resize.png");
+        resizeImage.setFitHeight(IMAGE_HEIGHT);
+        resizeImage.setFitWidth(IMAGE_WIDTH);
+        resizeButton.setGraphic(resizeImage);
+        resizeButton.setTooltip(getToolTip("Resize Window"));
+        resizeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            @Override
+            public void handle(MouseEvent event) {
+                isSelected = !isSelected;
+                if(isSelected) {
+                    resizeButton.setStyle(selectedStyle);
+                    at.resizeOnMouse();
+                }
+                else {
+                    resizeButton.setStyle(unSelectedStyle);
+                    at.resetHandlers();
+                }
+            }
+        });
+        nodes.add(resizeButton);
+
+        Button fullscreenButton = new Button();
+        ImageView fullscreenImage = new ImageView("icons/fullscreen.png");
+        fullscreenImage.setFitHeight(IMAGE_HEIGHT);
+        fullscreenImage.setFitWidth(IMAGE_WIDTH);
+        fullscreenButton.setGraphic(fullscreenImage);
+        fullscreenButton.setTooltip(getToolTip("Max To Screen"));
+        fullscreenButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            @Override
+            public void handle(MouseEvent event)
+            {
+                isSelected = !isSelected;
+                if(isSelected) {
+                    fullscreenButton.setStyle(selectedStyle);
+                    at.makeFullscreen(true);
+                }
+                else {
+                    fullscreenButton.setStyle(unSelectedStyle);
+                    at.makeFullscreen(false);
+                }
+            }
+        });
+        nodes.add(fullscreenButton);
+
+        Button moveWindowButton = new Button();
+        ImageView moveWindowImage = new ImageView("icons/move.png");
+        moveWindowImage.setFitHeight(IMAGE_HEIGHT);
+        moveWindowImage.setFitWidth(IMAGE_WIDTH);
+        moveWindowButton.setGraphic(moveWindowImage);
+        moveWindowButton.setTooltip(getToolTip("Move Window"));
+        moveWindowButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            @Override
+            public void handle(MouseEvent event) {
+                isSelected = !isSelected;
+                if(isSelected) {
+//                    moveButton.setStyle(selectedStyle);
+//                    at.getMouseCatchingScene().setCursor(Cursor.OPEN_HAND);
+                    at.setMovingHandler();
+                }
+                else {
+//                    moveButton.setStyle(unSelectedStyle);
+                    at.resetHandlers();
+                }
+            }
+        });
+        nodes.add(moveWindowButton);
 
         /**
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png

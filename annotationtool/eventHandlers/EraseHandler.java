@@ -1,5 +1,6 @@
 package eventHandlers;
 
+import javafx.scene.Cursor;
 import transferableShapes.Custom_Shape;
 import transferableShapes.TransferableShapePoint;
 import annotation.AnnotationToolApplication;
@@ -23,7 +24,7 @@ import java.util.UUID;
 public class EraseHandler implements EventHandler<MouseEvent> {
 
     private ArrayList<TransferableShapePoint> pathElements;
-    private Color eraserColor = new Color(0,0,0,.1);
+    private Color eraserColor = new Color(0,0,0,.2);
     private AnnotationToolApplication annotationToolApplication;
     private Path eraserPath;
     private UUID uuid;
@@ -67,8 +68,6 @@ public class EraseHandler implements EventHandler<MouseEvent> {
                 e.printStackTrace();
             }  catch (IOException e) {
                 e.printStackTrace(); }
-
-
             eraseShape = null;
             annotationToolApplication.getRedoStack().clear();
         }

@@ -4,6 +4,7 @@ package annotation;
  */
 
 import changeItem.*;
+import javafx.scene.control.Label;
 import transferableShapes.*;
 
 import com.google.gson.*;
@@ -41,8 +42,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
-import org.jnativehook.mouse.NativeMouseEvent;
-import org.jnativehook.mouse.NativeMouseInputListener;
 import utils.FilePacker;
 import utils.GlobalInputListener;
 import utils.InputRecord;
@@ -51,10 +50,7 @@ import utils.WindowLinkedInputRecord;
 import utils.X11InfoGatherer;
 
 import javax.imageio.ImageIO;
-import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.awt.Stroke;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -89,19 +85,17 @@ public class AnnotationToolApplication extends Application {
     // Instance Variables
     //================================================================================
 
-    final ClipboardOwner clipboardOwner = new ClipboardOwner() {
-        @Override
-        public void lostOwnership(java.awt.datatransfer.Clipboard clipboard, Transferable contents) {
-        }
+    final ClipboardOwner clipboardOwner = (clipboard, contents) -> {
+        // leave for now
     };
     // Colors and Paint
     private final Color clickablyClearPaint = new Color(1, 1, 1, 1d / 255d);
     private final Color clearPaint = new Color(0, 0, 0, 0);
-    private final double[] minStageSize = {100, 100};
+    public static final double[] minStageSize = {100, 100};
     public static FileWriter writer = null;
     public static FileWriter windowWriter = null;
     //record keeping
-    UUID uuid;
+    private UUID uuid;
     private Gson gson = new Gson();
     private String last_file_fileName = "lastFile.txt";
     private String jnote_fileName;
@@ -127,7 +121,7 @@ public class AnnotationToolApplication extends Application {
     private javafx.scene.paint.Paint paint = Color.BLACK;
     // Handlers
     private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
-    private MovingHandler movingHandler = new MovingHandler(this);
+    private MouseMoveWindowHandler movingHandler = new MouseMoveWindowHandler(this);
     private DrawingHandler drawingHandler = new DrawingHandler(this);
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler(this);
@@ -138,26 +132,25 @@ public class AnnotationToolApplication extends Application {
     private OutBoundedOvalHandler outBoundedOvalHandler = new OutBoundedOvalHandler(this);
     private EraseHandler eraseHandler = new EraseHandler(this);
     private TwoTouchChangeSizeAndMoveHandler twoTouchChangeSizeAndMoveHandler = new TwoTouchChangeSizeAndMoveHandler(this);
+    private MouseChangeSizeHandler mouseChangeSizeHandler = new MouseChangeSizeHandler(this);
     private ResizeHandler resizeHandler = new ResizeHandler(this);
     private RectangleHandler rectangleHandler = new RectangleHandler(this);
     private RectificationHandler rectificationHandler = new RectificationHandler(this);
     private LineHandler lineHandler = new LineHandler(this);
     private GlobalInputListener globalInputListener = new GlobalInputListener(this);
     // Annotation Objects
-    private Path path;
-    private Line line;
-    private Stroke stroke;
     private Text text;
-    private Circle circle;
     private Rectangle borderShape;
     private StringBuffer textBoxText = new StringBuffer(64);
     private Stack<ChangeItem> undoStack = new Stack<>();
     private Stack<ChangeItem> redoStack = new Stack<>();
     // Cursors
-    private Cursor pencilCursor = new ImageCursor(new Image("icons/pencil-cursor.png"));
-    private Cursor eraserCursor = new ImageCursor(new Image("icons/eraser-cursor.png"));
-    private Cursor textCursor = new ImageCursor(new Image("icons/TextIcon.png"));
-    private Cursor arrowCursor = new ImageCursor(new Image("icons/arrow-cursor.png"));
+    public Cursor defaultCursor = new ImageCursor();
+    public Cursor pencilCursor = new ImageCursor(new Image("icons/pencil-cursor.png"));
+    public Cursor eraserCursor = new ImageCursor(new Image("icons/eraser-cursor-2.png"));
+    public Cursor textCursor = new ImageCursor(new Image("icons/TextIcon.png"));
+    public Cursor arrowCursor = new ImageCursor(new Image("icons/arrow-cursor.png"));
+    public Cursor resizeWindowCursor = Cursor.NW_RESIZE;
     // Settings
     private WindowInfo windowID;
     private String textFont = "Times New Roman";
@@ -168,6 +161,7 @@ public class AnnotationToolApplication extends Application {
     private int saveImageIndex = 0;
     private boolean mouseTransparent = false;
     private boolean clickable = true;
+    private boolean toggleResize = false;
     private boolean makingTextBox = false;
     private boolean lockedControllerBox = true;
     private boolean recording = false;
@@ -175,6 +169,10 @@ public class AnnotationToolApplication extends Application {
     private boolean saveEditText = false;
     private EditText editTextToSave;
     private Stage primaryStage;
+    private double retainX;
+    private double retainY;
+    private double retainWidth;
+    private double retainHeight;
     /*
     This number is used to determine how opaque shapes are
     when settransparent is used. The less opaque that they are, the more shapes that can
@@ -717,7 +715,7 @@ public class AnnotationToolApplication extends Application {
         this.makingTextBox = false;
         AddShape.movingShapes = false;
         resetStages();
-        mouseCatchingScene.setCursor(pencilCursor);
+        mouseCatchingScene.setCursor(defaultCursor);
     }
 
     /**
@@ -757,10 +755,9 @@ public class AnnotationToolApplication extends Application {
         mouseCatchingScene.addEventHandler(TouchEvent.ANY, twoTouchChangeSizeAndMoveHandler);       //Doesnt need to be added below cause we always wanna be listening for it
         mouseCatchingScene.addEventHandler(KeyEvent.KEY_PRESSED, shortcutHandler);
         mouseCatchingScene.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler(this));
-        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler(this));
         mouseCatchingStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler(this));
+        pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveTextBoxHandler(this));
         pictureStage.addEventHandler(MouseEvent.MOUSE_PRESSED, new SaveEditTextHandler(this));
-
 
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, drawingHandler));
         eventHandlers.add(new HandlerGroup(KeyEvent.KEY_TYPED,textBoxKeyHandler));
@@ -773,10 +770,10 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectificationHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, lineHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, mouseChangeSizeHandler));
     }
 
-    public void recordInput()
-    {
+    public void recordInput() {
         if(!recording) {
             recording = true;
         } else {
@@ -790,7 +787,6 @@ public class AnnotationToolApplication extends Application {
         pictureStage.setFullScreen(false);
         mouseCatchingStage.setMaximized(false);
         mouseCatchingStage.setFullScreen(false);
-
     }
 
     /**
@@ -853,27 +849,45 @@ public class AnnotationToolApplication extends Application {
      * @param changeX
      * @param changeY
      */
-    private void moveAnnotationWindow(double changeX, double changeY) {
-    	double stageXPos = mouseCatchingStage.getX();
+    public void moveAnnotationWindow(double changeX, double changeY) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        double stageXPos = mouseCatchingStage.getX();
     	double stageYPos = mouseCatchingStage.getY();
-    	mouseCatchingStage.setX(stageXPos + changeX);
-		mouseCatchingStage.setY(stageYPos + changeY);
+    	double leftBound = stageXPos;
+    	double topBound = stageYPos;
+    	double rightBound = stageXPos + mouseCatchingStage.getWidth();
+    	double bottomBound = stageYPos + mouseCatchingStage.getHeight();
+    	if (leftBound + changeX > 0 && rightBound + changeX < screenSize.width) {
+            mouseCatchingStage.setX(stageXPos + changeX);
+        }
+        if (topBound + changeY > 0 && bottomBound + changeY < screenSize.height) {
+            mouseCatchingStage.setY(stageYPos + changeY);
+        }
     }
 
     /**
      * Does the same thing as resizeAnnotationWindow, but instead of taking in the change in x and the change in y
      * it takes in the new values of x and y.
      */
-    public void resizeAnnotationWindow2(double width, double height)
+    public void resizeAnnotationWindow(double width, double height)
     {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        double stageXPos = mouseCatchingStage.getX();
+        double stageYPos = mouseCatchingStage.getY();
+        double leftBound = stageXPos;
+        double topBound = stageYPos;
+        double rightBound = stageXPos + width;
+        double bottomBound = stageYPos + height;
         double screenWidth = screenSize.getWidth();
         double screenHeight = screenSize.getHeight();
-        double stageWidth = mouseCatchingStage.getWidth();
-        double stageHeight = mouseCatchingStage.getHeight();
-
-        mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, width), minStageSize[0] ) );
-        mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, height), minStageSize[1] ) );
+        if (leftBound > 0 && rightBound < screenSize.width) {
+            mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, width), minStageSize[0] ) );
+        }
+        if (topBound > 0 && bottomBound < screenSize.height) {
+            mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, height), minStageSize[1] ) );
+        }
     }
 
     /**
@@ -882,15 +896,34 @@ public class AnnotationToolApplication extends Application {
      * @param changeX
      * @param changeY
      */
-    private void adjustAnnotationWindowSize(double changeX, double changeY) {
+    public void adjustAnnotationWindowSize(double changeX, double changeY) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         double screenWidth = screenSize.getWidth();
         double screenHeight = screenSize.getHeight();
         double stageWidth = mouseCatchingStage.getWidth();
         double stageHeight = mouseCatchingStage.getHeight();
+        mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth - changeX), minStageSize[0] ) );
+        mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight - changeY), minStageSize[1] ) );
+    }
 
-        mouseCatchingStage.setWidth( Math.max( Math.min(screenWidth, stageWidth + changeX), minStageSize[0] ) );
-        mouseCatchingStage.setHeight( Math.max( Math.min(screenHeight, stageHeight + changeY), minStageSize[1] ) );
+    public void makeFullscreen(boolean bool) {
+        if (bool) {
+            retainX = mouseCatchingStage.getX();
+            retainY = mouseCatchingStage.getY();
+            retainWidth = mouseCatchingStage.getWidth();
+            retainHeight = mouseCatchingStage.getHeight();
+
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            mouseCatchingStage.setX(0);
+            mouseCatchingStage.setY(0);
+            mouseCatchingStage.setWidth(screenSize.getWidth());
+            mouseCatchingStage.setHeight(screenSize.getHeight());
+        } else {
+            mouseCatchingStage.setWidth(retainWidth);
+            mouseCatchingStage.setHeight(retainHeight);
+            mouseCatchingStage.setX(retainX);
+            mouseCatchingStage.setY(retainY);
+        }
     }
 
     /**
@@ -903,7 +936,7 @@ public class AnnotationToolApplication extends Application {
     	if(windowID != null) {
     		int[] windowInfo = windowID.getDimensions();
     		if(windowInfo[0] != 0 && windowInfo[1] != 0 && windowInfo[2] != 0 && windowInfo[3] != 0) {
-    			resizeAnnotationWindow2(windowInfo[0], windowInfo[1]);
+    			resizeAnnotationWindow(windowInfo[0], windowInfo[1]);
     			mouseCatchingStage.setX(windowInfo[2]);
     			mouseCatchingStage.setY(windowInfo[3]);
     			pictureStage.setX(windowInfo[2]);
@@ -914,7 +947,6 @@ public class AnnotationToolApplication extends Application {
     	}
     }
 
-
     /**
      * Sets the state of the program so that the user can draw arrows.
      */
@@ -922,6 +954,15 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         this.mouseCatchingScene.setCursor(arrowCursor);
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, arrowHandler);
+    }
+
+    /**
+     * Resize the annotation window on mouse movements
+     */
+    public void resizeOnMouse() {
+        this.resetHandlers();
+        this.mouseCatchingScene.setCursor(resizeWindowCursor);
+        this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, mouseChangeSizeHandler);
     }
 
     /**
@@ -1072,11 +1113,6 @@ public class AnnotationToolApplication extends Application {
                 mouseCatchingStage.setIconified(true);
             }
         });
-    }
-
-    public void saveSceneState()
-    {
-
     }
 
     public void setBorderVisibility(boolean borderVisibility)
@@ -1278,9 +1314,7 @@ public class AnnotationToolApplication extends Application {
     {
         this.resetHandlers();
         mouseCatchingScene.addEventHandler(MouseEvent.ANY, rectangleHandler);
-
     }
-
 
     /**
      * Sets the state of the program so that you are drawing.
@@ -1289,6 +1323,7 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         textBoxText.delete(0,textBoxText.length());
+        mouseCatchingScene.setCursor(pencilCursor);
     }
 
     /**
@@ -1467,6 +1502,7 @@ public class AnnotationToolApplication extends Application {
             {
                 if(mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED)
                 {
+                    mouseCatchingScene.setCursor(Cursor.CLOSED_HAND);
                     startTime = new Date();
                     shapeStartX = leader.getLayoutX();
                     shapeStartY = leader.getLayoutY();

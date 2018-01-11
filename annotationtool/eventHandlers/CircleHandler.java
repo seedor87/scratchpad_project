@@ -1,5 +1,6 @@
 package eventHandlers;
 
+import javafx.scene.Cursor;
 import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import changeItem.AddShape;
@@ -72,6 +73,12 @@ public class CircleHandler implements EventHandler<MouseEvent>
 
             annotationToolApplication.getRedoStack().clear();
             circle = null;
+        }
+        else if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET) {
+            annotationToolApplication.getMouseCatchingScene().setCursor(Cursor.OPEN_HAND);
+        }
+        else if (event.getEventType() == MouseEvent.MOUSE_EXITED_TARGET) {
+            annotationToolApplication.getMouseCatchingScene().setCursor(Cursor.DEFAULT);
         }
     }
 }

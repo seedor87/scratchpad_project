@@ -1,6 +1,7 @@
 package eventHandlers;
 
 
+import javafx.scene.Cursor;
 import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import changeItem.AddShape;
@@ -58,6 +59,11 @@ public class LineHandler implements EventHandler<MouseEvent>
             Custom_Shape.setUpUUIDMaps(line, uuid);
             annotationToolApplication.getRedoStack().clear();
         }
-
+        else if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET) {
+            annotationToolApplication.getMouseCatchingScene().setCursor(Cursor.OPEN_HAND);
+        }
+        else if (event.getEventType() == MouseEvent.MOUSE_EXITED_TARGET) {
+            annotationToolApplication.getMouseCatchingScene().setCursor(Cursor.DEFAULT);
+        }
     }
 }

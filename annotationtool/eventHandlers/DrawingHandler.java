@@ -1,6 +1,7 @@
 package eventHandlers;
 
 
+import javafx.scene.Cursor;
 import transferableShapes.Custom_Shape;
 import transferableShapes.TransferableShapePoint;
 import annotation.AnnotationToolApplication;
@@ -78,7 +79,12 @@ public class DrawingHandler implements EventHandler<MouseEvent> {
                 path = null;
                 annotationToolApplication.getRedoStack().clear();
             }
-
+            else if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET) {
+                annotationToolApplication.getMouseCatchingScene().setCursor(Cursor.OPEN_HAND);
+            }
+            else if (event.getEventType() == MouseEvent.MOUSE_EXITED_TARGET) {
+                annotationToolApplication.getMouseCatchingScene().setCursor(annotationToolApplication.pencilCursor);
+            }
         }
     }
 }

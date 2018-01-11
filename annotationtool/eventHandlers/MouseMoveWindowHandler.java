@@ -12,7 +12,7 @@ import javafx.stage.Stage;
  * Handler for moving the stage. should be implemented with MouseEvent.ANY when you add the
  * handler to the mousecatchingscene.
  */
-public class MovingHandler implements EventHandler<MouseEvent>
+public class MouseMoveWindowHandler implements EventHandler<MouseEvent>
 {
     private double originalX = -1;
     private double originalY;
@@ -24,7 +24,7 @@ public class MovingHandler implements EventHandler<MouseEvent>
     private ImageCursor grabCursor = new ImageCursor(new Image("icons/grab.png"));
     private ImageCursor handCursor = new ImageCursor(new Image("icons/hand.png"));
 
-    public MovingHandler(AnnotationToolApplication annotationToolApplication)
+    public MouseMoveWindowHandler(AnnotationToolApplication annotationToolApplication)
     {
         this.annotationToolApplication = annotationToolApplication;
     }

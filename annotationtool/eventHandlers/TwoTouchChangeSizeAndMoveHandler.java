@@ -2,7 +2,6 @@ package eventHandlers;
 
 import annotation.AnnotationToolApplication;
 import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TouchEvent;
 import javafx.scene.input.TouchPoint;
 import javafx.stage.Stage;
@@ -55,10 +54,6 @@ public class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent
                 originalScreenY = mouseCatchingStage.getY();
                 originalScreenWidth = mouseCatchingStage.getWidth();
                 originalScreenHeight = mouseCatchingStage.getHeight();
-                double rightXChange = 0;
-                double topYChange = 0;
-                double leftXChange = 0;
-                double bottomYChange = 0;
 
                 TouchPoint point1 = event.getTouchPoints().get(0);
                 TouchPoint point2 = event.getTouchPoints().get(1);
@@ -100,7 +95,7 @@ public class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent
                         }
                         //mouseCatchingStage.setHeight(topYChange + originalScreenHeight + bottomYChange);
                         //mouseCatchingStage.setWidth(rightXChange + leftXChange);
-                        annotationToolApplication.resizeAnnotationWindow2(rightXChange  +  originalScreenWidth + leftXChange
+                        annotationToolApplication.resizeAnnotationWindow(rightXChange  +  originalScreenWidth + leftXChange
                                 ,topYChange + originalScreenHeight + bottomYChange);
                         mouseCatchingStage.setX(originalScreenX - leftXChange);
                         mouseCatchingStage.setY(originalScreenY - topYChange);
@@ -111,6 +106,7 @@ public class TwoTouchChangeSizeAndMoveHandler implements EventHandler<TouchEvent
             using = false;
             annotationToolApplication.unResetHandlers();
         }
+
 
     }
 }

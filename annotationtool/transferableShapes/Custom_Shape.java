@@ -2,12 +2,17 @@ package transferableShapes;
 
 import annotation.AnnotationToolApplication;
 import changeItem.*;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.scene.Cursor;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-
-
 import java.util.*;
 
 import javafx.scene.paint.Color;
