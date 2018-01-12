@@ -121,7 +121,7 @@ public class AnnotationToolApplication extends Application {
     private javafx.scene.paint.Paint paint = Color.BLACK;
     // Handlers
     private List<HandlerGroup> eventHandlers = new LinkedList<HandlerGroup>();
-    private MouseMoveWindowHandler movingHandler = new MouseMoveWindowHandler(this);
+    private MouseMoveWindowHandler mouseMoveWindowHandler = new MouseMoveWindowHandler(this);
     private DrawingHandler drawingHandler = new DrawingHandler(this);
     private PutControllerBoxOnTopHandler putControllerBoxOnTopHandler = new PutControllerBoxOnTopHandler();
     private ArrowHandler arrowHandler = new ArrowHandler(this);
@@ -194,8 +194,6 @@ public class AnnotationToolApplication extends Application {
         System.out.println("From init" + jnote_fileName);
         remakeFromJSON();
         this.primaryStage = primaryStage;
-        
-
     }
 
     public AnnotationToolApplication(Stage primaryStage, Stage secondaryStage, double x, double y, boolean sizedWindow, WindowInfo windowID, String jnote_fileName) throws IOException {
@@ -300,6 +298,10 @@ public class AnnotationToolApplication extends Application {
     	
     	// Don't forget to disable the parent handlers.
     	logger.setUseParentHandlers(false);
+
+//    	borderShape.addEventHandler(MouseEvent.ANY, new BorderShapeResizeHandler(this));
+//        borderShape.addEventHandler(MouseEvent.MOUSE_ENTERED_TARGET, MouseEventHandler -> getMouseCatchingScene().setCursor(Cursor.OPEN_HAND));
+//        borderShape.addEventHandler(MouseEvent.MOUSE_PRESSED, MouseEventHandler -> getMouseCatchingScene().setCursor(Cursor.CLOSED_HAND));
     }
 
     public ObservableList<Node> getLeaderGroup()
@@ -765,7 +767,7 @@ public class AnnotationToolApplication extends Application {
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, circleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, eraseHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, arrowHandler));
-        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, movingHandler));
+        eventHandlers.add(new HandlerGroup(MouseEvent.ANY, mouseMoveWindowHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, outBoundedOvalHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectangleHandler));
         eventHandlers.add(new HandlerGroup(MouseEvent.ANY, rectificationHandler));
@@ -780,13 +782,6 @@ public class AnnotationToolApplication extends Application {
             recording = false;
             globalInputListener.saveInputEvents();
         }
-    }
-
-    private void unMaximize() {
-        pictureStage.setMaximized(false);
-        pictureStage.setFullScreen(false);
-        mouseCatchingStage.setMaximized(false);
-        mouseCatchingStage.setFullScreen(false);
     }
 
     /**
@@ -842,28 +837,6 @@ public class AnnotationToolApplication extends Application {
             }
         });
 
-    }
-    /**
-     * moves the mousecatchingstage to a new position that is based on the current position and
-     * the values of X and Y passed in.
-     * @param changeX
-     * @param changeY
-     */
-    public void moveAnnotationWindow(double changeX, double changeY) {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-        double stageXPos = mouseCatchingStage.getX();
-    	double stageYPos = mouseCatchingStage.getY();
-    	double leftBound = stageXPos;
-    	double topBound = stageYPos;
-    	double rightBound = stageXPos + mouseCatchingStage.getWidth();
-    	double bottomBound = stageYPos + mouseCatchingStage.getHeight();
-    	if (leftBound + changeX > 0 && rightBound + changeX < screenSize.width) {
-            mouseCatchingStage.setX(stageXPos + changeX);
-        }
-        if (topBound + changeY > 0 && bottomBound + changeY < screenSize.height) {
-            mouseCatchingStage.setY(stageYPos + changeY);
-        }
     }
 
     /**
@@ -1288,7 +1261,7 @@ public class AnnotationToolApplication extends Application {
     public void setMovingHandler() {
         this.resetHandlers();
         mouseCatchingScene.setCursor(new ImageCursor(new Image("icons/hand.png")));
-        mouseCatchingScene.addEventHandler(MouseEvent.ANY, movingHandler);
+        mouseCatchingScene.addEventHandler(MouseEvent.ANY, mouseMoveWindowHandler);
     }
 
     /**
@@ -1323,7 +1296,7 @@ public class AnnotationToolApplication extends Application {
         this.resetHandlers();
         this.mouseCatchingScene.addEventHandler(MouseEvent.ANY, drawingHandler);
         textBoxText.delete(0,textBoxText.length());
-        mouseCatchingScene.setCursor(pencilCursor);
+//        mouseCatchingScene.setCursor(pencilCursor);
     }
 
     /**
@@ -1535,7 +1508,7 @@ public class AnnotationToolApplication extends Application {
                         startTime = null;
                     }
                 }
-                else if(mouseEvent.getEventType() ==MouseEvent.MOUSE_RELEASED)
+                else if(mouseEvent.getEventType() == MouseEvent.MOUSE_RELEASED)
                 {
                     if(didReset)
                     {

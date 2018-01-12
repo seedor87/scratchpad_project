@@ -1,19 +1,23 @@
 package annotation;
 
 
+import javafx.event.Event;
+import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import transferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
@@ -27,10 +31,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import utils.SocketListener;
 
-import java.awt.AWTException;
-import java.awt.Dimension;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -40,7 +41,6 @@ import java.util.*;
  */
 public class IconControllerBox extends Stage
 {
-
     private static final int IMAGE_WIDTH = 25;
     private static final int IMAGE_HEIGHT = 25;
     private static final int LEFT_LOCATION = 0;
@@ -63,15 +63,14 @@ public class IconControllerBox extends Stage
     private double buttonSize;
     private int location = RIGHT_LOCATION;
     private AnnotationToolApplication at;
-    private LinkedList<Button> nodes = new LinkedList<>();
+    private LinkedList<Node> nodes = new LinkedList<>();
     private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
     private LinkedList<Button> saveSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
     private Button sendToBackButton;
     private Button bringToFrontButton;
-    private Button selectedButton;
-    private Background defaultBackground;
     private static final Background SELECTED_BACKGROUND = null;
+    private Cursor savedCursor = null;
 
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -94,7 +93,6 @@ public class IconControllerBox extends Stage
         
         final IconControllerBox CONTROLLER_BOX = this;
         listenerThread = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				SocketListener serverSocket = new SocketListener(CONTROLLER_BOX, 26222);
@@ -102,6 +100,20 @@ public class IconControllerBox extends Stage
 
         });
         listenerThread.start();
+
+
+        ToggleButton tb1 = new ToggleButton("toggle button 1");
+        tb1.setOnAction(event -> System.out.println(event.getTarget() + " pressed!!"));
+        ToggleButton tb2 = new ToggleButton("toggle button 2");
+        ToggleButton tb3 = new ToggleButton("toggle button 3");
+        ToggleGroup group = new ToggleGroup();
+        tb1.setToggleGroup(group);
+        tb2.setToggleGroup(group);
+        tb3.setToggleGroup(group);
+        nodes.add(tb1);
+        nodes.add(tb2);
+        nodes.add(tb3);
+
 
         Button exitButton = new Button();
         ImageView exitImage = new ImageView("icons/exit.png");
@@ -149,7 +161,6 @@ public class IconControllerBox extends Stage
         newFileButton.setGraphic(newFileImage);
         newFileButton.setTooltip(getToolTip("Create or open a new annotation"));
         newFileButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-
 			@Override
 			public void handle(MouseEvent event) {
 				newFile("");
@@ -496,11 +507,19 @@ public class IconControllerBox extends Stage
 
         Button colorPickerButton = new Button();
         ColorPicker colorPicker = new ColorPicker(Color.BLACK);
-        colorPicker.setOnAction(new EventHandler() {
-            public void handle(Event t) {
-                Color c = colorPicker.getValue();
-                at.setPaint(c);
+        colorPicker.setOnAction(t -> {
+            Color c = colorPicker.getValue();
+            Image pencilImage = new Image("icons/pencil-cursor-temp.png");
+            PixelReader pixelReader = pencilImage.getPixelReader();
+            WritableImage newPencilImage = new WritableImage(pixelReader, (int) pencilImage.getWidth(), (int) pencilImage.getHeight());
+            for (int x = 2; x < 6; x++) {
+                for (int y = 2; y < 6; y++) {
+                    newPencilImage.getPixelWriter().setColor(x,y,c);
+                }
             }
+            at.pencilCursor = new ImageCursor(newPencilImage);
+            at.getMouseCatchingScene().setCursor(at.pencilCursor);
+            at.setPaint(c);
         });
         colorPicker.setMaxWidth(25);
         colorPickerButton.setGraphic(colorPicker);
@@ -755,10 +774,13 @@ public class IconControllerBox extends Stage
                 {
                     background = toggleClickableButton.getBackground();
                     toggleClickableButton.setBackground(SELECTED_BACKGROUND);
+                    savedCursor = at.getMouseCatchingScene().getCursor();
+                    at.getMouseCatchingScene().setCursor(Cursor.DEFAULT);
                 }
                 else
                 {
                     toggleClickableButton.setBackground(background);
+                    at.getMouseCatchingScene().setCursor(savedCursor);
                 }
             }
         });
@@ -857,10 +879,6 @@ public class IconControllerBox extends Stage
         });
         nodes.add(saveStateButton);
 */
-
-
-
-
 
         Button newButton = new Button();
         ImageView newImage = new ImageView("icons/new.png");
@@ -1071,6 +1089,31 @@ public class IconControllerBox extends Stage
         });
         nodes.add(recordInputButton);
 
+        ToggleButton fullscreenButton = new ToggleButton();
+        ImageView fullscreenImage = new ImageView("icons/fullscreen.png");
+        fullscreenImage.setFitHeight(IMAGE_HEIGHT);
+        fullscreenImage.setFitWidth(IMAGE_WIDTH);
+        fullscreenButton.setGraphic(fullscreenImage);
+        fullscreenButton.setTooltip(getToolTip("Max To Screen"));
+//        fullscreenButton.setOnAction(event -> at.makeFullscreen(((ToggleButton) event.getSource()).isSelected()));
+        fullscreenButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    boolean isSelected = false;
+
+                    @Override
+                    public void handle(MouseEvent event) {
+                        isSelected = !isSelected;
+                        if (isSelected) {
+                            fullscreenButton.setStyle(selectedStyle);
+                            at.makeFullscreen(true);
+                        } else {
+                            fullscreenButton.setStyle(unSelectedStyle);
+                            at.makeFullscreen(false);
+                        }
+                    }
+                }
+        );
+        nodes.add(fullscreenButton);
+
         Button resizeButton = new Button();
         ImageView resizeImage = new ImageView("icons/resize.png");
         resizeImage.setFitHeight(IMAGE_HEIGHT);
@@ -1092,31 +1135,8 @@ public class IconControllerBox extends Stage
                 }
             }
         });
+        resizeButton.disableProperty().bind(fullscreenButton.selectedProperty());
         nodes.add(resizeButton);
-
-        Button fullscreenButton = new Button();
-        ImageView fullscreenImage = new ImageView("icons/fullscreen.png");
-        fullscreenImage.setFitHeight(IMAGE_HEIGHT);
-        fullscreenImage.setFitWidth(IMAGE_WIDTH);
-        fullscreenButton.setGraphic(fullscreenImage);
-        fullscreenButton.setTooltip(getToolTip("Max To Screen"));
-        fullscreenButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            boolean isSelected = false;
-            @Override
-            public void handle(MouseEvent event)
-            {
-                isSelected = !isSelected;
-                if(isSelected) {
-                    fullscreenButton.setStyle(selectedStyle);
-                    at.makeFullscreen(true);
-                }
-                else {
-                    fullscreenButton.setStyle(unSelectedStyle);
-                    at.makeFullscreen(false);
-                }
-            }
-        });
-        nodes.add(fullscreenButton);
 
         Button moveWindowButton = new Button();
         ImageView moveWindowImage = new ImageView("icons/move.png");
@@ -1140,6 +1160,7 @@ public class IconControllerBox extends Stage
                 }
             }
         });
+        moveWindowButton.disableProperty().bind(fullscreenButton.selectedProperty());
         nodes.add(moveWindowButton);
 
         /**
@@ -1283,25 +1304,45 @@ public class IconControllerBox extends Stage
         {
             nodes.add(sendToBackButton);
         }
-        for(Button n : this.nodes)
+        for(Node n : this.nodes)
         {
-            //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
-            n.setMinSize(size, size);
-            n.setMaxSize(size, size);
+            if (n instanceof Button) {
+                //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
+                ((Button) n).setMinSize(size, size);
+                ((Button) n).setMaxSize(size, size);
 
-            Node graphicsContext = n.getGraphic();
-            if(graphicsContext instanceof ImageView)
-            {
-                ((ImageView) graphicsContext).setFitWidth(size-5);
-                ((ImageView) graphicsContext).setFitHeight(size-5);
-            }
-            else if(graphicsContext instanceof Text)
-            {
-                ((Text)graphicsContext).setFont(new Font(size-15));
-            }
-            else if(graphicsContext instanceof Circle)
-            {
-                ((Circle)graphicsContext).setRadius((size-10)/2);
+                Node graphicsContext = ((Button) n).getGraphic();
+                if(graphicsContext instanceof ImageView)
+                {
+                    ((ImageView) graphicsContext).setFitWidth(size-5);
+                    ((ImageView) graphicsContext).setFitHeight(size-5);
+                }
+                else if(graphicsContext instanceof Text)
+                {
+                    ((Text)graphicsContext).setFont(new Font(size-15));
+                }
+                else if(graphicsContext instanceof Circle)
+                {
+                    ((Circle)graphicsContext).setRadius((size-10)/2);
+                }
+            } else {
+                ((ToggleButton) n).setMinSize(size, size);
+                ((ToggleButton) n).setMaxSize(size, size);
+
+                Node graphicsContext = ((ToggleButton) n).getGraphic();
+                if(graphicsContext instanceof ImageView)
+                {
+                    ((ImageView) graphicsContext).setFitWidth(size-5);
+                    ((ImageView) graphicsContext).setFitHeight(size-5);
+                }
+                else if(graphicsContext instanceof Text)
+                {
+                    ((Text)graphicsContext).setFont(new Font(size-15));
+                }
+                else if(graphicsContext instanceof Circle)
+                {
+                    ((Circle)graphicsContext).setRadius((size-10)/2);
+                }
             }
         }
         nodes.remove(nodes.size()-1);

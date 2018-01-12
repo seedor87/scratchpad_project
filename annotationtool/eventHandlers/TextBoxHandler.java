@@ -25,8 +25,7 @@ public class TextBoxHandler implements EventHandler<MouseEvent> {
     public void handle(MouseEvent event) {
         if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET) {
             annotationToolApplication.getMouseCatchingScene().setCursor(Cursor.OPEN_HAND);
-        }
-        else if (event.getEventType() == MouseEvent.MOUSE_EXITED_TARGET) {
+        } else if (event.getEventType() == MouseEvent.MOUSE_EXITED_TARGET) {
             annotationToolApplication.getMouseCatchingScene().setCursor(annotationToolApplication.textCursor);
         } else {
             String defaultText = "Text";
