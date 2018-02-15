@@ -16,13 +16,13 @@ import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
@@ -45,12 +45,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import util.FilePacker;
-import util.ProcessRunner;
-import util.WindowInfo;
-import util.X11InfoGatherer;
-
-import javax.swing.*;
+import utils.FilePacker;
+import utils.ProcessRunner;
+import utils.WindowInfo;
+import utils.X11InfoGatherer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -150,6 +148,7 @@ public class FXAnnotationToolBuilder extends Application {
 
 		stage.getScene().addEventHandler(KeyEvent.KEY_PRESSED, new BuilderKeyHandler());
 		stage.getScene().addEventHandler(MouseEvent.ANY, new BuilderMouseHandler());
+		stage.getScene().setCursor(Cursor.CROSSHAIR);
 
 		gc.setStroke(Color.RED);
 		gc.setLineWidth(4);
@@ -178,27 +177,23 @@ public class FXAnnotationToolBuilder extends Application {
 		dialog.setTitle("Scratchpad.exe");
 		dialog.setHeaderText("Welcome to Scratchpad");
 		dialog.setContentText("");
-		ButtonType buttonTypeOne = new ButtonType("Create New Project");
-		ButtonType buttonTypeTwo = new ButtonType("Import Project");
-		ButtonType buttonTypeThree = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-		dialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
+		ButtonType newProjButton = new ButtonType("Create New Project");
+		ButtonType importProjButton = new ButtonType("Import Project");
+		ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+		dialog.getButtonTypes().setAll(newProjButton, importProjButton, cancelButton);
+		((Button) dialog.getDialogPane().lookupButton(newProjButton)).setDefaultButton(true);
+
 		//Set extension filter
 		chooser.setInitialFileName(path);
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Annotation Files (*.jnote)", "*.jnote");
 		chooser.getExtensionFilters().add(extFilter);
 		Optional<ButtonType> result = dialog.showAndWait();
-		if (result.get() == buttonTypeOne) { //create new project/file
-
+		if (result.get() == newProjButton) { //create new project/file
 			chooser.getExtensionFilters().add(extFilter);
-
-
 			//Show save file dialog
 			File file = chooser.showSaveDialog(stage);
 			path = file.getAbsoluteFile().toString();
-
-
-
-		} else if (result.get() == buttonTypeTwo) { //import from file
+		} else if (result.get() == importProjButton) { //import from file
 			// ... user chose "Two"
 			path = importFile(chooser);
 		} else {
@@ -334,7 +329,6 @@ public class FXAnnotationToolBuilder extends Application {
 		final VBox vbox = new VBox();
 		vbox.setSpacing(5);
 		vbox.setPadding(new Insets(10, 20, 20, 20));
-		
 
 		Button restoreSessionButton = new Button();
 		restoreSessionButton.setText("Restore Previous Session");
@@ -435,10 +429,15 @@ public class FXAnnotationToolBuilder extends Application {
 	 *
 	 * @param gc
 	 */
-	private void highlight(GraphicsContext gc) {
+	private void highlight(GraphicsContext gc, boolean adequateSize) {
 		gc.clearRect(0, 0, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-		gc.setStroke(new Color(1, 0, 0, 0.5f));
+		if (adequateSize) {
+			gc.setStroke(new Color(0, 0, 1, 0.5f));
+		} else {
+			gc.setStroke(new Color(1, 0, 0, 0.5f));
+		}
 		gc.setLineWidth(4);
+		gc.setLineDashes(20);
 		double beginX, beginY, width, height;
 		if (dragging == true) {
 			beginX = Math.min(xPos1, xPosCurr);
@@ -466,38 +465,54 @@ public class FXAnnotationToolBuilder extends Application {
 
 		@Override
 		public void handle(MouseEvent event) {
-			if(event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-				if(event.getButton() != MouseButton.SECONDARY) {
-					xPos1 = event.getX();
-					yPos1 = event.getY();
-					dragging = true;
-				}
+			if(event.getEventType() == MouseEvent.MOUSE_PRESSED &&
+					event.getButton() == MouseButton.PRIMARY) {
+				xPos1 = event.getX();
+				yPos1 = event.getY();
+				dragging = true;
 			}
 
-			if(event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-				if(event.getButton() == MouseButton.SECONDARY) {
+			if(event.getEventType() == MouseEvent.MOUSE_RELEASED &&
+					event.getButton() == MouseButton.PRIMARY) {
+//				if(event.getButton() == MouseButton.SECONDARY) {
+//					try {
+//						build();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//				}
+				double width, height;
+				xPos2 = event.getX();
+				yPos2 = event.getY();
+				dragging = false;
+				width = Math.abs(xPosCurr - xPos1);
+				height = Math.abs(yPosCurr - yPos1);
+				if (width > AnnotationToolApplication.minStageSize[0]
+						&& height > AnnotationToolApplication.minStageSize[1]) {
 					try {
 						build();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-				}
-				xPos2 = event.getX();
-				yPos2 = event.getY();
-				dragging = false;
-				try {
-					build();
-				} catch (IOException e) {
-					e.printStackTrace();
+				} else {
+					Alert alert = new Alert(AlertType.ERROR, "Annotation Area is Inadequate Size\nPlease try again", ButtonType.OK);
+					alert.showAndWait();
 				}
 			}
 
 			if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+				double width, height;
 				xPosCurr = event.getX();
 				yPosCurr = event.getY();
-				highlight(gc);
+				width = Math.abs(xPosCurr - xPos1);
+				height = Math.abs(yPosCurr - yPos1);
+				if (width > AnnotationToolApplication.minStageSize[0]
+						&& height > AnnotationToolApplication.minStageSize[1]) {
+					highlight(gc, true);
+				} else {
+					highlight(gc, false);
+				}
 			}
-
 		}
 
 	}

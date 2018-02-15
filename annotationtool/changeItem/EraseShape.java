@@ -1,12 +1,14 @@
 package changeItem;
 
-import TransferableShapes.Custom_Shape;
+import transferableShapes.Custom_Shape;
 import annotation.AnnotationToolApplication;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Stack;
 
@@ -19,6 +21,8 @@ public class EraseShape implements ChangeItem
     private Path eraseArea;
     private Stack<ChangeItem> shapesPartiallyErased = new Stack<>();
     private Stack<ChangeItem> undidStack;
+    private ArrayList<Node> oldLeaders;
+    private ArrayList<Node> newLeaders;
 
     /**
      * @param eraseArea the area that should be subtracted from each existing shape in a window
@@ -48,6 +52,9 @@ public class EraseShape implements ChangeItem
         ChangeItem oldItem;
         Shape oldShape;
         Shape newShape;
+        oldLeaders = new ArrayList<>(annotationToolApplication.getLeaderGroup().size());
+        oldLeaders.addAll(annotationToolApplication.getLeaderGroup());
+        annotationToolApplication.getLeaderGroup().clear();
         Stack<ChangeItem> stack = annotationToolApplication.getUndoStack();
         ListIterator<ChangeItem> iterator = stack.listIterator(stack.size());        //list iterator starting from top of stack.
         while(iterator.hasPrevious())
@@ -65,12 +72,13 @@ public class EraseShape implements ChangeItem
                 {
                     newShape = Shape.subtract(oldShape, eraseArea);
                     newShape.setFill(oldShape.getFill());
-                    if (oldShape.getFill() == null) {
+                    if (oldShape.getFill() == null)
+                    {
                         newShape.setFill(oldShape.getStroke());
-
                     }
                     shapesPartiallyErased.add(oldItem);
                     Custom_Shape.changeShape(((AddShape) oldItem).getShape(), newShape);
+                    annotationToolApplication.addLeaderToFollower(newShape);
                     iterator.set(new AddShape(newShape));
                 }
             }
@@ -99,6 +107,11 @@ public class EraseShape implements ChangeItem
         undidStack = (Stack<ChangeItem>) undoStack.clone();
         undoStack.clear();
 
+        newLeaders = new ArrayList<>(annotationToolApplication.getLeaderGroup().size());
+        newLeaders.addAll(annotationToolApplication.getLeaderGroup());
+        annotationToolApplication.getLeaderGroup().clear();
+        annotationToolApplication.getLeaderGroup().setAll(oldLeaders);
+
         while(!(shapesPartiallyErased.isEmpty()))
         {
             undoStack.push(shapesPartiallyErased.pop());
@@ -122,6 +135,8 @@ public class EraseShape implements ChangeItem
     {
         Stack<ChangeItem> undoStack = annotationToolApplication.getUndoStack();
         shapesPartiallyErased = (Stack<ChangeItem>)undoStack.clone();
+        annotationToolApplication.getLeaderGroup().clear();
+        annotationToolApplication.getLeaderGroup().setAll(newLeaders);
         undoStack.clear();
         undoStack.addAll(undidStack);
         Platform.runLater(new Runnable() {
