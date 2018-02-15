@@ -1,37 +1,37 @@
 package annotation;
 
 
-import TransferableShapes.Custom_Shape;
+import javafx.event.Event;
+import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
+import transferableShapes.Custom_Shape;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import util.SocketListener;
+import utils.SocketListener;
 
-import java.awt.AWTException;
-import java.awt.Dimension;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -41,7 +41,6 @@ import java.util.*;
  */
 public class IconControllerBox extends Stage
 {
-
     private static final int IMAGE_WIDTH = 25;
     private static final int IMAGE_HEIGHT = 25;
     private static final int LEFT_LOCATION = 0;
@@ -49,6 +48,11 @@ public class IconControllerBox extends Stage
     private static final int RIGHT_LOCATION = 2;
     private static final int TOOLTIP_FONT_SIZE = 20;
     private static final Font TOOLTIP_FONT = new Font(TOOLTIP_FONT_SIZE);
+    private final String selectedStyle = "-fx-color: paleturquoise";
+    private final String unSelectedStyle = "-fx-background-color:" +
+            "                            -fx-shadow-highlight-color,"  +
+            "                            linear-gradient(to bottom, derive(-fx-color,-22%) 0%, derive(-fx-color,-15%) 100%)," +
+            "                            linear-gradient(to bottom, derive(-fx-color,-15%) 0%, derive(-fx-color,-10%) 50%, derive(-fx-color,-8%) 98%, derive(-fx-color,-12%) 100%);";
     private Thread listenerThread;
     private Pane root;
     private Pane trunk;
@@ -59,15 +63,14 @@ public class IconControllerBox extends Stage
     private double buttonSize;
     private int location = RIGHT_LOCATION;
     private AnnotationToolApplication at;
-    private LinkedList<Button> nodes = new LinkedList<>();
+    private LinkedList<Node> nodes = new LinkedList<>();
     private LinkedList<Button> shapeSelectingNodes = new LinkedList<>();
     private LinkedList<Button> saveSelectingNodes = new LinkedList<>();
     private Node shapePickerGraphic;
     private Button sendToBackButton;
     private Button bringToFrontButton;
-    private Button selectedButton;
-    private Background defaultBackground;
     private static final Background SELECTED_BACKGROUND = null;
+    private Cursor savedCursor = null;
 
     public IconControllerBox(AnnotationToolApplication at)
     {
@@ -90,17 +93,30 @@ public class IconControllerBox extends Stage
         
         final IconControllerBox CONTROLLER_BOX = this;
         listenerThread = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				SocketListener serverSocket = new SocketListener(CONTROLLER_BOX, 26222);
 			}
-        	
+
         });
         listenerThread.start();
 
+
+        ToggleButton tb1 = new ToggleButton("toggle button 1");
+        tb1.setOnAction(event -> System.out.println(event.getTarget() + " pressed!!"));
+        ToggleButton tb2 = new ToggleButton("toggle button 2");
+        ToggleButton tb3 = new ToggleButton("toggle button 3");
+        ToggleGroup group = new ToggleGroup();
+        tb1.setToggleGroup(group);
+        tb2.setToggleGroup(group);
+        tb3.setToggleGroup(group);
+        nodes.add(tb1);
+        nodes.add(tb2);
+        nodes.add(tb3);
+
+
         Button exitButton = new Button();
-        ImageView exitImage = new ImageView("exit.png");
+        ImageView exitImage = new ImageView("icons/exit.png");
         exitImage.setFitHeight(IMAGE_HEIGHT);
         exitImage.setFitWidth(IMAGE_WIDTH);
         exitButton.setGraphic(exitImage);
@@ -139,23 +155,22 @@ public class IconControllerBox extends Stage
         nodes.add(exitButton);
         
         Button newFileButton = new Button();
-        ImageView newFileImage = new ImageView("file.png");
+        ImageView newFileImage = new ImageView("icons/file.png");
         newFileImage.setFitHeight(IMAGE_HEIGHT);
         newFileImage.setFitWidth(IMAGE_WIDTH);
         newFileButton.setGraphic(newFileImage);
         newFileButton.setTooltip(getToolTip("Create or open a new annotation"));
         newFileButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-
 			@Override
 			public void handle(MouseEvent event) {
 				newFile("");
 			}
-        	
+
         });
         nodes.add(newFileButton);
 
         Button saveImageButton = new Button();
-        ImageView saveImage = new ImageView("camera.png");
+        ImageView saveImage = new ImageView("icons/camera.png");
         saveImage.setFitHeight(IMAGE_HEIGHT);
         saveImage.setFitWidth(IMAGE_WIDTH);
         saveImageButton.setGraphic(saveImage);
@@ -171,7 +186,7 @@ public class IconControllerBox extends Stage
         nodes.add(saveImageButton);
 
         Button arrowButton = new Button();
-        ImageView arrowImage = new ImageView("arrow.png");
+        ImageView arrowImage = new ImageView("icons/arrow.png");
         arrowImage.setFitHeight(IMAGE_HEIGHT);
         arrowImage.setFitWidth(IMAGE_WIDTH);
         arrowButton.setGraphic(arrowImage);
@@ -202,7 +217,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(circleButton);
 
         Button rectificationButton = new Button();
-        ImageView rectificationImage = new ImageView("star.png");
+        ImageView rectificationImage = new ImageView("icons/star.png");
         rectificationImage.setFitHeight(IMAGE_HEIGHT);
         rectificationImage.setFitWidth(IMAGE_WIDTH);
         rectificationButton.setGraphic(rectificationImage);
@@ -218,7 +233,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(rectificationButton);
 
         Button lineButton = new Button();
-        ImageView lineImage = new ImageView("line.png");
+        ImageView lineImage = new ImageView("icons/line.png");
         lineImage.setFitHeight(IMAGE_HEIGHT);
         lineImage.setFitWidth(IMAGE_WIDTH);
         lineButton.setGraphic(lineImage);
@@ -233,7 +248,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(lineButton);
 
         Button rectangleButton = new Button();
-        ImageView rectangleImage = new ImageView("rectangle.png");
+        ImageView rectangleImage = new ImageView("icons/rectangle.png");
         rectangleImage.setFitHeight(IMAGE_HEIGHT);
         rectangleImage.setFitWidth(IMAGE_WIDTH);
         rectangleButton.setGraphic(rectangleImage);
@@ -249,7 +264,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(rectangleButton);
 
         Button outBoundedOvalButton = new Button();
-        ImageView ovalImage = new ImageView("oval.png");
+        ImageView ovalImage = new ImageView("icons/oval.png");
         ovalImage.setFitHeight(IMAGE_HEIGHT);
         ovalImage.setFitWidth(IMAGE_WIDTH);
         outBoundedOvalButton.setGraphic(ovalImage);
@@ -264,7 +279,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(outBoundedOvalButton);
 
         Button drawButton = new Button();
-        ImageView drawImage = new ImageView("pencil-32.png");
+        ImageView drawImage = new ImageView("icons/pencil-32.png");
         drawImage.setFitHeight(IMAGE_HEIGHT);
         drawImage.setFitWidth(IMAGE_WIDTH);
         drawButton.setGraphic(drawImage);
@@ -280,7 +295,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(drawButton);
 
         Button textButton = new Button();
-        ImageView textImage = new ImageView("TextIcon.png");
+        ImageView textImage = new ImageView("icons/TextIcon.png");
         textImage.setFitHeight(IMAGE_HEIGHT);
         textImage.setFitWidth(IMAGE_WIDTH);
         textButton.setGraphic(textImage);
@@ -296,7 +311,7 @@ public class IconControllerBox extends Stage
         shapeSelectingNodes.add(textButton);
 
         Button eraseButton = new Button();
-        ImageView eraseImage = new ImageView("eraser.png");
+        ImageView eraseImage = new ImageView("icons/eraser.png");
         eraseImage.setFitHeight(IMAGE_HEIGHT);
         eraseImage.setFitWidth(IMAGE_WIDTH);
         eraseButton.setGraphic(eraseImage);
@@ -492,11 +507,19 @@ public class IconControllerBox extends Stage
 
         Button colorPickerButton = new Button();
         ColorPicker colorPicker = new ColorPicker(Color.BLACK);
-        colorPicker.setOnAction(new EventHandler() {
-            public void handle(Event t) {
-                Color c = colorPicker.getValue();
-                at.setPaint(c);
+        colorPicker.setOnAction(t -> {
+            Color c = colorPicker.getValue();
+            Image pencilImage = new Image("icons/pencil-cursor-temp.png");
+            PixelReader pixelReader = pencilImage.getPixelReader();
+            WritableImage newPencilImage = new WritableImage(pixelReader, (int) pencilImage.getWidth(), (int) pencilImage.getHeight());
+            for (int x = 2; x < 6; x++) {
+                for (int y = 2; y < 6; y++) {
+                    newPencilImage.getPixelWriter().setColor(x,y,c);
+                }
             }
+            at.pencilCursor = new ImageCursor(newPencilImage);
+            at.getMouseCatchingScene().setCursor(at.pencilCursor);
+            at.setPaint(c);
         });
         colorPicker.setMaxWidth(25);
         colorPickerButton.setGraphic(colorPicker);
@@ -511,7 +534,7 @@ public class IconControllerBox extends Stage
         nodes.add(colorPickerButton);
 
         Button undoButton = new Button();
-        ImageView undoImage = new ImageView("undoImage.png");
+        ImageView undoImage = new ImageView("icons/undoImage.png");
         undoImage.setFitHeight(IMAGE_HEIGHT);
         undoImage.setFitWidth(IMAGE_WIDTH);
         undoButton.setGraphic(undoImage);
@@ -534,7 +557,7 @@ public class IconControllerBox extends Stage
         nodes.add(undoButton);
 
         Button redoButton = new Button();
-        ImageView redoImage = new ImageView("redoImage.png");
+        ImageView redoImage = new ImageView("icons/redoImage.png");
         redoImage.setFitHeight(IMAGE_HEIGHT);
         redoImage.setFitWidth(IMAGE_WIDTH);
         redoButton.setGraphic(redoImage);
@@ -557,7 +580,7 @@ public class IconControllerBox extends Stage
         nodes.add(redoButton);
 
         Button changeButtonSizeButton = new Button();
-        ImageView changeButtonSizeImage = new ImageView("changebuttonsizeimage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
+        ImageView changeButtonSizeImage = new ImageView("icons/changebuttonsizeimage.png");   //https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Simple_icon_size.svg/1280px-Simple_icon_size.svg.png
         changeButtonSizeImage.setFitHeight(IMAGE_HEIGHT);
         changeButtonSizeImage.setFitWidth(IMAGE_WIDTH);
         changeButtonSizeButton.setGraphic(changeButtonSizeImage);
@@ -660,7 +683,7 @@ public class IconControllerBox extends Stage
 
 
         Button snapToLeftButton = new Button();
-        ImageView snapToLeftImage = new ImageView("snapLeftImage.png");
+        ImageView snapToLeftImage = new ImageView("icons/snapLeftImage.png");
         snapToLeftImage.setFitHeight(IMAGE_HEIGHT);
         snapToLeftImage.setFitWidth(IMAGE_WIDTH);
         snapToLeftButton.setGraphic(snapToLeftImage);
@@ -676,7 +699,7 @@ public class IconControllerBox extends Stage
         nodes.add(snapToLeftButton);
 
         Button snapToRightButton = new Button();
-        ImageView snapToRightImage = new ImageView("snapRightImage.png");
+        ImageView snapToRightImage = new ImageView("icons/snapRightImage.png");
         snapToRightImage.setFitHeight(IMAGE_HEIGHT);
         snapToRightImage.setFitWidth(IMAGE_WIDTH);
         snapToRightButton.setGraphic(snapToRightImage);
@@ -692,7 +715,7 @@ public class IconControllerBox extends Stage
         nodes.add(snapToRightButton);
 
         Button snapToTopButton = new Button();
-        ImageView snapToTopImage = new ImageView("snapTopImage.png");
+        ImageView snapToTopImage = new ImageView("icons/snapTopImage.png");
         snapToTopImage.setFitHeight(IMAGE_HEIGHT);
         snapToTopImage.setFitWidth(IMAGE_WIDTH);
         snapToTopButton.setGraphic(snapToTopImage);
@@ -707,24 +730,27 @@ public class IconControllerBox extends Stage
         });
         nodes.add(snapToTopButton);
 
-        Button moveButton = new Button();
-        ImageView moveImage = new ImageView("hand.png");
-        moveImage.setFitHeight(IMAGE_HEIGHT);
-        moveImage.setFitWidth(IMAGE_WIDTH);
-        moveButton.setGraphic(moveImage);
-        moveButton.setTooltip(getToolTip("Move window"));
-        moveButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event)
-            {
-                at.setMovingHandler();
-            }
-        });
-        nodes.add(moveButton);
-        selectedButton = moveButton;
+        /*
+        The old move control, kept for posterity
+         */
+//        Button moveButton = new Button();
+//        ImageView moveImage = new ImageView("icons/hand.png");
+//        moveImage.setFitHeight(IMAGE_HEIGHT);
+//        moveImage.setFitWidth(IMAGE_WIDTH);
+//        moveButton.setGraphic(moveImage);
+//        moveButton.setTooltip(getToolTip("Move window"));
+//        moveButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new javafx.event.EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event)
+//            {
+//                at.setMovingHandler();
+//            }
+//        });
+//        nodes.add(moveButton);
+//        selectedButton = moveButton;
 
         Button toggleClickableButton = new Button();
-        ImageView toggleClickableImage = new ImageView("pointer.png");
+        ImageView toggleClickableImage = new ImageView("icons/pointer.png");
         toggleClickableImage.setFitHeight(IMAGE_HEIGHT);
         toggleClickableImage.setFitWidth(IMAGE_WIDTH);
         toggleClickableButton.setGraphic(toggleClickableImage);
@@ -748,10 +774,13 @@ public class IconControllerBox extends Stage
                 {
                     background = toggleClickableButton.getBackground();
                     toggleClickableButton.setBackground(SELECTED_BACKGROUND);
+                    savedCursor = at.getMouseCatchingScene().getCursor();
+                    at.getMouseCatchingScene().setCursor(Cursor.DEFAULT);
                 }
                 else
                 {
                     toggleClickableButton.setBackground(background);
+                    at.getMouseCatchingScene().setCursor(savedCursor);
                 }
             }
         });
@@ -762,7 +791,7 @@ public class IconControllerBox extends Stage
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Edit-clear.svg/1024px-Edit-clear.svg.png
          */
         Button eraseTransparentButton = new Button();
-        ImageView eraseTransparentImage = new ImageView("eraseTransparent.png");
+        ImageView eraseTransparentImage = new ImageView("icons/eraseTransparent.png");
         eraseTransparentImage.setFitHeight(IMAGE_HEIGHT);
         eraseTransparentImage.setFitWidth(IMAGE_WIDTH);
         eraseTransparentButton.setGraphic(eraseTransparentImage);
@@ -802,7 +831,7 @@ public class IconControllerBox extends Stage
         nodes.add(preferencesButton);*/
 
         Button clearHistoryButton = new Button();
-        ImageView clearHistoryImage = new ImageView("clearHistory.png");
+        ImageView clearHistoryImage = new ImageView("icons/clearHistory.png");
         clearHistoryImage.setFitHeight(IMAGE_HEIGHT);
         clearHistoryImage.setFitWidth(IMAGE_WIDTH);
         clearHistoryButton.setGraphic(clearHistoryImage);
@@ -817,7 +846,7 @@ public class IconControllerBox extends Stage
         nodes.add(clearHistoryButton);
 
         Button moveShapesButton = new Button();
-        ImageView moveShapesImage = new ImageView("selectimage.png");
+        ImageView moveShapesImage = new ImageView("icons/selectimage.png");
         moveShapesImage.setFitHeight(IMAGE_HEIGHT);
         moveShapesImage.setFitWidth(IMAGE_WIDTH);
         moveShapesButton.setGraphic(moveShapesImage);
@@ -831,8 +860,8 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(moveShapesButton);
-/*
 
+/*
         Button saveStateButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
         ImageView saveStateImage = new ImageView("saveState.png");
@@ -849,16 +878,10 @@ public class IconControllerBox extends Stage
             }
         });
         nodes.add(saveStateButton);
-
-
 */
 
-
-
-
-
         Button newButton = new Button();
-        ImageView newImage = new ImageView("new.png");
+        ImageView newImage = new ImageView("icons/new.png");
         newImage.setFitHeight(IMAGE_HEIGHT);
         newImage.setFitWidth(IMAGE_WIDTH);
         newButton.setGraphic(newImage);
@@ -870,9 +893,7 @@ public class IconControllerBox extends Stage
                 //
                 FXAnnotationToolBuilder builder = new FXAnnotationToolBuilder();
                 try {
-
                     at.fileManagement("new"); //new file
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -884,7 +905,7 @@ public class IconControllerBox extends Stage
 
 
         Button openButton = new Button();
-        ImageView openImage = new ImageView("open.png");
+        ImageView openImage = new ImageView("icons/open.png");
         openImage.setFitHeight(IMAGE_HEIGHT);
         openImage.setFitWidth(IMAGE_WIDTH);
         openButton.setGraphic(openImage);
@@ -906,7 +927,7 @@ public class IconControllerBox extends Stage
 
 
         Button saveAsButton = new Button();
-        ImageView saveAsImage = new ImageView("saveAs.png");
+        ImageView saveAsImage = new ImageView("icons/saveAs.png");
         saveAsImage.setFitHeight(IMAGE_HEIGHT);
         saveAsImage.setFitWidth(IMAGE_WIDTH);
         saveAsButton.setGraphic(saveAsImage);
@@ -932,7 +953,7 @@ public class IconControllerBox extends Stage
 
 
         Button saveFileButton = new Button();
-        ImageView saveFileImage = new ImageView("save-file.png");
+        ImageView saveFileImage = new ImageView("icons/save-file.png");
         saveFileImage.setFitHeight(IMAGE_HEIGHT);
         saveFileImage.setFitWidth(IMAGE_WIDTH);
         saveFileButton.setGraphic(saveFileImage);
@@ -960,7 +981,7 @@ public class IconControllerBox extends Stage
 
 
         Button closeButton = new Button();
-        ImageView closeImage = new ImageView("close.png");
+        ImageView closeImage = new ImageView("icons/close.png");
         closeImage.setFitHeight(IMAGE_HEIGHT);
         closeImage.setFitWidth(IMAGE_WIDTH);
         closeButton.setGraphic(closeImage);
@@ -980,7 +1001,7 @@ public class IconControllerBox extends Stage
 
         Button saveStateButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
-        ImageView saveStateImage = new ImageView("saveState.png");
+        ImageView saveStateImage = new ImageView("icons/saveState.png");
         saveStateImage.setFitHeight(IMAGE_HEIGHT);
         saveStateImage.setFitWidth(IMAGE_WIDTH);
         saveStateButton.setGraphic(saveStateImage);
@@ -1037,7 +1058,7 @@ public class IconControllerBox extends Stage
 
         Button lockControllerBoxButton = new Button();
         //Padlock image sourced from http://game-icons.net/lorc/originals/padlock.html by "Lorc".
-        ImageView lockControllerBoxImage = new ImageView("padlock.png");
+        ImageView lockControllerBoxImage = new ImageView("icons/padlock.png");
         lockControllerBoxImage.setFitHeight(IMAGE_HEIGHT);
         lockControllerBoxImage.setFitWidth(IMAGE_WIDTH);
         lockControllerBoxButton.setGraphic(lockControllerBoxImage);
@@ -1052,10 +1073,9 @@ public class IconControllerBox extends Stage
         });
         nodes.add(lockControllerBoxButton);
 
-
         Button recordInputButton = new Button();
         //Camera image sourced from http://game-icons.net/delapouite/originals/video-camera.html by "Delapouite".
-        ImageView recordInputImage = new ImageView("record.png");
+        ImageView recordInputImage = new ImageView("icons/record.png");
         recordInputImage.setFitHeight(IMAGE_HEIGHT);
         recordInputImage.setFitWidth(IMAGE_WIDTH);
         recordInputButton.setGraphic(recordInputImage);
@@ -1069,12 +1089,86 @@ public class IconControllerBox extends Stage
         });
         nodes.add(recordInputButton);
 
+        ToggleButton fullscreenButton = new ToggleButton();
+        ImageView fullscreenImage = new ImageView("icons/fullscreen.png");
+        fullscreenImage.setFitHeight(IMAGE_HEIGHT);
+        fullscreenImage.setFitWidth(IMAGE_WIDTH);
+        fullscreenButton.setGraphic(fullscreenImage);
+        fullscreenButton.setTooltip(getToolTip("Max To Screen"));
+//        fullscreenButton.setOnAction(event -> at.makeFullscreen(((ToggleButton) event.getSource()).isSelected()));
+        fullscreenButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                    boolean isSelected = false;
+
+                    @Override
+                    public void handle(MouseEvent event) {
+                        isSelected = !isSelected;
+                        if (isSelected) {
+                            fullscreenButton.setStyle(selectedStyle);
+                            at.makeFullscreen(true);
+                        } else {
+                            fullscreenButton.setStyle(unSelectedStyle);
+                            at.makeFullscreen(false);
+                        }
+                    }
+                }
+        );
+        nodes.add(fullscreenButton);
+
+        Button resizeButton = new Button();
+        ImageView resizeImage = new ImageView("icons/resize.png");
+        resizeImage.setFitHeight(IMAGE_HEIGHT);
+        resizeImage.setFitWidth(IMAGE_WIDTH);
+        resizeButton.setGraphic(resizeImage);
+        resizeButton.setTooltip(getToolTip("Resize Window"));
+        resizeButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            @Override
+            public void handle(MouseEvent event) {
+                isSelected = !isSelected;
+                if(isSelected) {
+                    resizeButton.setStyle(selectedStyle);
+                    at.resizeOnMouse();
+                }
+                else {
+                    resizeButton.setStyle(unSelectedStyle);
+                    at.resetHandlers();
+                }
+            }
+        });
+        resizeButton.disableProperty().bind(fullscreenButton.selectedProperty());
+        nodes.add(resizeButton);
+
+        Button moveWindowButton = new Button();
+        ImageView moveWindowImage = new ImageView("icons/move.png");
+        moveWindowImage.setFitHeight(IMAGE_HEIGHT);
+        moveWindowImage.setFitWidth(IMAGE_WIDTH);
+        moveWindowButton.setGraphic(moveWindowImage);
+        moveWindowButton.setTooltip(getToolTip("Move Window"));
+        moveWindowButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            boolean isSelected = false;
+            @Override
+            public void handle(MouseEvent event) {
+                isSelected = !isSelected;
+                if(isSelected) {
+//                    moveButton.setStyle(selectedStyle);
+//                    at.getMouseCatchingScene().setCursor(Cursor.OPEN_HAND);
+                    at.setMovingHandler();
+                }
+                else {
+//                    moveButton.setStyle(unSelectedStyle);
+                    at.resetHandlers();
+                }
+            }
+        });
+        moveWindowButton.disableProperty().bind(fullscreenButton.selectedProperty());
+        nodes.add(moveWindowButton);
+
         /**
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
          * edited*
          */
         sendToBackButton = new Button();
-        ImageView sendToBackImage = new ImageView("sendToBack.png");
+        ImageView sendToBackImage = new ImageView("icons/sendToBack.png");
         sendToBackImage.setFitHeight(IMAGE_HEIGHT);
         sendToBackImage.setFitWidth(IMAGE_WIDTH);
         sendToBackButton.setGraphic(sendToBackImage);
@@ -1099,7 +1193,7 @@ public class IconControllerBox extends Stage
          * Image obtained from https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Fast_forward_font_awesome.svg/1024px-Fast_forward_font_awesome.svg.png
          */
         bringToFrontButton = new Button();
-        ImageView bringToFrontImage = new ImageView("bringToFront.png");
+        ImageView bringToFrontImage = new ImageView("icons/bringToFront.png");
         bringToFrontImage.setFitHeight(IMAGE_HEIGHT);
         bringToFrontImage.setFitWidth(IMAGE_WIDTH);
         bringToFrontButton.setGraphic(bringToFrontImage);
@@ -1210,25 +1304,45 @@ public class IconControllerBox extends Stage
         {
             nodes.add(sendToBackButton);
         }
-        for(Button n : this.nodes)
+        for(Node n : this.nodes)
         {
-            //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
-            n.setMinSize(size, size);
-            n.setMaxSize(size, size);
+            if (n instanceof Button) {
+                //n.setBackground(new Background(new BackgroundFill(Color.BLUE,null,null)));
+                ((Button) n).setMinSize(size, size);
+                ((Button) n).setMaxSize(size, size);
 
-            Node graphicsContext = n.getGraphic();
-            if(graphicsContext instanceof ImageView)
-            {
-                ((ImageView) graphicsContext).setFitWidth(size-5);
-                ((ImageView) graphicsContext).setFitHeight(size-5);
-            }
-            else if(graphicsContext instanceof Text)
-            {
-                ((Text)graphicsContext).setFont(new Font(size-15));
-            }
-            else if(graphicsContext instanceof Circle)
-            {
-                ((Circle)graphicsContext).setRadius((size-10)/2);
+                Node graphicsContext = ((Button) n).getGraphic();
+                if(graphicsContext instanceof ImageView)
+                {
+                    ((ImageView) graphicsContext).setFitWidth(size-5);
+                    ((ImageView) graphicsContext).setFitHeight(size-5);
+                }
+                else if(graphicsContext instanceof Text)
+                {
+                    ((Text)graphicsContext).setFont(new Font(size-15));
+                }
+                else if(graphicsContext instanceof Circle)
+                {
+                    ((Circle)graphicsContext).setRadius((size-10)/2);
+                }
+            } else {
+                ((ToggleButton) n).setMinSize(size, size);
+                ((ToggleButton) n).setMaxSize(size, size);
+
+                Node graphicsContext = ((ToggleButton) n).getGraphic();
+                if(graphicsContext instanceof ImageView)
+                {
+                    ((ImageView) graphicsContext).setFitWidth(size-5);
+                    ((ImageView) graphicsContext).setFitHeight(size-5);
+                }
+                else if(graphicsContext instanceof Text)
+                {
+                    ((Text)graphicsContext).setFont(new Font(size-15));
+                }
+                else if(graphicsContext instanceof Circle)
+                {
+                    ((Circle)graphicsContext).setRadius((size-10)/2);
+                }
             }
         }
         nodes.remove(nodes.size()-1);
