@@ -102,17 +102,19 @@ public class IconControllerBox extends Stage
         listenerThread.start();
 
 
-        ToggleButton tb1 = new ToggleButton("toggle button 1");
-        tb1.setOnAction(event -> System.out.println(event.getTarget() + " pressed!!"));
-        ToggleButton tb2 = new ToggleButton("toggle button 2");
-        ToggleButton tb3 = new ToggleButton("toggle button 3");
-        ToggleGroup group = new ToggleGroup();
-        tb1.setToggleGroup(group);
-        tb2.setToggleGroup(group);
-        tb3.setToggleGroup(group);
-        nodes.add(tb1);
-        nodes.add(tb2);
-        nodes.add(tb3);
+        /* This adds the toggle buttons to the head of the controller box, this code does nothing else but has been kept for posterity. A reminder of the work to be continued
+        */
+//        ToggleButton tb1 = new ToggleButton("toggle button 1");
+//        tb1.setOnAction(event -> System.out.println(event.getTarget() + " pressed!!"));
+//        ToggleButton tb2 = new ToggleButton("toggle button 2");
+//        ToggleButton tb3 = new ToggleButton("toggle button 3");
+//        ToggleGroup group = new ToggleGroup();
+//        tb1.setToggleGroup(group);
+//        tb2.setToggleGroup(group);
+//        tb3.setToggleGroup(group);
+//        nodes.add(tb1);
+//        nodes.add(tb2);
+//        nodes.add(tb3);
 
 
         Button exitButton = new Button();
@@ -950,8 +952,6 @@ public class IconControllerBox extends Stage
 
 
 
-
-
         Button saveFileButton = new Button();
         ImageView saveFileImage = new ImageView("icons/save-file.png");
         saveFileImage.setFitHeight(IMAGE_HEIGHT);
@@ -976,10 +976,6 @@ public class IconControllerBox extends Stage
 
 
 
-
-
-
-
         Button closeButton = new Button();
         ImageView closeImage = new ImageView("icons/close.png");
         closeImage.setFitHeight(IMAGE_HEIGHT);
@@ -995,8 +991,6 @@ public class IconControllerBox extends Stage
         });
         //nodes.add(closeButton);
         saveSelectingNodes.add(closeButton);
-
-
 
 
         Button saveStateButton = new Button();
